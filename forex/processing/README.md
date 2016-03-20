@@ -2,7 +2,7 @@
 
 ## Data 
 
-Data downloaded in http://www.histdata.com/download-free-forex-data/
+Data downloaded in [here](http://www.histdata.com/download-free-forex-data/)
 
 # CSV Format
 
