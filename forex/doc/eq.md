@@ -11,4 +11,5 @@
 
     RKZ(t, m; n) = \frac { \sum_{i = t - alpha + 1}^{t} RKZ(i, m - 1; n)  } {alpha} 
 
+    where RKZ is Revised- Kolmogorov-Zurbenko.
 ```
