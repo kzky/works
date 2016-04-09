@@ -140,11 +140,11 @@ class Interpolator(object):
 def main():
 
     base_dirpaths = [
-        "/home/kzk/datasets/EURJPY",
-        "/home/kzk/datasets/USDJPY",
-        "/home/kzk/datasets/GBPJPY",
-        "/home/kzk/datasets/GBPUSD",
-        "/home/kzk/datasets/EURUSD",
+        "/home/kzk/datasets/forex/EURJPY",
+        "/home/kzk/datasets/forex/USDJPY",
+        "/home/kzk/datasets/forex/GBPJPY",
+        "/home/kzk/datasets/forex/GBPUSD",
+        "/home/kzk/datasets/forex/EURUSD",
     ]
 
     for base_dirpath in base_dirpaths:
