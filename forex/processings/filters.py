@@ -8,19 +8,19 @@ def compute_rkzfilter(values, n=6, m=6):
     Parameters
     ---------------
     values: 1d-array
-        numpy 1d-array
+        Numpy 1d-array. It represents values over time.
     
     n: int
-        filter length
+        Filter length
     
     m: int
-        number of filter applications
+        Number of filter applications
     
     Returns
     ------------
     rkz: 2d-array
-        2d-array, 0-d shows time and 1-d shows the order of m + 1,
-        0-th represents the original value.
+        2d-array, 0-th axis shows time and 1st axis shows the order of m + 1,
+        0-th at 2nd axis represents the original value over time.
     """
 
     T = len(values)
