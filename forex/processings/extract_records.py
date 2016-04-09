@@ -26,12 +26,17 @@ class RecordsExtractor(object):
     def extract_then_save(self, data_filepath, min_unit=30):
         """Extract the records in the unit of min_unit and save.
 
-        Saved dirpath is the basedir of data_filepath with the siffux, 'min_unit' and the file will be saved in the same directory level of the basedir of the data_filepath.
+        Saved dirpath is the basedir of data_filepath with the siffux, 'min_unit' and
+        the file will be saved in the same directory level of the basedir of
+        the data_filepath.
 
-        :param data_filepath: Filepath to data, the interpolated csv file corresponding to 1 year data.
-        :type data_filepath: str
-        :param min_unit: the unit of minutes
-        :type min_unit: int
+        Parameters
+        -----------------
+        param data_filepath:  str
+            Filepath to data, the interpolated csv file corresponding to 1 year data.
+
+        min_unit: int
+            The unit of minutes
         """
 
         # Load data
@@ -66,11 +71,11 @@ class RecordsExtractor(object):
             
 def main():
     base_dirpaths = [
-        "/home/kzk/downloads/interpolated_EURJPY",
-        "/home/kzk/downloads/interpolated_USDJPY",
-        "/home/kzk/downloads/interpolated_GBPJPY",
-        "/home/kzk/downloads/interpolated_GBPUSD",
-        "/home/kzk/downloads/interpolated_EURUSD",
+        "/home/kzk/datasets/interpolated_EURJPY",
+        "/home/kzk/datasets/interpolated_USDJPY",
+        "/home/kzk/datasets/interpolated_GBPJPY",
+        "/home/kzk/datasets/interpolated_GBPUSD",
+        "/home/kzk/datasets/interpolated_EURUSD",
     ]
 
     for base_dirpath in base_dirpaths:
@@ -82,7 +87,7 @@ def main():
             print data_filepath
             
             extractor = RecordsExtractor()
-            extractor.extract_then_save(data_filepath, min_unit=60)
+            extractor.extract_then_save(data_filepath, min_unit=10)
             
             print "--------------------"
 

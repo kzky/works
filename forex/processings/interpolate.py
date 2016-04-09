@@ -26,15 +26,20 @@ class Interpolator(object):
     def interpolate_then_save(self, data_filepath, gdata_filepath):
         """Interpolate the data with gapped information and save the result.
 
-        Saved dirpath is the basedir of the data_filepath with the prefix, 'interpolated' and the file will be saved in the same directory level of the basedir of the data_filepath.
-        
-        :param data_filepath: Filepath to data, the csv file corresponding to 1 year data. This data must have to correspond to gdata_filepath.
-        :type data_filepath: str
-        :param gdata_filepath: Filepath to gapped information, This data must have to correspond to gdata_filepath.
-        :type gdata_filepath: str
+        Saved dirpath is the basedir of the data_filepath with the prefix,
+        'interpolated' and the file will be saved in the same directory level of the basedir of the data_filepath.
 
-        :return: None
-        :rtype: None
+        Parameters
+        -----------------
+        
+        data_filepath: str
+            Filepath to data, the csv file corresponding to 1 year data.
+            This data must have to correspond to gdata_filepath.
+
+        gdata_filepath: str
+            Filepath to gapped information.
+            This data must have to correspond to gdata_filepath.
+
         """
         # Load datas
         data = np.loadtxt(data_filepath, dtype=np.str, delimiter=",")
@@ -135,11 +140,11 @@ class Interpolator(object):
 def main():
 
     base_dirpaths = [
-        "/home/kzk/downloads/EURJPY",
-        "/home/kzk/downloads/USDJPY",
-        "/home/kzk/downloads/GBPJPY",
-        "/home/kzk/downloads/GBPUSD",
-        "/home/kzk/downloads/EURUSD",
+        "/home/kzk/datasets/EURJPY",
+        "/home/kzk/datasets/USDJPY",
+        "/home/kzk/datasets/GBPJPY",
+        "/home/kzk/datasets/GBPUSD",
+        "/home/kzk/datasets/EURUSD",
     ]
 
     for base_dirpath in base_dirpaths:
