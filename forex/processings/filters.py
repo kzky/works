@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import csv
 import numpy as np
 
 def compute_rkzfilter(values, n=6, m=6):
@@ -36,13 +36,29 @@ def compute_rkzfilter(values, n=6, m=6):
     return rkz
     
 def main():
-    filepath = "/home/kzk/datasets/forex/interpolated_USDJPY_30/DAT_MT_USDJPY_M1_2005.csv"
-    
-    values = np.loadtxt(filepath, usecols=(5, ), delimiter=",")
-    rkz = compute_rkzfilter(values, n=6, m=6)
+    # Config
+    currency_pair = "USDJPY"
+    min_unit = 30
+    n = 6
+    m = 6
 
-    print rkz
-    
+    # Read data
+    filepath = "/home/kzk/datasets/forex/interpolated_{}_{}/DAT_MT_USDJPY_M1_2005.csv".format(currency_pair, min_unit)
+    date_time = np.loadtxt(filepath, dtype="S10", usecols=(0, 1), delimiter=",")
+    values = np.loadtxt(filepath, usecols=(5, ), delimiter=",")
+
+    # Apply filter
+    rkz = compute_rkzfilter(values, n=n, m=m)
+
+    # Save i-th convolved data as csv
+    filepath = "/var/www/html/data/{}_{}_{}.csv".format(currency_pair, min_unit, m)
+    fvalues = rkz[:, m]
+
+    with open(filepath, "w") as fpout:
+            writer = csv.writer(fpout, delimiter=",")
+            writer.writerow(["Date Time", "Close Price", "RKZ-conv Value"])
+            for d, t, v0, fv in zip(date_time[:, 0], date_time[:, 1], values, fvalues):
+                writer.writerow(["{} {}".format(d.replace(".", "/"), t), v0, fv])
     
 if __name__ == '__main__':
     main()

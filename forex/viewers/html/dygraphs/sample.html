@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+  </head>
+  <body>
+    <div id="graphdiv2"
+         style="width:1100px; height:300px;"></div>
+
+    <script type="text/javascript">
+      g2 = new Dygraph(
+      document.getElementById("graphdiv2"),
+      "http://localhost/data/USDJPY_30_6.csv",
+      {
+      rollPeriod: 7,
+      legend: 'always',
+      title: '',
+      titleHeight: 32,
+      ylabel: 'USDJPY',
+      xlabel: 'Date Time',
+      labelsDivStyles: {
+      'text-align': 'right',
+      'background': 'none'
+      },
+      strokeWidth: 1.5
+      }
+      );
+    </script>
+  </body>
+</html>  
+
