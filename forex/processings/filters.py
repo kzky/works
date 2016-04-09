@@ -52,13 +52,16 @@ def main():
 
     # Save i-th convolved data as csv
     filepath = "/var/www/html/data/{}_{}_{}.csv".format(currency_pair, min_unit, m)
-    fvalues = rkz[:, m]
+    
+    fvalues_m = rkz[:, m]
 
+    header = ["Date Time", "Close Price", "RKZ (m)"]
     with open(filepath, "w") as fpout:
             writer = csv.writer(fpout, delimiter=",")
-            writer.writerow(["Date Time", "Close Price", "RKZ-conv Value"])
-            for d, t, v0, fv in zip(date_time[:, 0], date_time[:, 1], values, fvalues):
-                writer.writerow(["{} {}".format(d.replace(".", "/"), t), v0, fv])
+            writer.writerow(header)
+            for d, t, v0, fv_m in zip(date_time[:, 0], date_time[:, 1], values,
+                                      fvalues_m):
+                writer.writerow(["{} {}".format(d.replace(".", "/"), t), v0, fv_m])
     
 if __name__ == '__main__':
     main()
