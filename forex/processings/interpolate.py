@@ -31,7 +31,6 @@ class Interpolator(object):
 
         Parameters
         -----------------
-        
         data_filepath: str
             Filepath to data, the csv file corresponding to 1 year data.
             This data must have to correspond to gdata_filepath.
