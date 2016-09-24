@@ -21,14 +21,14 @@ class MLP(Chain):
         fc_layers = OrderedDict()
         bn_layers = OrderedDict()
         layers = {}
-        for i, dim in enumerate(zip(dims[:-1], dims[1:])):
+        for i, d in enumerate(zip(dims[:-1], dims[1:])):
             fc_name = "fc{}".format(i)
             bn_name = "bn{}".format(i)
 
-            fc_layers[fc_name] = L.Linear(dim[0], dim[1])
-            bn_layers[bn_name] = L.BatchNormalization(dim[1])
+            fc_layers[fc_name] = L.Linear(d[0], d[1])
+            bn_layers[bn_name] = L.BatchNormalization(d[1])
             layers[fc_name] = fc_layers[fc_name]
-            layers[bn_name] = fc_layers[bn_name]
+            layers[bn_name] = bn_layers[bn_name]
             
         super(MLP, self).__init__(**layers)
 
@@ -50,18 +50,19 @@ class MLP(Chain):
         mid_outputs = self.mid_outputs = []
         
         h = x
-        for fc, bn in zip(self.fc_layers, self.bn_layers):
-            z = l(h)
+        for fc, bn in zip(self.fc_layers.values(), self.bn_layers.values()):
+            z = fc(h)
             z_bn = bn(z, self.test)
             h = self.act(z_bn)
-            
+
+            #TODO: Add non-BN output
             mid_outputs.append(z)
-            
+        
         return h
 
 class CrossEntropy(Chain):
     def __init__(self, predictor):
-        super(Classifier, self).__init__(predictor=predictor)
+        super(CrossEntropy, self).__init__(predictor=predictor)
 
     def __call__(self, x_l, y_l):
         y = self.predictor(x_l)
@@ -74,13 +75,13 @@ class CrossEntropy(Chain):
 class RBF(Link):
     def __init__(self, dim):
         super(RBF, self).__init__(
-            gamma=(dim)
+            gamma=(1, dim)
         )
-        self.gamma = np.random.randn(dim)
+        self.gamma.data[:] = np.random.randn(1, dim)
         
     def __call__(self, x, y):
-        g = F.expand_dims(self.gamma ** 2, 0)
-        z = (x - y) ** 2
+        g = self.gamma ** 2
+        z = F.expand_dims((x - y) ** 2, axis=0)
         o = F.exp(- F.linear(z, g))
         return o
         
@@ -89,57 +90,65 @@ class GraphLoss(Chain):
 
     Parameters
     -----------------
-    ffnn_u0: MLP (now)
-    ffnn_u1: MLP (now)
+    ffnn_u_0: MLP (now)
+    ffnn_u_1: MLP (now)
     """
-    def __init__(self, ffnn_u0, ffnn_u1, dims, batch_size):
+    def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
         # Create and set layers
         layers = {}
-        gammas = {}
+        similarities = OrderedDict()
         for i, d in enumerate(dims[1:]):
-            g_name = "g{}".format(i+1)
-            gammas[g_name] = RBF(d)
-            layers[f_namme] = gammas[g_name]
+            sim_name = "sim{}".format(i+1)
+            similarities[sim_name] = RBF(d)
+            layers[sim_name] = similarities[sim_name]
 
-        layers["ffnn_u0"] = ffnn_u0
-        layers["fnnn_u1"] = ffnn_u1
+        layers["ffnn_u_0"] = ffnn_u_0
+        layers["ffnn_u_1"] = ffnn_u_1
 
         super(GraphLoss, self).__init__(**layers)
 
         # Set attributes
-        self.gammas = gammas
+        self.layers = layers
+        self.similarities = similarities
         self.dims = dims
         self.batch_size = batch_size
-        
-        
-    def __call__(self, x_u0, x_u1):
-        f0 = F.softmax(self.ffnn_u0(x_u0))
-        f1 = F.softmax(self.ffnn_u1(x_u1))
+        self.coef = 1 / batch_size
 
-        mid_outputs_0 = self.ffnn_u0.mid_outputs_0
-        mid_outputs_1 = self.ffnn_u0.mid_outputs_1
+    def __call__(self, x_u_0, x_u_1):
+        ffnn_u_0 = self.layers["ffnn_u_0"]
+        ffnn_u_1 = self.layers["ffnn_u_1"]
+        
+        f_0 = F.softmax(ffnn_u_0(x_u_0))
+        f_1 = F.softmax(ffnn_u_1(x_u_1))
+
+        mid_outputs_0 = ffnn_u_0.mid_outputs
+        mid_outputs_1 = ffnn_u_1.mid_outputs
         
         #TODO: Compare fast matmul implementation if possible
         loss = 0
         L = len(self.dims[1:])
-        gammas = self.gammas
+        similarities = self.similarities.values()
+        batch_size = self.batch_size
         for i in range(batch_size - 1):
-            o0_i = mid_output_0[i, :]
-            f0_i = f0[i, :]
+            f_0_i = f_0[i, :]
+
             for j in range(i+1, batch_size):
-                o1_j = mid_outputs_1[j]
-                f1_j = f1[j, :]
-                
+                f_1_j = f_1[j, :]
+
                 s = 0  # similarity over layers, i.e., factors of variations
                 for l in range(L):
-                    s += gammas[l](o0_i, o1_j)
+                    o_0_i = mid_outputs_0[l][i, :]
+                    o_1_j = mid_outputs_1[l][j, :]
+                    s += similarities[l](o_0_i, o_1_j)
 
-                loss += s * F.sum((f0_i - f1_j) ** 2)
-                    
+                # one term between i-th and j-th sample
+                loss += F.reshape(s, ()) * F.sum((f_0_i - f_1_j) ** 2)
+
+        loss /= batch_size
         return loss
 
-class Loss(Chain):
-    """Loss function, objective
+class SSLGraphLoss(Chain):
+    """Semi-Supervised Learning Graph Loss function, objective
 
     Parameters
     -----------------
@@ -149,13 +158,13 @@ class Loss(Chain):
          Coefficients between supervised loss and graph loss
     """
     def __init__(self, sloss, gloss, lambdas=[1., 1.]):
-        super(Loss, self).__init__(sloss=sloss, gloss=gloss)
+        super(SSLGraphLoss, self).__init__(sloss=sloss, gloss=gloss)
 
-        #self.lambdas = [Varialbe(l).to_gpu() for l in lambdas]
+        #self.lambdas = [Variable(l).to_gpu() for l in lambdas]
         self.lambdas = lambdas
         
-    def __call__(self, x_l, y_l, x_u0, x_u1):
+    def __call__(self, x_l, y_l, x_u_0, x_u_1):
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
-               + self.lambdas[1] * self.gloss(x_u0, x_u1)
+               + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
 
         return loss
