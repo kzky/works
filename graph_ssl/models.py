@@ -141,7 +141,7 @@ class GraphLoss(Chain):
                     o_1_j = mid_outputs_1[l][j, :]
                     s += similarities[l](o_0_i, o_1_j)
 
-                # one term between i-th and j-th sample
+                # one term between i-th and j-th sample. align shape to () not (1, 1)
                 loss += F.reshape(s, ()) * F.sum((f_0_i - f_1_j) ** 2)
 
         loss /= batch_size
