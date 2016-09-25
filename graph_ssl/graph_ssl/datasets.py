@@ -45,8 +45,10 @@ class MNISTDataReader(object):
         # Read data
         beg = self._next_position_l_train
         end = self._next_position_l_train+self._batch_size
-        batch_data_x = self.l_train_data["x"][beg:end, :]
-        batch_data_y = self.l_train_data["y"][beg:end]
+        batch_data_x_ = self.l_train_data["x"][beg:end, :]
+        batch_data_y_ = self.l_train_data["y"][beg:end]
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
         self._next_position_l_train += self._batch_size
@@ -58,8 +60,9 @@ class MNISTDataReader(object):
             np.random.shuffle(idx)
             self.l_train_data["x"] = self.l_train_data["x"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
+
         
-        return batch_data_x / 255. , batch_data_y
+        return batch_data_x, batch_data_y
 
     def get_u_train_batch(self,):
         """Return next batch data.
@@ -74,8 +77,10 @@ class MNISTDataReader(object):
         # Read data
         beg = self._next_position_u_train
         end = self._next_position_u_train+self._batch_size
-        batch_data_x = self.u_train_data["x"][beg:end, :]
-        batch_data_y = self.u_train_data["y"][beg:end]
+        batch_data_x_ = self.u_train_data["x"][beg:end, :]
+        batch_data_y_ = self.u_train_data["y"][beg:end]
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
         self._next_position_u_train += self._batch_size
@@ -88,7 +93,7 @@ class MNISTDataReader(object):
             self.u_train_data["x"] = self.u_train_data["x"][idx]
             self.u_train_data["y"] = self.u_train_data["y"][idx]
         
-        return batch_data_x / 255. , batch_data_y
+        return batch_data_x, batch_data_y
 
     def get_test_batch(self,):
         """Return next batch data.
@@ -101,12 +106,12 @@ class MNISTDataReader(object):
         """
 
         # Read data
-        batch_data_x = self.test_data["x"]
+        batch_data_x_ = self.test_data["x"]
         batch_data_y_ = self.test_data["y"]
-        batch_data_y = np.zeros((len(batch_data_y_), self._n_cls))
-        batch_data_y[np.arange(len(batch_data_y_)), batch_data_y_] = 1.
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        batch_data_y = batch_data_y_.astype(np.int32)
 
-        return batch_data_x / 255. , batch_data_y
+        return batch_data_x , batch_data_y
 
 class Separator(object):
     """Seprate the original samples to labeled samples and unlabeled samples.
