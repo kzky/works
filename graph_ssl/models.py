@@ -17,7 +17,7 @@ class MLP(Chain):
                  act=F.relu,
                  test=False):
 
-        # Create and set layers
+        # Create and set links
         fc_layers = OrderedDict()
         bn_layers = OrderedDict()
         layers = {}
@@ -94,7 +94,7 @@ class GraphLoss(Chain):
     ffnn_u_1: MLP (now)
     """
     def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
-        # Create and set layers
+        # Create and set chain
         layers = {}
         similarities = OrderedDict()
         for i, d in enumerate(dims[1:]):
@@ -160,6 +160,7 @@ class SSLGraphLoss(Chain):
     def __init__(self, sloss, gloss, lambdas=[1., 1.]):
         super(SSLGraphLoss, self).__init__(sloss=sloss, gloss=gloss)
 
+        #TODO: this should be to_gpu?
         #self.lambdas = [Variable(l).to_gpu() for l in lambdas]
         self.lambdas = lambdas
         
@@ -168,3 +169,36 @@ class SSLGraphLoss(Chain):
                + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
 
         return loss
+
+class GraphSSLMLPModel(Chain):
+    """Graph-based Semi-Supervised Learning Model
+
+    Class instantiates the all chains necessary for foward pass upto the objective,
+    and the objective is passed to the super.__init__ method as a chain.
+    """
+
+    def __init__(self, dims, batch_size):
+        # Create chains
+        mlp_l = MLP(dims)
+        mlp_u_0 = mlp_l.copy()
+        mlp_u_1 = mlp_l.copy()
+        sloss = CrossEntropy(mlp_l)
+        gloss = GraphLoss(mlp_u_0, mlp_u_1, dims, batch_size)
+        ssl_graph_loss = SSLGraphLoss(sloss, gloss)
+
+        # Set as attrirbutes for shortcut access
+        self.mlp_l = mlp_l
+        self.mlp_u_0 = mlp_u_0
+        self.mlp_u_1 = mlp_u_1
+        self.sloss = sloss
+        self.gloss = gloss
+
+        # Set chain
+        super(GraphSSLMLPModel, self).__init__(ssl_graph_loss=ssl_graph_loss)
+
+    def __call__(self, x_l, y_l, x_u_0, x_u_1):
+        return self.ssl_graph_loss(x_l, y_l, x_u_0, x_u_1)
+
+    def foward(self, x_l, y_l, x_u_0, x_u_1):
+        return self(x_l, y_l, x_u_0, x_u_1)
+    
