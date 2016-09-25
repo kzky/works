@@ -40,6 +40,7 @@ def main():
 
     # Training loop
     print("# Training loop")
+    epoch = 1
     for i in range(n_iter):
 
         # Get data
@@ -55,7 +56,7 @@ def main():
 
         # Eval
         if (i+1) % iter_epoch == 0:
-            print("Evaluation at {}-th iter".format(i))
+            print("Evaluation at {}-th epoch".format(epoch))
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = data_reader.get_test_batch()
@@ -67,6 +68,8 @@ def main():
             loss = model.sloss.loss
             acc = model.sloss.accuracy
             print("Loss:{},Accuracy:{}".format(loss.data, acc.data * 100))
+
+            epoch +=1
             
 if __name__ == '__main__':
     main()
