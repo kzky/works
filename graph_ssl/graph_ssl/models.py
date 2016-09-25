@@ -63,14 +63,15 @@ class MLP(Chain):
 class CrossEntropy(Chain):
     def __init__(self, predictor):
         super(CrossEntropy, self).__init__(predictor=predictor)
-
+        self.loss = None
+        self.accuracy = None
+        
     def __call__(self, x_l, y_l):
         y = self.predictor(x_l)
-        accuracy = F.accuracy(y, y_l)
-        loss = F.softmax_cross_entropy(y, y_l)
-        report({"supervised loss": loss, "accuracy": accuracy}, self)
-
-        return loss
+        self.accuracy = F.accuracy(y, y_l)
+        self.loss = F.softmax_cross_entropy(y, y_l)
+        
+        return self.loss
 
 class RBF(Link):
     def __init__(self, dim):
@@ -112,7 +113,7 @@ class GraphLoss(Chain):
         self.similarities = similarities
         self.dims = dims
         self.batch_size = batch_size
-        self.coef = 1 / batch_size
+        self.coef = 1. / batch_size
 
     def __call__(self, x_u_0, x_u_1):
         ffnn_u_0 = self.layers["ffnn_u_0"]

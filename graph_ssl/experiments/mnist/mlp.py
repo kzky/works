@@ -1,14 +1,16 @@
 from graph_ssl.datasets import MNISTDataReader, Separator
 from graph_ssl.models import GraphSSLMLPModel
 import os
+from chainer import optimizers
 
 def main():
     # Settings
-    batch_size = 64
+    batch_size = 32
     inp_dim = 784
     out_dim = n_cls = 10
     n_l_train_data = 100
-    n_u_train_data = n_l_train_data -  n_l_train_data
+    n_train_data = 60000
+    n_u_train_data = n_train_data -  n_l_train_data
 
     dims = [inp_dim, 1000, 500, 250, 250, 250, out_dim]
     learning_rate = 1. * 1e-3
@@ -18,8 +20,8 @@ def main():
 
     # Separate dataset
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "mnist/train.npz")
-    separator = Separator(l)
+    fpath = os.path.join(home, "datasets/mnist/train.npz")
+    separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
     l_train_path = os.path.join(home, "datasets/mnist/l_train.npz")
@@ -31,9 +33,11 @@ def main():
                                   batch_size=batch_size,
                                   n_cls=n_cls)
     model = GraphSSLMLPModel(dims, batch_size)
-    optimizer = Optimizer.Adam(learning_rate)
+    optimizer = optimizers.Adam(learning_rate)
+    optimizer.setup(model)
 
     # Training loop
+    print("# Training loop")
     for i in range(n_iter):
 
         # Get data
@@ -48,12 +52,19 @@ def main():
         optimizer.update()
 
         # Eval
-        if i % iter_epoch == 0:
+        if (i+1) % iter_epoch == 0:
+            print("Evaluation at {}-th iter".format(i))
+
             # Get data, go to test mode, eval, revert to train mode
             x_l, y_l = data_reader.get_test_batch()
             model.mlp_l.test = True
             model.sloss(x_l, y_l)
             model.mlp_l.test = False
+
+            # Report
+            loss = model.sloss.loss
+            acc = model.sloss.accuracy
+            print("Loss:{},Accuracy:{}".format(loss.data, acc.data * 100))
             
 if __name__ == '__main__':
     main()
