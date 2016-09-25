@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-class DataReader(object):
+class MNISTDataReader(object):
     """DataReader
     """
     def __init__(self,
@@ -46,11 +46,7 @@ class DataReader(object):
         beg = self._next_position_l_train
         end = self._next_position_l_train+self._batch_size
         batch_data_x = self.l_train_data["x"][beg:end, :]
-        batch_data_y_ = self.l_train_data["y"][beg:end]
-
-        # Change to one-hot representaion
-        batch_data_y = np.zeros((len(batch_data_y_), self._n_cls))
-        batch_data_y[np.arange(len(batch_data_y_)), batch_data_y_] = 1.
+        batch_data_y = self.l_train_data["y"][beg:end]
 
         # Reset pointer
         self._next_position_l_train += self._batch_size
@@ -79,11 +75,7 @@ class DataReader(object):
         beg = self._next_position_u_train
         end = self._next_position_u_train+self._batch_size
         batch_data_x = self.u_train_data["x"][beg:end, :]
-        batch_data_y_ = self.u_train_data["y"][beg:end]
-
-        # Change to one-hot representaion
-        batch_data_y = np.zeros((len(batch_data_y_), self._n_cls))
-        batch_data_y[np.arange(len(batch_data_y_)), batch_data_y_] = 1.
+        batch_data_y = self.u_train_data["y"][beg:end]
 
         # Reset pointer
         self._next_position_u_train += self._batch_size
