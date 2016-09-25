@@ -19,12 +19,12 @@ def test_loss():
     fc0_W_data = model.mlp_l["fc0"].W.data.copy()  # once copy
         
     # Optimizer
-    optimizer = optimizers.SGD()
+    optimizer = optimizers.Adam()
     optimizer.setup(model)
 
     # Train one-step
     model.zerograds()
-    loss = model.foward(x_l, y_l, x_u_0, x_u_1)
+    loss = model(x_l, y_l, x_u_0, x_u_1)
     loss.backward()
     optimizer.update()
 

@@ -198,7 +198,4 @@ class GraphSSLMLPModel(Chain):
 
     def __call__(self, x_l, y_l, x_u_0, x_u_1):
         return self.ssl_graph_loss(x_l, y_l, x_u_0, x_u_1)
-
-    def foward(self, x_l, y_l, x_u_0, x_u_1):
-        return self(x_l, y_l, x_u_0, x_u_1)
     
