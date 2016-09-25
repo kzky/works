@@ -7,8 +7,8 @@ import numpy as np
 
 def main():
     # Settings
-    device = 1 
-    batch_size = 128 
+    device = None #1
+    batch_size = 32
     inp_dim = 784
     out_dim = n_cls = 10
     n_l_train_data = 100
@@ -45,7 +45,7 @@ def main():
     print("# Training loop")
     epoch = 1
     for i in range(n_iter):
-	print(i)
+
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
         x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
@@ -76,4 +76,3 @@ def main():
             
 if __name__ == '__main__':
     main()
-
