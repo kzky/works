@@ -63,10 +63,14 @@ def main():
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
+            model.to_cpu()
             model.mlp_l.test = True
+            model.to_gpu(device) if device else None
             model.sloss(x_l, y_l)
+            model_to_cpu()
             model.mlp_l.test = False
-
+            model.to_gpu(device) if device else None
+            
             # Report
             loss = model.sloss.loss
             acc = model.sloss.accuracy
