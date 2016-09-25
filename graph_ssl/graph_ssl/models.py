@@ -160,6 +160,97 @@ class GraphLoss(Chain):
         logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return loss
 
+class RBF0(Link):
+    def __init__(self, dim):
+        super(RBF0, self).__init__(
+            gamma=(1, dim)
+        )
+        self.gamma.data[:] = np.random.randn(1, dim)
+
+    def __call__(self, x, y):
+        g, x, y = F.broadcast(*[self.gamma, x, y])
+        x_g = x * g
+        y_g = y * g
+
+        x_g_norm = F.sum(x_g**2, axis=1)  
+        y_g_norm = F.sum(y_g**2, axis=1)
+        x_g_y_g = F.linear(x_g, y_g)
+        
+        x_g_norm, x_g_y_g, y_g_norm = \
+                                      F.broadcast(
+                                          *[x_g_norm,
+                                            x_g_y_g,
+                                            F.expand_dims(y_g_norm, 1)])
+        #F.exp(- (x_g_norm - 2 * x_g_y_g+ y_g_norm))
+        return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
+        
+class GraphLoss0(Chain):
+    """Graph Loss0
+
+    Parameters
+    -----------------
+    ffnn_u_0: MLP (now)
+    ffnn_u_1: MLP (now)
+    """
+    def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
+        # Create and set chain
+        layers = {}
+        similarities = OrderedDict()
+        for i, d in enumerate(dims[1:]):
+            sim_name = "sim{}".format(i+1)
+            similarities[sim_name] = RBF0(d)
+            layers[sim_name] = similarities[sim_name]
+
+        layers["ffnn_u_0"] = ffnn_u_0
+        layers["ffnn_u_1"] = ffnn_u_1
+
+        super(GraphLoss0, self).__init__(**layers)
+
+        # Set attributes
+        self.layers = layers
+        self.similarities = similarities
+        self.dims = dims
+        self.batch_size = batch_size
+        self.coef = 1. / batch_size
+
+    def __call__(self, x_u_0, x_u_1):
+        st = time.time()
+        
+        ffnn_u_0 = self.layers["ffnn_u_0"]
+        ffnn_u_1 = self.layers["ffnn_u_1"]
+        
+        f_0 = F.softmax(ffnn_u_0(x_u_0))
+        f_1 = F.softmax(ffnn_u_1(x_u_1))
+
+        mid_outputs_0 = ffnn_u_0.mid_outputs
+        mid_outputs_1 = ffnn_u_1.mid_outputs
+        
+        L = len(self.dims[1:])
+        similarities = self.similarities.values()
+        batch_size = self.batch_size
+
+        # Efficient computation
+        ## sample similarity W^l summed over l
+        W = 0
+        for l in range(L):
+            W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
+
+        ## class similarity 
+        f_0_norm = F.sum(f_0**2, axis=1)
+        f_1_norm = F.sum(f_1**2, axis=1)
+        f_0_f_1 = F.linear(f_0, f_1)
+        f_0_norm, f_0_f_1, f_1_norm= \
+                                      F.broadcast(
+                                          *[f_0_norm,
+                                            f_0_f_1,
+                                            F.expand_dims(f_1_norm, 1)])
+        F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
+        
+        loss = F.sum(W * F_)
+        
+        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
+        return loss
+        
 class SSLGraphLoss(Chain):
     """Semi-Supervised Learning Graph Loss function, objective
 
@@ -199,7 +290,7 @@ class GraphSSLMLPModel(Chain):
         mlp_u_0 = mlp_l.copy()
         mlp_u_1 = mlp_l.copy()
         sloss = CrossEntropy(mlp_l)
-        gloss = GraphLoss(mlp_u_0, mlp_u_1, dims, batch_size)
+        gloss = GraphLoss0(mlp_u_0, mlp_u_1, dims, batch_size)
         ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
