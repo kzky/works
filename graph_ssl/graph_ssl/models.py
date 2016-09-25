@@ -168,20 +168,21 @@ class RBF0(Link):
         self.gamma.data[:] = np.random.randn(1, dim)
 
     def __call__(self, x, y):
-        g, x, y = F.broadcast(*[self.gamma ** 2, x, y])
+        g, x, y = F.broadcast(*[self.gamma, x, y])
         x_g = x * g
         y_g = y * g
 
         x_g_norm = F.sum(x_g**2, axis=1)  
         y_g_norm = F.sum(y_g**2, axis=1)
         x_g_y_g = F.linear(x_g, y_g)
+        
         x_g_norm, x_g_y_g, y_g_norm = \
                                       F.broadcast(
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-        
-        return F.exp(-(x_g_norm -2 * x_g_y_g + y_g_norm))
+        #F.exp(- (x_g_norm - 2 * x_g_y_g+ y_g_norm))
+        return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
         
 class GraphLoss0(Chain):
     """Graph Loss0
@@ -238,7 +239,7 @@ class GraphLoss0(Chain):
         f_0_norm = F.sum(f_0**2, axis=1)
         f_1_norm = F.sum(f_1**2, axis=1)
         f_0_f_1 = F.linear(f_0, f_1)
-        f_0_norm, f_1_norm, f_0_f_1 = \
+        f_0_norm, f_0_f_1, f_1_norm= \
                                       F.broadcast(
                                           *[f_0_norm,
                                             f_0_f_1,
