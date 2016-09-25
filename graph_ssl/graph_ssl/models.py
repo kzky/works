@@ -133,7 +133,7 @@ class GraphLoss(Chain):
         for i in range(batch_size - 1):
             f_0_i = f_0[i, :]
 
-            for j in range(i+1, batch_size):
+            for j in range(i, batch_size):
                 f_1_j = f_1[j, :]
 
                 s = 0  # similarity over layers, i.e., factors of variations
