@@ -48,8 +48,6 @@ class MLP(Chain):
         x: Variable
             Shape is 784 in case of MNIST
         """
-        st = time.time()
-        
         # Reset mid outputs
         mid_outputs = self.mid_outputs = []
         
@@ -62,7 +60,6 @@ class MLP(Chain):
             #TODO: Add non-BN output
             mid_outputs.append(z)
 
-        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return h
 
 class CrossEntropy(Chain):
@@ -72,13 +69,10 @@ class CrossEntropy(Chain):
         self.accuracy = None
         
     def __call__(self, x_l, y_l):
-        st = time.time()
-
         y = self.predictor(x_l)
         self.accuracy = F.accuracy(y, y_l)
         self.loss = F.softmax_cross_entropy(y, y_l)
 
-        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return self.loss
 
 class RBF(Link):
@@ -124,8 +118,6 @@ class GraphLoss(Chain):
         self.coef = 1. / batch_size
 
     def __call__(self, x_u_0, x_u_1):
-        st = time.time()
-        
         ffnn_u_0 = self.layers["ffnn_u_0"]
         ffnn_u_1 = self.layers["ffnn_u_1"]
         
@@ -157,7 +149,6 @@ class GraphLoss(Chain):
 
         loss /= batch_size
 
-        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return loss
 
 class RBF0(Link):
@@ -214,8 +205,6 @@ class GraphLoss0(Chain):
         self.coef = 1. / batch_size
 
     def __call__(self, x_u_0, x_u_1):
-        st = time.time()
-        
         ffnn_u_0 = self.layers["ffnn_u_0"]
         ffnn_u_1 = self.layers["ffnn_u_1"]
         
@@ -248,7 +237,6 @@ class GraphLoss0(Chain):
         
         loss = F.sum(W * F_)
         
-        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return loss
         
 class SSLGraphLoss(Chain):
@@ -269,12 +257,9 @@ class SSLGraphLoss(Chain):
         self.lambdas = lambdas
         
     def __call__(self, x_l, y_l, x_u_0, x_u_1):
-        st = time.time()
-        
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
                + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
 
-        logging.warn("{}:{} [s]".format(self.__class__.__name__, time.time() - st))
         return loss
 
 class GraphSSLMLPModel(Chain):
