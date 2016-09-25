@@ -5,6 +5,7 @@ from chainer import optimizers
 
 def main():
     # Settings
+    device = "1"
     batch_size = 32
     inp_dim = 784
     out_dim = n_cls = 10
@@ -33,6 +34,7 @@ def main():
                                   batch_size=batch_size,
                                   n_cls=n_cls)
     model = GraphSSLMLPModel(dims, batch_size)
+    model.to_gpu(device) if device else None
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)
 
@@ -55,7 +57,7 @@ def main():
         if (i+1) % iter_epoch == 0:
             print("Evaluation at {}-th iter".format(i))
 
-            # Get data, go to test mode, eval, revert to train mode
+            # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = data_reader.get_test_batch()
             model.mlp_l.test = True
             model.sloss(x_l, y_l)
