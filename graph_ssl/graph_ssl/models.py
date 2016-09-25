@@ -147,7 +147,7 @@ class GraphLoss(Chain):
                 # one term between i-th and j-th sample. align shape to () not (1, 1)
                 loss += F.reshape(s, ()) * F.sum((f_0_i - f_1_j) ** 2)
 
-        loss /= batch_size
+        loss /= (batch_size ** 2)
 
         return loss
 
@@ -216,7 +216,6 @@ class GraphLoss0(Chain):
         
         L = len(self.dims[1:])
         similarities = self.similarities.values()
-        batch_size = self.batch_size
 
         # Efficient computation
         ## sample similarity W^l summed over l
@@ -234,8 +233,8 @@ class GraphLoss0(Chain):
                                             f_0_f_1,
                                             F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
-        
-        loss = F.sum(W * F_)
+
+        loss = F.sum(W * F_) / (self.batch_size * 2)
         
         return loss
         
