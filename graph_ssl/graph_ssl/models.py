@@ -158,7 +158,7 @@ class SSLGraphLoss(Chain):
     lambdas: list
          Coefficients between supervised loss and graph loss
     """
-    def __init__(self, sloss, gloss, lambdas=[1., 1.]):
+    def __init__(self, sloss, gloss, lambdas=np.array([1., 1.])):
         super(SSLGraphLoss, self).__init__(sloss=sloss, gloss=gloss)
 
         #TODO: this should be to_gpu?
@@ -178,14 +178,14 @@ class GraphSSLMLPModel(Chain):
     and the objective is passed to the super.__init__ method as a chain.
     """
 
-    def __init__(self, dims, batch_size):
+    def __init__(self, dims, batch_size, lambdas=np.array([1., 1.])):
         # Create chains
         mlp_l = MLP(dims)
         mlp_u_0 = mlp_l.copy()
         mlp_u_1 = mlp_l.copy()
         sloss = CrossEntropy(mlp_l)
         gloss = GraphLoss(mlp_u_0, mlp_u_1, dims, batch_size)
-        ssl_graph_loss = SSLGraphLoss(sloss, gloss)
+        ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
         self.mlp_l = mlp_l

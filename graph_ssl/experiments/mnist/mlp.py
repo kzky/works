@@ -1,11 +1,13 @@
 from graph_ssl.datasets import MNISTDataReader, Separator
 from graph_ssl.models import GraphSSLMLPModel
+from graph_ssl.datasets import to_device
 import os
 from chainer import optimizers
+import numpy as np
 
 def main():
     # Settings
-    device = "1"
+    device = None #1
     batch_size = 32
     inp_dim = 784
     out_dim = n_cls = 10
@@ -14,6 +16,7 @@ def main():
     n_u_train_data = n_train_data -  n_l_train_data
 
     dims = [inp_dim, 1000, 500, 250, 250, 250, out_dim]
+    lambdas = to_device(np.array([1., 1.], np.float32), device)
     learning_rate = 1. * 1e-3
     n_epoch = 200
     iter_epoch = n_u_train_data / batch_size
@@ -44,8 +47,8 @@ def main():
     for i in range(n_iter):
 
         # Get data
-        x_l, y_l = data_reader.get_l_train_batch()
-        x_u, _ = data_reader.get_u_train_batch()
+        x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
+        x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
         x_u_0 = x_u_1 = x_u
 
         # Train one-step
