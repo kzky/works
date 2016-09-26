@@ -271,7 +271,7 @@ class GraphSSLMLPModel(Chain):
     def __init__(self, dims, batch_size, lambdas=np.array([1., 1.])):
         # Create chains
         mlp_l = MLP(dims)
-        mlp_u_0 = mlp_l.copy()
+        mlp_u_0 = mlp_l.copy()  # copy only Links!
         mlp_u_1 = mlp_l.copy()
         sloss = CrossEntropy(mlp_l)
         gloss = GraphLoss0(mlp_u_0, mlp_u_1, dims, batch_size)
