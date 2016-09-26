@@ -6,7 +6,7 @@ def to_device(x, device=None):
     if device:
         return cuda.to_gpu(x, device)
     else:
-        return x
+        return cuda.to_cpu(x)
 
 class MNISTDataReader(object):
     """DataReader
