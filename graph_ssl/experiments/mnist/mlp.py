@@ -4,10 +4,11 @@ from graph_ssl.datasets import to_device
 import os
 from chainer import optimizers
 import numpy as np
+import sys
 
 def main():
     # Settings
-    device = None #1
+    device = sys.argv[1] if len(sys.argv) > 1 else None
     batch_size = 32
     inp_dim = 784
     out_dim = n_cls = 10
