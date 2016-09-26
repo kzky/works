@@ -37,8 +37,6 @@ def main():
                                   batch_size=batch_size,
                                   n_cls=n_cls)
     model = GraphSSLMLPModel(dims, batch_size)
-    eval_model = model.copy()
-    eval_model.mlp_l.test = True
     model.to_gpu(device) if device else None
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)
@@ -65,12 +63,13 @@ def main():
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
-            eval_model.sloss(x_l, y_l)
                         
             # Report
             loss = eval_model.sloss.loss
             acc = eval_model.sloss.accuracy
-            print("Loss:{},Accuracy:{}".format(loss.data, acc.data * 100))
+            print("Loss:{},Accuracy:{}".format(
+                to_device(loss.data),
+                to_device(acc.data) * 100))
 
             epoch +=1
             
