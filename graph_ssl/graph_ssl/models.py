@@ -642,7 +642,7 @@ class GraphSSLMLPModel(Chain):
         mlp_u_0 = mlp_l.copy()  # copy only Links!
         mlp_u_1 = mlp_l.copy()
         sloss = CrossEntropy(mlp_l)
-        gloss = GraphLoss1(mlp_u_0, mlp_u_1, dims, batch_size)
+        gloss = GraphLoss0(mlp_u_0, mlp_u_1, dims, batch_size)
         ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
