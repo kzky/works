@@ -6,6 +6,7 @@ from chainer import optimizers
 import numpy as np
 import sys
 import time
+import chainer.functions as F
 
 def main():
     # Settings
@@ -20,6 +21,8 @@ def main():
     lambdas = to_device(np.array([1., 1.], np.float32), device)
     learning_rate = 1. * 1e-3
     n_epoch = 200
+    decay = 0.5
+    act = F.tanh
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -37,7 +40,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    model = GraphSSLMLPModel(dims, batch_size)
+    model = GraphSSLMLPModel(dims, batch_size, act, decay)
     model.to_gpu(device) if device else None
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)

@@ -20,15 +20,18 @@ class MLP(Chain):
         Each element corresponds to the units. 
     act: activation
         E.g,.  F.relu or F.tanh
+    decay: float
+        Decay parameter of Batch Normlization
     test: bool
-        If False, the running mean and variance are computed in batch normalization,
+        If False, the running mean and variance are computed in Batch Normalization,
         and batch mean and variacne are used in batch normliazatoin; otherwise 
         in the inference time, the comupted running mean and variance are used in
-        batch normalization.
+        Batch Normalization.
     """
     def __init__(self,
                  dims=[784, 1000, 500, 250, 250, 250, 10],
                  act=F.relu,
+                 decay=0.9,
                  test=False):
 
         # Create and set links
@@ -40,7 +43,7 @@ class MLP(Chain):
             bn_name = "bn{}".format(i)
 
             fc_layers[fc_name] = L.Linear(d[0], d[1])
-            bn_layers[bn_name] = L.BatchNormalization(d[1])
+            bn_layers[bn_name] = L.BatchNormalization(d[1], decay)
             layers[fc_name] = fc_layers[fc_name]
             layers[bn_name] = bn_layers[bn_name]
             
@@ -50,6 +53,7 @@ class MLP(Chain):
         self.fc_layers = fc_layers
         self.bn_layers = bn_layers
         self.act = act
+        self.decay = decay
         self.test = False
         self.mid_outputs = []
 
@@ -371,12 +375,11 @@ class GraphSSLMLPModel(Chain):
     
     """
 
-    def __init__(self, dims, batch_size, lambdas=np.array([1., 1.])):
-        """
+    def __init__(self, dims, batch_size, act=F.Relu, decay,
+                 lambdas=np.array([1., 1.])):
 
-        """
         # Create chains
-        mlp_l = MLP(dims)
+        mlp_l = MLP(dims, act, decay)
         mlp_u_0 = mlp_l.copy()  # copy only Links!
         mlp_u_1 = mlp_l.copy()
         sloss = CrossEntropy(mlp_l)
