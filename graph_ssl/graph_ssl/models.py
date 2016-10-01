@@ -13,6 +13,18 @@ import time
 
 class MLP(Chain):
     """MLP
+
+    Parameters
+    -----------------
+    dims: list of int
+        Each element corresponds to the units. 
+    act: activation
+        E.g,.  F.relu or F.tanh
+    test: bool
+        If False, the running mean and variance are computed in batch normalization,
+        and batch mean and variacne are used in batch normliazatoin; otherwise 
+        in the inference time, the comupted running mean and variance are used in
+        batch normalization.
     """
     def __init__(self,
                  dims=[784, 1000, 500, 250, 250, 250, 10],
@@ -63,12 +75,27 @@ class MLP(Chain):
         return h
 
 class CrossEntropy(Chain):
+    """CrossEntropy Loss
+
+    Parameters
+    -----------------
+    predictor: Chain
+        Chain of MLP or CNN as a predictor network.
+    """
     def __init__(self, predictor):
         super(CrossEntropy, self).__init__(predictor=predictor)
         self.loss = None
         self.accuracy = None
         
     def __call__(self, x_l, y_l):
+        """
+        Parameters
+        -----------------
+        x_l: Variable
+            Feature of labeled samples.
+        y_l: Variable
+            Label.
+        """
         y = self.predictor(x_l)
         self.accuracy = F.accuracy(y, y_l)
         self.loss = F.softmax_cross_entropy(y, y_l)
@@ -76,6 +103,8 @@ class CrossEntropy(Chain):
         return self.loss
 
 class RBF(Link):
+    """RBF Kernel
+    """
     def __init__(self, dim):
         super(RBF, self).__init__(
             gamma=(1, dim)
@@ -83,6 +112,14 @@ class RBF(Link):
         self.gamma.data[:] = np.random.randn(1, dim)
         
     def __call__(self, x, y):
+        """
+        Parameters
+        -----------------
+        x: Variable
+            Feature of unlabeled samples.
+        y: Variable
+            Feature of unlabeled samples.
+        """
         g = self.gamma ** 2
         z = F.expand_dims((x - y) ** 2, axis=0)
         o = F.exp(- F.linear(z, g))
@@ -95,6 +132,9 @@ class GraphLoss(Chain):
     -----------------
     ffnn_u_0: MLP (now)
     ffnn_u_1: MLP (now)
+    dims: list of int
+        Each element corresponds to the units.
+    batch_size: int
     """
     def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
         # Create and set chain
@@ -118,6 +158,14 @@ class GraphLoss(Chain):
         self.coef = 1. / batch_size
 
     def __call__(self, x_u_0, x_u_1):
+        """
+        Parameters
+        -----------------
+        x: Variable
+            Feature of unlabeled samples.
+        y: Variable
+            Feature of unlabeled samples.
+        """
         ffnn_u_0 = self.layers["ffnn_u_0"]
         ffnn_u_1 = self.layers["ffnn_u_1"]
         
@@ -152,13 +200,31 @@ class GraphLoss(Chain):
         return loss
 
 class RBF0(Link):
+    """RBF Kernel
+
+    Efficient computation of RBF Kernel, while it consumes memory.
+
+    Parameters
+    -----------------
+    dim: int
+    """
     def __init__(self, dim):
+        
         super(RBF0, self).__init__(
             gamma=(1, dim)
         )
         self.gamma.data[:] = np.random.randn(1, dim)
 
     def __call__(self, x, y):
+        """
+        Parameters
+        -----------------
+        x: Variable
+            Feature of unlabeled samples.
+        y: Variable
+            Feature of unlabeled samples.
+        """
+        
         g, x, y = F.broadcast(*[self.gamma, x, y])
         x_g = x * g
         y_g = y * g
@@ -178,10 +244,16 @@ class RBF0(Link):
 class GraphLoss0(Chain):
     """Graph Loss0
 
+    The same as GraphLoss except for using RBF0 and efficient computation,
+    when computing \sum_{i, j} (f_i - f_j)^2
+
     Parameters
     -----------------
     ffnn_u_0: MLP (now)
     ffnn_u_1: MLP (now)
+    dims: list of int
+        Each element corresponds to the units.
+    batch_size: int
     """
     def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
         # Create and set chain
@@ -205,6 +277,15 @@ class GraphLoss0(Chain):
         self.coef = 1. / batch_size
 
     def __call__(self, x_u_0, x_u_1):
+        """
+        Parameters
+        -----------------
+        x_u_0: Variable
+            Feature of unlabeled samples.
+        x_u_1: Variable
+            Feature of unlabeled samples.
+
+        """
         ffnn_u_0 = self.layers["ffnn_u_0"]
         ffnn_u_1 = self.layers["ffnn_u_1"]
         
@@ -256,6 +337,19 @@ class SSLGraphLoss(Chain):
         self.lambdas = lambdas
         
     def __call__(self, x_l, y_l, x_u_0, x_u_1):
+        """
+        Parameters
+        -----------------
+        x_l: Variable
+            Feature of labeled samples.
+        y_l: Variable
+            Label.
+        x_u_0: Variable
+            Feature of unlabeled samples.
+        x_u_1: Variable
+            Feature of unlabeled samples.
+        """
+        
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
                + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
 
@@ -266,9 +360,21 @@ class GraphSSLMLPModel(Chain):
 
     Class instantiates the all chains necessary for foward pass upto the objective,
     and the objective is passed to the super.__init__ method as a chain.
+
+    Parameters
+    -----------------
+    dims: list of int
+    batch_size: int
+    lambdas: np.ndarray
+        Np.ndarray with size of two. Each is a coefficients between labeled objective
+        and unlabeled objective
+    
     """
 
     def __init__(self, dims, batch_size, lambdas=np.array([1., 1.])):
+        """
+
+        """
         # Create chains
         mlp_l = MLP(dims)
         mlp_u_0 = mlp_l.copy()  # copy only Links!
@@ -288,5 +394,18 @@ class GraphSSLMLPModel(Chain):
         super(GraphSSLMLPModel, self).__init__(ssl_graph_loss=ssl_graph_loss)
 
     def __call__(self, x_l, y_l, x_u_0, x_u_1):
+        """
+        Parameters
+        -----------------
+        x_l: Variable
+            Feature of labeled samples.
+        y_l: Variable
+            Label.
+        x_u_0: Variable
+            Feature of unlabeled samples.
+        x_u_1: Variable
+            Feature of unlabeled samples.
+
+        """
         return self.ssl_graph_loss(x_l, y_l, x_u_0, x_u_1)
     
