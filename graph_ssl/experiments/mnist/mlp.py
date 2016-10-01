@@ -11,7 +11,7 @@ import chainer.functions as F
 def main():
     # Settings
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
-    batch_size = 128
+    batch_size = 512
     inp_dim = 784
     out_dim = n_cls = 10
     n_l_train_data = 100

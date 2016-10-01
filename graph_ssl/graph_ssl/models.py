@@ -329,7 +329,7 @@ class GraphLoss0(Chain):
                                             F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
-        loss = F.sum(W * F_) / (self.batch_size * 2)
+        loss = F.sum(W * F_) / (self.batch_size ** 2)
 
         self.loss = loss
         return loss
@@ -452,7 +452,7 @@ class GraphLoss1(Chain):
                                             F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
-        loss = F.sum(W * F_) / (self.batch_size * 2)
+        loss = F.sum(W * F_) / (self.batch_size ** 2)
 
         self.loss = loss
         return loss
@@ -577,7 +577,7 @@ class GraphLoss2(Chain):
                                             F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
-        loss = F.sum(W * F_) / (self.batch_size * 2)
+        loss = F.sum(W * F_) / (self.batch_size ** 2)
 
         self.loss = loss
         return loss
@@ -615,7 +615,7 @@ class SSLGraphLoss(Chain):
         
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
                + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
-
+        
         return loss
 
 class GraphSSLMLPModel(Chain):
