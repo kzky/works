@@ -73,8 +73,13 @@ class MLP(Chain):
             z_bn = bn(z, self.test)
             h = self.act(z_bn)
 
+            shape = z.data.shape
+            batch = shape[0]
+            m, _ = F.broadcast(*[F.sum(z, 0) / batch, z])
+            v, _ = F.broadcast(*[F.sum((z - m) ** 2, 0) / batch, z])
+            
             #TODO: Add non-BN output
-            mid_outputs.append(z)
+            mid_outputs.append((z - m) / v )
 
         return h
 
