@@ -280,7 +280,7 @@ class GraphLoss0(Chain):
         self.dims = dims
         self.batch_size = batch_size
         self.coef = 1. / batch_size
-        self.loss = NOne
+        self.loss = None
 
     def __call__(self, x_u_0, x_u_1):
         """
