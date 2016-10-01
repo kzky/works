@@ -73,10 +73,12 @@ def main():
             model.mlp_l.test = False
                         
             # Report
-            loss = model.sloss.loss
+            sloss = model.sloss.loss
+            gloss = model.gloss.loss
             acc = model.sloss.accuracy
-            print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
-                to_device(loss.data), to_device(acc.data) * 100, time.time() - st))
+            print("SLoss:{},GLoss:{},Accuracy:{},Time/epoch:{}[s]".format(
+                to_device(sloss.data), to_device(gloss.data),
+                to_device(acc.data) * 100, time.time() - st))
             
             epoch +=1
             st = time.time()
