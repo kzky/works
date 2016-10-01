@@ -31,7 +31,7 @@ def main():
     separator.separate_then_save(fpath)
 
     l_train_path = os.path.join(home, "datasets/mnist/l_train.npz")
-    u_train_path = os.path.join(home, "datasets/mnist/u_train.npz")
+    u_train_path = os.path.join(home, "datasets/mnist/train.npz")
     test_path = os.path.join(home, "datasets/mnist/test.npz")
 
     # DataReader, Model, Optimizer

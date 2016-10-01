@@ -133,8 +133,8 @@ class Separator(object):
 
     def separate_then_save(self,
                 fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/train.npz"):
-        ldata, udata = self._separate(fpath)
-        self._save_ssl_data(fpath, ldata, udata)
+        ldata = self._separate(fpath)
+        self._save_ssl_data(fpath, ldata)
         
     def _separate(self,
                  fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/train.npz"):
@@ -143,26 +143,19 @@ class Separator(object):
         n = len(data["x"])
         idxs = np.arange(n)
         idxs_l = np.random.choice(idxs, size=self.l, replace=False)
-        idxs_u = idxs  # Use all samples as unlabeled ones.
 
         ldata = {}
-        udata = {}
         ldata["x"] = data["x"][idxs_l]
         ldata["y"] = data["y"][idxs_l]
-        udata["x"] = data["x"][idxs_u]
-        udata["y"] = data["y"][idxs_u]
 
-        return ldata, udata
+        return ldata
         
-    def _save_ssl_data(self, fpath, ldata, udata):
+    def _save_ssl_data(self, fpath, ldata):
         dpath = os.path.dirname(fpath)
         fname = os.path.basename(fpath)
 
         l_fname = "l_{}".format(fname)
-        u_fname = "u_{}".format(fname)
         
         ldata_fpath = os.path.join(dpath, l_fname)
-        udata_fpath = os.path.join(dpath, u_fname)
 
         np.savez(ldata_fpath, **ldata)
-        np.savez(udata_fpath, **udata)
