@@ -115,7 +115,7 @@ class RBF(Link):
         super(RBF, self).__init__(
             gamma=(1, dim)
         )
-        self.gamma.data[:] = np.random.normal(0, 0.1, dim)
+        self.gamma.data[:] = np.random.normal(0, 0.1, (1, dim))
         
     def __call__(self, x, y):
         """
@@ -221,7 +221,7 @@ class RBF0(Link):
         super(RBF0, self).__init__(
             gamma=(1, dim)
         )
-        self.gamma.data[:] = np.random.normal(0, 0.1, dim)
+        self.gamma.data[:] = np.random.normal(0, 0.1, (1, dim))
 
     def __call__(self, x, y):
         """
@@ -344,7 +344,7 @@ class RBF1(Link):
         super(RBF1, self).__init__(
             gamma=(1, )
         )
-        self.gamma.data[:] = np.random.normal(0, 0.1)
+        self.gamma.data[:] = np.random.normal(0, 0.1, (1, ))
 
     def __call__(self, x, y):
         """
