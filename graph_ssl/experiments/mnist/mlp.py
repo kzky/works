@@ -66,6 +66,9 @@ def main():
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
+            model.mlp_l.test = True
+            model.sloss(x_l, y_l)
+            model.mlp_l.test = False
                         
             # Report
             loss = model.sloss.loss
