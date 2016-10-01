@@ -71,7 +71,7 @@ def main():
             loss = model.sloss.loss
             acc = model.sloss.accuracy
             print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
-                to_device(loss.data), to_device(acc.data) * 100), time.time() - st)
+                to_device(loss.data), to_device(acc.data) * 100, time.time() - st)
             
             epoch +=1
             st = time.time()
