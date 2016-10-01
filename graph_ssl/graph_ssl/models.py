@@ -318,6 +318,9 @@ class GraphLoss0(Chain):
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
+        W_norm, _ = F.broadcast(F.sum(W, axis=1), W)
+        W_reg = W / W_norm
+            
         ## class similarity 
         f_0_norm = F.sum(f_0**2, axis=1)
         f_1_norm = F.sum(f_1**2, axis=1)
@@ -329,7 +332,7 @@ class GraphLoss0(Chain):
                                             F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
-        loss = F.sum(W * F_) / (self.batch_size ** 2)
+        loss = F.sum(W_reg * F_) / (self.batch_size ** 2)
 
         self.loss = loss
         return loss
