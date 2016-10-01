@@ -160,6 +160,7 @@ class GraphLoss(Chain):
         self.dims = dims
         self.batch_size = batch_size
         self.coef = 1. / batch_size
+        self.loss = None
 
     def __call__(self, x_u_0, x_u_1):
         """
@@ -200,7 +201,7 @@ class GraphLoss(Chain):
                 loss += F.reshape(s, ()) * F.sum((f_0_i - f_1_j) ** 2)
 
         loss /= (batch_size ** 2)
-
+        
         return loss
 
 class RBF0(Link):
@@ -279,6 +280,7 @@ class GraphLoss0(Chain):
         self.dims = dims
         self.batch_size = batch_size
         self.coef = 1. / batch_size
+        self.loss = NOne
 
     def __call__(self, x_u_0, x_u_1):
         """
@@ -320,7 +322,8 @@ class GraphLoss0(Chain):
         F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
         loss = F.sum(W * F_) / (self.batch_size * 2)
-        
+
+        self.loss = loss
         return loss
         
 class SSLGraphLoss(Chain):
