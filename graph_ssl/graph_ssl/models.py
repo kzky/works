@@ -72,7 +72,6 @@ class MLP(Chain):
             z = fc(h)
             z_bn = bn(z, self.test)
             h = self.act(z_bn)
-            h = F.dropout(h, train=not self.test)
 
             shape = z.data.shape
             batch = shape[0]
