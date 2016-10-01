@@ -66,8 +66,8 @@ def main():
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
                         
             # Report
-            loss = eval_model.sloss.loss
-            acc = eval_model.sloss.accuracy
+            loss = model.sloss.loss
+            acc = model.sloss.accuracy
             print("Loss:{},Accuracy:{}".format(
                 to_device(loss.data),
                 to_device(acc.data) * 100))
