@@ -41,7 +41,7 @@ class MLP(Chain):
         for i, d in enumerate(zip(dims[:-1], dims[1:])):
             fc_name = "fc{}".format(i)
             bn_name = "bn{}".format(i)
-
+            dp_name = "dp{}".format(i)
             fc_layers[fc_name] = L.Linear(d[0], d[1])
             bn_layers[bn_name] = L.BatchNormalization(d[1], decay)
             layers[fc_name] = fc_layers[fc_name]
@@ -72,6 +72,7 @@ class MLP(Chain):
             z = fc(h)
             z_bn = bn(z, self.test)
             h = self.act(z_bn)
+            h = F.dropout(h, train=not self.test)
 
             shape = z.data.shape
             batch = shape[0]
@@ -251,7 +252,7 @@ class RBF0(Link):
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-        #F.exp(- (x_g_norm - 2 * x_g_y_g+ y_g_norm))
+
         return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
         
 class GraphLoss0(Chain):
@@ -374,7 +375,7 @@ class RBF1(Link):
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-        #F.exp(- (x_g_norm - 2 * x_g_y_g+ y_g_norm))
+
         return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
         
 class GraphLoss1(Chain):
@@ -404,131 +405,6 @@ class GraphLoss1(Chain):
         layers["ffnn_u_1"] = ffnn_u_1
 
         super(GraphLoss1, self).__init__(**layers)
-
-        # Set attributes
-        self.layers = layers
-        self.similarities = similarities
-        self.dims = dims
-        self.batch_size = batch_size
-        self.coef = 1. / batch_size
-        self.loss = None
-
-    def __call__(self, x_u_0, x_u_1):
-        """
-        Parameters
-        -----------------
-        x_u_0: Variable
-            Feature of unlabeled samples.
-        x_u_1: Variable
-            Feature of unlabeled samples.
-
-        """
-        ffnn_u_0 = self.layers["ffnn_u_0"]
-        ffnn_u_1 = self.layers["ffnn_u_1"]
-        
-        f_0 = F.softmax(ffnn_u_0(x_u_0))
-        f_1 = F.softmax(ffnn_u_1(x_u_1))
-
-        mid_outputs_0 = ffnn_u_0.mid_outputs
-        mid_outputs_1 = ffnn_u_1.mid_outputs
-        
-        L = len(self.dims[1:])
-        similarities = self.similarities.values()
-
-        # Efficient computation
-        ## sample similarity W^l summed over l
-        W = 0
-        for l in range(L):
-            W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
-
-        ## class similarity 
-        f_0_norm = F.sum(f_0**2, axis=1)
-        f_1_norm = F.sum(f_1**2, axis=1)
-        f_0_f_1 = F.linear(f_0, f_1)
-        f_0_norm, f_0_f_1, f_1_norm= \
-                                      F.broadcast(
-                                          *[f_0_norm,
-                                            f_0_f_1,
-                                            F.expand_dims(f_1_norm, 1)])
-        F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
-
-        loss = F.sum(W * F_) / (self.batch_size ** 2)
-
-        self.loss = loss
-        return loss
-
-class RBF2(Link):
-    """RBF Kernel
-
-    Same prameters for different dimensions.
-    Efficient computation of RBF Kernel, while it consumes memory.
-
-    Parameters
-    -----------------
-    dim: int
-    """
-    def __init__(self, dim):
-        
-        super(RBF2, self).__init__(
-        )
-
-    def __call__(self, x, y):
-        """
-        Parameters
-        -----------------
-        x: Variable
-            Feature of unlabeled samples.
-        y: Variable
-            Feature of unlabeled samples.
-        """
-
-        g = F.broadcast_to(
-            F.gaussian(
-                np.array([0], dtype=np.float32),
-                np.array([np.exp(1)], dtype=np.float32)), x.shape)
-            
-        x_g = x * g
-        y_g = y * g
-
-        x_g_norm = F.sum(x_g**2, axis=1)  
-        y_g_norm = F.sum(y_g**2, axis=1)
-        x_g_y_g = F.linear(x_g, y_g)
-        
-        x_g_norm, x_g_y_g, y_g_norm = \
-                                      F.broadcast(
-                                          *[x_g_norm,
-                                            x_g_y_g,
-                                            F.expand_dims(y_g_norm, 1)])
-        #F.exp(- (x_g_norm - 2 * x_g_y_g+ y_g_norm))
-        return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
-        
-class GraphLoss2(Chain):
-    """Graph Loss2
-
-    The same as GraphLoss except for using RBF2 and efficient computation,
-    when computing \sum_{i, j} (f_i - f_j)^2
-
-    Parameters
-    -----------------
-    ffnn_u_0: MLP (now)
-    ffnn_u_1: MLP (now)
-    dims: list of int
-        Each element corresponds to the units.
-    batch_size: int
-    """
-    def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
-        # Create and set chain
-        layers = {}
-        similarities = OrderedDict()
-        for i, d in enumerate(dims[1:]):
-            sim_name = "sim{}".format(i+1)
-            similarities[sim_name] = RBF2(d)
-            layers[sim_name] = similarities[sim_name]
-
-        layers["ffnn_u_0"] = ffnn_u_0
-        layers["ffnn_u_1"] = ffnn_u_1
-
-        super(GraphLoss2, self).__init__(**layers)
 
         # Set attributes
         self.layers = layers
