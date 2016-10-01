@@ -375,7 +375,7 @@ class GraphSSLMLPModel(Chain):
     
     """
 
-    def __init__(self, dims, batch_size, act=F.Relu, decay=0.9,
+    def __init__(self, dims, batch_size, act=F.relu, decay=0.9,
                  lambdas=np.array([1., 1.])):
 
         # Create chains
