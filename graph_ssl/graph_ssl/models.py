@@ -30,7 +30,7 @@ class MLP(Chain):
     """
     def __init__(self,
                  dims=[784, 1000, 500, 250, 250, 250, 10],
-                 act=F.relu,
+                 act=F.tanh,
                  decay=0.9,
                  test=False):
 
@@ -375,7 +375,7 @@ class GraphSSLMLPModel(Chain):
     
     """
 
-    def __init__(self, dims, batch_size, act=F.Relu, decay,
+    def __init__(self, dims, batch_size, act=F.Relu, decay=0.9,
                  lambdas=np.array([1., 1.])):
 
         # Create chains
