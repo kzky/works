@@ -40,9 +40,10 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    model = GraphSSLMLPModel(dims, batch_size, act, decay)
+    model = GraphSSLMLPModel(dims, batch_size, act, decay, lambdas)
     model.to_gpu(device) if device else None
     optimizer = optimizers.Adam(learning_rate)
+    optimizer.use_cleargrads()
     optimizer.setup(model)
 
     # Training loop
