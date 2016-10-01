@@ -5,6 +5,7 @@ import os
 from chainer import optimizers
 import numpy as np
 import sys
+import time
 
 def main():
     # Settings
@@ -45,6 +46,7 @@ def main():
     # Training loop
     print("# Training loop")
     epoch = 1
+    st = time.time()
     for i in range(n_iter):
 
         # Get data
@@ -68,11 +70,11 @@ def main():
             # Report
             loss = model.sloss.loss
             acc = model.sloss.accuracy
-            print("Loss:{},Accuracy:{}".format(
-                to_device(loss.data),
-                to_device(acc.data) * 100))
-
+            print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
+                to_device(loss.data), to_device(acc.data) * 100), time.time() - st)
+            
             epoch +=1
+            st = time.time()
             
 if __name__ == '__main__':
     main()
