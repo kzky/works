@@ -143,7 +143,7 @@ class Separator(object):
         n = len(data["x"])
         idxs = np.arange(n)
         idxs_l = np.random.choice(idxs, size=self.l, replace=False)
-        idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
+        idxs_u = idxs  # Use all samples as unlabeled ones.
 
         ldata = {}
         udata = {}
