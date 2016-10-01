@@ -481,11 +481,12 @@ class RBF2(Link):
         y: Variable
             Feature of unlabeled samples.
         """
-        mu, ln_var, _ = F.broadcast(
-            *[Variable(np.array([0], dtype=np.float32)),
-              Variable(np.array([np.exp(1)], dtype=np.float32)),
-              x])
-        g = F.gaussian(mu, ln_var)
+
+        g = F.broadcast_to(
+            F.gaussian(
+                np.array([0], dtype=np.float32),
+                np.array([np.exp(1)], dtype=np.float32)), x.shape)
+            
         x_g = x * g
         y_g = y * g
 
