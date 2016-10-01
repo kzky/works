@@ -15,13 +15,12 @@ def main():
     out_dim = n_cls = 10
     n_l_train_data = 100
     n_train_data = 60000
-    n_u_train_data = n_train_data -  n_l_train_data
 
     dims = [inp_dim, 1000, 500, 250, 250, 250, out_dim]
     lambdas = to_device(np.array([1., 1.], np.float32), device)
     learning_rate = 1. * 1e-3
     n_epoch = 200
-    iter_epoch = n_u_train_data / batch_size
+    iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
     # Separate dataset
