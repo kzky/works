@@ -10,6 +10,7 @@ import chainer.links as L
 from collections import OrderedDict
 import logging
 import time
+from utils import to_device
 
 class MLP(Chain):
     """MLP
@@ -32,8 +33,6 @@ class MLP(Chain):
                  dims=[784, 1000, 500, 250, 250, 250, 10],
                  act=F.tanh,
                  decay=0.9,
-                 noisy=False,
-                 test=False,
                  device=None):
 
         # Create and set links
@@ -56,7 +55,7 @@ class MLP(Chain):
         self.bn_layers = bn_layers
         self.act = act
         self.decay = decay
-        self.noisy = noisy
+        self.noisy = True
         self.test = False
         self.device = device
         self.mid_outputs = []
@@ -73,14 +72,14 @@ class MLP(Chain):
         
         h = h_noise = x
         if self.noisy:
-            noise = to_device(np.random.normal(0, 1, h.shape), self.device)
+            noise = to_device(np.random.normal(0, 0.1, h.shape), self.device)
             h_noise = h + noise
         for fc, bn in zip(self.fc_layers.values(), self.bn_layers.values()):
             z = fc(h)
             z_bn = bn(z, self.test)
-            h = self.act(z_bn)
+            h = h_noise = self.act(z_bn)
             if self.noisy:
-                noise = to_device(np.random.normal(0, 1, h.shape), self.device)
+                noise = to_device(np.random.normal(0, 0.1, h.shape), self.device)
                 h_noise = h + noise
                       
             #TODO: Add non-BN output
@@ -93,7 +92,7 @@ class CrossEntropy(Chain):
 
     Parameters
     -----------------
-    predictor: Chain
+    classifier: Chain
         Chain of MLP or CNN as a predictor network.
     """
     def __init__(self, predictor):
@@ -167,13 +166,12 @@ class GraphLoss0(Chain):
 
     Parameters
     -----------------
-    ffnn_u_0: MLP (now)
-    ffnn_u_1: MLP (now)
+    classifier: MLP (now)
     dims: list of int
         Each element corresponds to the units.
     batch_size: int
     """
-    def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
+    def __init__(self, classifier, dims, batch_size):
         # Create and set chain
         layers = {}
         similarities = OrderedDict()
@@ -182,8 +180,7 @@ class GraphLoss0(Chain):
             similarities[sim_name] = RBF0(d)
             layers[sim_name] = similarities[sim_name]
 
-        layers["ffnn_u_0"] = ffnn_u_0
-        layers["ffnn_u_1"] = ffnn_u_1
+        layers["classifier"] = classifier
 
         super(GraphLoss0, self).__init__(**layers)
 
@@ -203,27 +200,24 @@ class GraphLoss0(Chain):
             Feature of unlabeled samples.
         x_u_1: Variable
             Feature of unlabeled samples.
-
         """
-        ffnn_u_0 = self.layers["ffnn_u_0"]
-        ffnn_u_1 = self.layers["ffnn_u_1"]
-        
-        f_0 = F.softmax(ffnn_u_0(x_u_0))
-        f_1 = F.softmax(ffnn_u_1(x_u_1))
-
-        mid_outputs_0 = ffnn_u_0.mid_outputs
-        mid_outputs_1 = ffnn_u_1.mid_outputs
+        classifier = self.layers["classifier"]
+        classifier.noisy = False
+        f_0 = F.softmax(classifier(x_u_0))
+        mid_outputs_0 = classifier.mid_outputs
+        classifier.noisy = True
+        f_1 = F.softmax(classifier(x_u_1))
+        mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
         similarities = self.similarities.values()
 
-        # Efficient computation
-        ## sample similarity W^l summed over l
+        # Sample similarity W^l summed over l
         W = 0
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
-        ## class similarity 
+        # Class similarity 
         f_0_norm = F.sum(f_0**2, axis=1)
         f_1_norm = F.sum(f_1**2, axis=1)
         f_0_f_1 = F.linear(f_0, f_1)
@@ -290,13 +284,12 @@ class GraphLoss1(Chain):
 
     Parameters
     -----------------
-    ffnn_u_0: MLP (now)
-    ffnn_u_1: MLP (now)
+    classifier: MLP (now)
     dims: list of int
         Each element corresponds to the units.
     batch_size: int
     """
-    def __init__(self, ffnn_u_0, ffnn_u_1, dims, batch_size):
+    def __init__(self, classifier, dims, batch_size):
         # Create and set chain
         layers = {}
         similarities = OrderedDict()
@@ -305,8 +298,7 @@ class GraphLoss1(Chain):
             similarities[sim_name] = RBF1(d)
             layers[sim_name] = similarities[sim_name]
 
-        layers["ffnn_u_0"] = ffnn_u_0
-        layers["ffnn_u_1"] = ffnn_u_1
+        layers["classifier"] = classifier
 
         super(GraphLoss1, self).__init__(**layers)
 
@@ -328,25 +320,23 @@ class GraphLoss1(Chain):
             Feature of unlabeled samples.
 
         """
-        ffnn_u_0 = self.layers["ffnn_u_0"]
-        ffnn_u_1 = self.layers["ffnn_u_1"]
-        
-        f_0 = F.softmax(ffnn_u_0(x_u_0))
-        f_1 = F.softmax(ffnn_u_1(x_u_1))
-
-        mid_outputs_0 = ffnn_u_0.mid_outputs
-        mid_outputs_1 = ffnn_u_1.mid_outputs
+        classifier = self.layers["classifier"]
+        classifier.noisy = False
+        f_0 = F.softmax(classifier(x_u_0))
+        mid_outputs_0 = classifier.mid_outputs
+        classifier.noisy = True
+        f_1 = F.softmax(classifier(x_u_1))
+        mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
         similarities = self.similarities.values()
 
-        # Efficient computation
-        ## sample similarity W^l summed over l
+        # Sample similarity W^l summed over l
         W = 0
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
-        ## class similarity 
+        # Class similarity 
         f_0_norm = F.sum(f_0**2, axis=1)
         f_1_norm = F.sum(f_1**2, axis=1)
         f_0_f_1 = F.linear(f_0, f_1)
@@ -392,7 +382,6 @@ class SSLGraphLoss(Chain):
         x_u_1: Variable
             Feature of unlabeled samples.
         """
-        
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
                + self.lambdas[1] * self.gloss(x_u_0, x_u_1)
         
@@ -415,20 +404,17 @@ class GraphSSLMLPModel(Chain):
     """
 
     def __init__(self, dims, batch_size, act=F.relu, decay=0.9,
-                 lambdas=np.array([1., 1.])):
+                 lambdas=np.array([1., 1.]), device=None):
 
         # Create chains
-        mlp_l = MLP(dims, act, decay)
-        mlp_u_0 = mlp_l.copy()  # copy only Links!
-        mlp_u_1 = mlp_l.copy()
-        sloss = CrossEntropy(mlp_l)
-        gloss = GraphLoss0(mlp_u_0, mlp_u_1, dims, batch_size)
+        classifier = MLP(dims, act, decay, device)
+        classifier_u = classifier.copy()
+        sloss = CrossEntropy(classifier)
+        gloss = GraphLoss1(classifier_u, dims, batch_size)
         ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
-        self.mlp_l = mlp_l
-        self.mlp_u_0 = mlp_u_0
-        self.mlp_u_1 = mlp_u_1
+        self.classifier = classifier
         self.sloss = sloss
         self.gloss = gloss
 
@@ -449,5 +435,7 @@ class GraphSSLMLPModel(Chain):
             Feature of unlabeled samples.
 
         """
+        self.classifier.noisy = True
+        self.classifier.test = False
         return self.ssl_graph_loss(x_l, y_l, x_u_0, x_u_1)
     
