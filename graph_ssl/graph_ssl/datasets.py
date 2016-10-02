@@ -2,12 +2,6 @@ import numpy as np
 import os
 from chainer import cuda
 
-def to_device(x, device=None):
-    if device:
-        return cuda.to_gpu(x, device)
-    else:
-        return cuda.to_cpu(x)
-
 class MNISTDataReader(object):
     """DataReader
     """
@@ -133,8 +127,8 @@ class Separator(object):
 
     def separate_then_save(self,
                 fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/train.npz"):
-        ldata = self._separate(fpath)
-        self._save_ssl_data(fpath, ldata)
+        ldata, udata = self._separate(fpath)
+        self._save_ssl_data(fpath, ldata, udata)
         
     def _separate(self,
                  fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/train.npz"):
@@ -143,19 +137,26 @@ class Separator(object):
         n = len(data["x"])
         idxs = np.arange(n)
         idxs_l = np.random.choice(idxs, size=self.l, replace=False)
+        idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
 
         ldata = {}
+        udata = {}
         ldata["x"] = data["x"][idxs_l]
         ldata["y"] = data["y"][idxs_l]
+        udata["x"] = data["x"][idxs_u]
+        udata["y"] = data["y"][idxs_u]
 
-        return ldata
+        return ldata, udata
         
-    def _save_ssl_data(self, fpath, ldata):
+    def _save_ssl_data(self, fpath, ldata, udata):
         dpath = os.path.dirname(fpath)
         fname = os.path.basename(fpath)
 
         l_fname = "l_{}".format(fname)
+        u_fname = "u_{}".format(fname)
         
         ldata_fpath = os.path.join(dpath, l_fname)
+        udata_fpath = os.path.join(dpath, u_fname)
 
         np.savez(ldata_fpath, **ldata)
+        np.savez(udata_fpath, **udata)
