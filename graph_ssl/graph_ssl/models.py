@@ -72,14 +72,16 @@ class MLP(Chain):
         
         h = h_noise = x
         if self.noisy:
-            noise = to_device(np.random.normal(0, 0.1, h.shape), self.device)
+            noise = to_device(np.random.normal(0, 0.1, h.shape).astype(np.float32),
+                              self.device)
             h_noise = h + noise
         for fc, bn in zip(self.fc_layers.values(), self.bn_layers.values()):
             z = fc(h)
             z_bn = bn(z, self.test)
             h = h_noise = self.act(z_bn)
             if self.noisy:
-                noise = to_device(np.random.normal(0, 0.1, h.shape), self.device)
+                noise = to_device(np.random.normal(0, 0.1, h.shape).astype(np.float32),
+                                  self.device)
                 h_noise = h + noise
                       
             #TODO: Add non-BN output
