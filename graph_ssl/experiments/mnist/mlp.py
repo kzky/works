@@ -1,6 +1,6 @@
 from graph_ssl.datasets import MNISTDataReader, Separator
 from graph_ssl.models import GraphSSLMLPModel
-from graph_ssl.datasets import to_device
+from graph_ssl.utils import to_device
 import os
 from chainer import optimizers
 import numpy as np
@@ -69,9 +69,10 @@ def main():
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
-            model.mlp_l.test = True
-            model.sloss(x_l, y_l)
-            model.mlp_l.test = False
+
+            model.classifier.noisy = False
+            model.classifier.test = True
+            model.sloss(x_l, y_l)  # noisy and test are automatically changed in trainig
                         
             # Report
             sloss = model.sloss.loss
