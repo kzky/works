@@ -203,10 +203,10 @@ class GraphLoss0(Chain):
         """
         classifier = self.layers["classifier"]
         classifier.noisy = False
-        f_0 = F.softmax(classifier(x_u_0))
+        f_0 = F.log_softmax(classifier(x_u_0))
         mid_outputs_0 = classifier.mid_outputs
         classifier.noisy = True
-        f_1 = F.softmax(classifier(x_u_1))
+        f_1 = F.log_softmax(classifier(x_u_1))
         mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
@@ -322,10 +322,10 @@ class GraphLoss1(Chain):
         """
         classifier = self.layers["classifier"]
         classifier.noisy = False
-        f_0 = F.softmax(classifier(x_u_0))
+        f_0 = F.log_softmax(classifier(x_u_0))
         mid_outputs_0 = classifier.mid_outputs
         classifier.noisy = True
-        f_1 = F.softmax(classifier(x_u_1))
+        f_1 = F.log_softmax(classifier(x_u_1))
         mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
