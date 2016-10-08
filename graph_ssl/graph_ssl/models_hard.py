@@ -223,13 +223,14 @@ class GraphLoss0(Chain):
         
         loss = l / (self.batch_size ** 2)
         self.loss = loss
-        
+
         return loss
 
     def _hard_sim(self, f_0_max, f_0_argmax, f_1_max, f_1_argmax, W):
+        #TODO: This does NOT backward
         for i in range(len(f_0_max)):
             for j in range(i, len(f_1_max)):
-                if f_0_argmax[i] == f_1_argmax[j]:
+                if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
                 l += 4
         return l
@@ -238,7 +239,7 @@ class GraphLoss0(Chain):
         l = 0
         for i in range(len(f_0_max)):
             for j in range(i, len(f_1_max)):
-                if f_0_argmax[i] == f_1_argmax[j]:
+                if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
                 l += f_0_max[i] ** 2 + f_1_max[j]
         return l
@@ -358,13 +359,14 @@ class GraphLoss1(Chain):
         
         loss = l / (self.batch_size ** 2)
         self.loss = loss
-        
+
         return loss
 
     def _hard_sim(self, f_0_max, f_0_argmax, f_1_max, f_1_argmax, W):
+        #TODO: This does NOT backward
         for i in range(len(f_0_max)):
             for j in range(i, len(f_1_max)):
-                if f_0_argmax[i] == f_1_argmax[j]:
+                if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
                 l += 4
         return l
@@ -373,7 +375,7 @@ class GraphLoss1(Chain):
         l = 0
         for i in range(len(f_0_max)):
             for j in range(i, len(f_1_max)):
-                if f_0_argmax[i] == f_1_argmax[j]:
+                if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
                 l += f_0_max[i] ** 2 + f_1_max[j]
         return l
