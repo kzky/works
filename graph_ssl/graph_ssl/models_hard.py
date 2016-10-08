@@ -76,7 +76,7 @@ class MLP(Chain):
             h = self.act(z_bn)
             
             #TODO: Add non-BN output
-            mid_outputs.append(h_noise)
+            mid_outputs.append(h)
 
         return h
 
