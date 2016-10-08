@@ -1,5 +1,5 @@
 from graph_ssl.datasets import MNISTDataReader, Separator
-from graph_ssl.models import GraphSSLMLPModel
+from graph_ssl.models_hard import GraphSSLMLPModel
 from graph_ssl.utils import to_device
 import os
 from chainer import optimizers
