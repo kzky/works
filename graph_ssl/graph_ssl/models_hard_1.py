@@ -209,6 +209,7 @@ class GraphLoss0(Chain):
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
+        #TODO: Address approximation
         # Class similarity
         l = 0
         f_0_max = F.max(f_0, axis=1) ** 2
@@ -328,6 +329,7 @@ class GraphLoss1(Chain):
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
+        #TODO: Address approximation
         # Class similarity
         l = 0
         f_0_max = F.max(f_0, axis=1) ** 2
