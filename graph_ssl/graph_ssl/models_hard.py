@@ -241,7 +241,7 @@ class GraphLoss0(Chain):
             for j in range(i, len(f_1_max)):
                 if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
-                l += f_0_max[i] ** 2 + f_1_max[j]
+                l += (f_0_max[i] ** 2 + f_1_max[j] ** 2) * W[i, j]
         return l
 
 class RBF1(Link):
@@ -377,7 +377,7 @@ class GraphLoss1(Chain):
             for j in range(i, len(f_1_max)):
                 if f_0_argmax[i].data == f_1_argmax[j].data:
                     continue
-                l += f_0_max[i] ** 2 + f_1_max[j]
+                l += (f_0_max[i] ** 2 + f_1_max[j] ** 2) * W[i, j]
         return l
 
 class SSLGraphLoss(Chain):
