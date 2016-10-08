@@ -197,9 +197,9 @@ class GraphLoss0(Chain):
             Feature of unlabeled samples.
         """
         classifier = self.layers["classifier"]
-        f_u = F.log_softmax(classifier(x_u))
+        f_u = F.exp(F.log_softmax(classifier(x_u)))
         mid_outputs_u = classifier.mid_outputs
-        f_l = F.log_softmax(classifier(x_l))
+        f_l = F.exp(F.log_softmax(classifier(x_l)))
         mid_outputs_l = classifier.mid_outputs
         
         L = len(self.dims[1:])
@@ -241,7 +241,7 @@ class RBF1(Link):
         super(RBF1, self).__init__(
             gamma=(1, )
         )
-        self.gamma.data[:] = np.random.normal(0, 0.1, (1, ))
+        self.gamma.data[:] = np.random.normal(0, 10, (1, ))
 
     def __call__(self, x, y):
         """
@@ -315,9 +315,9 @@ class GraphLoss1(Chain):
             Feature of unlabeled samples.
         """
         classifier = self.layers["classifier"]
-        f_u = F.log_softmax(classifier(x_u))
+        f_u = F.exp(F.log_softmax(classifier(x_u)))
         mid_outputs_u = classifier.mid_outputs
-        f_l = F.log_softmax(classifier(x_l))
+        f_l = F.exp(F.log_softmax(classifier(x_l)))
         mid_outputs_l = classifier.mid_outputs
         
         L = len(self.dims[1:])
