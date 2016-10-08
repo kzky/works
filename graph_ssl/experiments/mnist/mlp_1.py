@@ -55,7 +55,6 @@ def main():
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
         x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
-        x_u_0 = x_u_1 = x_u
 
         # Train one-step
         model.zerograds()
@@ -69,9 +68,9 @@ def main():
 
             # Get data, go to test mode, eval, revert to train mode over all samples
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
-            model.classifier = True
+            model.classifier.test = True
             model.sloss(x_l, y_l)
-            model.classifier = False
+            model.classifier.test = False
             
             # Report
             sloss = model.sloss.loss

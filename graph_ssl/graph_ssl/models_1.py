@@ -55,10 +55,10 @@ class MLP(Chain):
         self.bn_layers = bn_layers
         self.act = act
         self.decay = decay
+        self.test = False
         self.device = device
         self.mid_outputs = []
-        self.test = False
-        
+
     def __call__(self, x):
         """
         Parameters
@@ -69,14 +69,14 @@ class MLP(Chain):
         # Reset mid outputs
         mid_outputs = self.mid_outputs = []
         
-        h = x
+        h  = x
         for fc, bn in zip(self.fc_layers.values(), self.bn_layers.values()):
             z = fc(h)
             z_bn = bn(z, self.test)
             h = self.act(z_bn)
-
+            
             #TODO: Add non-BN output
-            mid_outputs.append(z)
+            mid_outputs.append(h)
 
         return h
 
@@ -123,16 +123,16 @@ class RBF0(Link):
         super(RBF0, self).__init__(
             gamma=(1, dim)
         )
-        self.gamma.data[:] = np.random.normal(0, 10, (1, dim))
+        self.gamma.data[:] = np.random.normal(0, 0.1, (1, dim))
 
     def __call__(self, x, y):
         """
         Parameters
         -----------------
         x: Variable
-            Feature of samples.
+            Feature of unlabeled samples.
         y: Variable
-            Feature of samples.
+            Feature of unlabeled samples.
         """
         
         g, x, y = F.broadcast(*[self.gamma, x, y])
@@ -148,9 +148,10 @@ class RBF0(Link):
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-
+        u = - x_g_norm + 2 * x_g_y_g - y_g_norm
+        
         return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
-
+        
 class GraphLoss0(Chain):
     """Graph Loss0
 
@@ -175,7 +176,7 @@ class GraphLoss0(Chain):
 
         layers["classifier"] = classifier
 
-        super(GraphLoss1, self).__init__(**layers)
+        super(GraphLoss0, self).__init__(**layers)
 
         # Set attributes
         self.layers = layers
@@ -190,17 +191,17 @@ class GraphLoss0(Chain):
         Parameters
         -----------------
         x_l: Variable
-            Feature of labeled samples.
+            Feature of unlabeled samples.
         y_l: Variable
-            Labeled samples.
+            Feature of unlabeled samples.
         x_u: Variable
             Feature of unlabeled samples.
         """
         classifier = self.layers["classifier"]
-        f_u = F.exp(F.log_softmax(classifier(x_u)))
-        mid_outputs_u = classifier.mid_outputs
-        f_l = F.exp(F.log_softmax(classifier(x_l)))
-        mid_outputs_l = classifier.mid_outputs
+        f_0 = F.softmax(classifier(x_l))
+        mid_outputs_0 = classifier.mid_outputs
+        f_1 = F.softmax(classifier(x_u))
+        mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
         similarities = self.similarities.values()
@@ -208,22 +209,22 @@ class GraphLoss0(Chain):
         # Sample similarity W^l summed over l
         W = 0
         for l in range(L):
-            W += similarities[l](mid_outputs_u[l], mid_outputs_l[l])
+            W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
         # Class similarity 
-        f_u_norm = F.sum(f_u**2, axis=1)
-        f_l_norm = F.sum(f_l**2, axis=1)
-        f_u_f_l = F.linear(f_u, f_l)
-        f_u_norm, f_u_f_l, f_l_norm= \
+        f_0_norm = F.sum(f_0**2, axis=1)
+        f_1_norm = F.sum(f_1**2, axis=1)
+        f_0_f_1 = F.linear(f_0, f_1)
+        f_0_norm, f_0_f_1, f_1_norm = \
                                       F.broadcast(
-                                          *[f_u_norm,
-                                            f_u_f_l,
-                                            F.expand_dims(f_l_norm, 1)])
-        F_ = f_u_norm - 2 * f_u_f_l + f_l_norm
+                                          *[f_0_norm,
+                                            f_0_f_1,
+                                            F.expand_dims(f_1_norm, 1)])
+        F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
         loss = F.sum(W * F_) / (self.batch_size ** 2)
-
         self.loss = loss
+        
         return loss
 
 class RBF1(Link):
@@ -241,16 +242,16 @@ class RBF1(Link):
         super(RBF1, self).__init__(
             gamma=(1, )
         )
-        self.gamma.data[:] = np.random.normal(0, 10, (1, ))
+        self.gamma.data[:] = np.random.normal(0, 0.1, (1, ))
 
     def __call__(self, x, y):
         """
         Parameters
         -----------------
         x: Variable
-            Feature of samples.
+            Feature of unlabeled samples.
         y: Variable
-            Feature of samples.
+            Feature of unlabeled samples.
         """
         
         g, x, y = F.broadcast(*[self.gamma, x, y])
@@ -308,17 +309,18 @@ class GraphLoss1(Chain):
         Parameters
         -----------------
         x_l: Variable
-            Feature of labeled samples.
+            Feature of unlabeled samples.
         y_l: Variable
-            Labeled samples.
+            Label.
         x_u: Variable
             Feature of unlabeled samples.
         """
+
         classifier = self.layers["classifier"]
-        f_u = F.exp(F.log_softmax(classifier(x_u)))
-        mid_outputs_u = classifier.mid_outputs
-        f_l = F.exp(F.log_softmax(classifier(x_l)))
-        mid_outputs_l = classifier.mid_outputs
+        f_0 = F.softmax(classifier(x_l))
+        mid_outputs_0 = classifier.mid_outputs
+        f_1 = F.softmax(classifier(x_u))
+        mid_outputs_1 = classifier.mid_outputs
         
         L = len(self.dims[1:])
         similarities = self.similarities.values()
@@ -326,23 +328,21 @@ class GraphLoss1(Chain):
         # Sample similarity W^l summed over l
         W = 0
         for l in range(L):
-            W += similarities[l](mid_outputs_u[l], mid_outputs_l[l])
+            W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
         # Class similarity 
-        f_u_norm = F.sum(f_u**2, axis=1)
-        f_l_norm = F.sum(f_l**2, axis=1)
-        f_u_f_l = F.linear(f_u, f_l)
-        f_u_norm, f_u_f_l, f_l_norm= \
+        f_0_norm = F.sum(f_0**2, axis=1)
+        f_1_norm = F.sum(f_1**2, axis=1)
+        f_0_f_1 = F.linear(f_0, f_1)
+        f_0_norm, f_0_f_1, f_1_norm = \
                                       F.broadcast(
-                                          *[f_u_norm,
-                                            f_u_f_l,
-                                            F.expand_dims(f_l_norm, 1)])
-        F_ = f_u_norm - 2 * f_u_f_l + f_l_norm
+                                          *[f_0_norm,
+                                            f_0_f_1,
+                                            F.expand_dims(f_1_norm, 1)])
+        F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
 
         loss = F.sum(W * F_) / (self.batch_size ** 2)
-
         self.loss = loss
-        return loss
 
 class SSLGraphLoss(Chain):
     """Semi-Supervised Learning Graph Loss function, objective
@@ -400,7 +400,7 @@ class GraphSSLMLPModel(Chain):
         classifier = MLP(dims, act, decay, device)
         classifier_u = classifier.copy()
         sloss = CrossEntropy(classifier)
-        gloss = GraphLoss1(classifier_u, dims, batch_size)
+        gloss = GraphLoss0(classifier_u, dims, batch_size)
         ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
@@ -421,6 +421,7 @@ class GraphSSLMLPModel(Chain):
             Label.
         x_u: Variable
             Feature of unlabeled samples.
+
         """
         return self.ssl_graph_loss(x_l, y_l, x_u)
     
