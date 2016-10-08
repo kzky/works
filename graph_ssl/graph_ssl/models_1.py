@@ -344,6 +344,8 @@ class GraphLoss1(Chain):
         loss = F.sum(W * F_) / (self.batch_size ** 2)
         self.loss = loss
 
+        return loss
+
 class SSLGraphLoss(Chain):
     """Semi-Supervised Learning Graph Loss function, objective
 
@@ -374,7 +376,7 @@ class SSLGraphLoss(Chain):
         """
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
                + self.lambdas[1] * self.gloss(x_l, y_l, x_u)
-        
+
         return loss
 
 class GraphSSLMLPModel(Chain):
@@ -400,7 +402,7 @@ class GraphSSLMLPModel(Chain):
         classifier = MLP(dims, act, decay, device)
         classifier_u = classifier.copy()
         sloss = CrossEntropy(classifier)
-        gloss = GraphLoss0(classifier_u, dims, batch_size)
+        gloss = GraphLoss1(classifier_u, dims, batch_size)
         ssl_graph_loss = SSLGraphLoss(sloss, gloss, lambdas)
 
         # Set as attrirbutes for shortcut access
