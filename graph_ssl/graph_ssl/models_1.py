@@ -302,7 +302,7 @@ class GraphLoss1(Chain):
         self.coef = 1. / batch_size
         self.loss = None
 
-    def __call__(self, x_l, y_l, x_u):
+    def __call__(self, x_l, y_l, x_u, y_l_float32):
         """
         Parameters
         -----------------
@@ -336,13 +336,13 @@ class GraphLoss1(Chain):
                                       F.broadcast(
                                           *[f_0_norm,
                                             f_0_f_1,
-                                            F.expand_dims(f_1_norm, 1)])
-        F_ = f_0_norm -1.8 * f_0_f_1 + f_1_norm
-        #print(np.max(F_.data))
-        #print(np.min(F_.data))
-        #print(len((np.where(F_.data < 0)[0])), np.prod(F_.data.shape))
-        # 
-        #time.sleep(0.5)
+                                            F.expand_dims(y_l_float32, 1)])
+        F_ = f_0_norm -2. * f_0_f_1 + f_1_norm
+        print(np.max(F_.data))
+        print(np.min(F_.data))
+        print(len((np.where(F_.data < 0)[0])), np.prod(F_.data.shape))
+         
+        time.sleep(0.5)
         
         loss = F.sum(W * F_) / (self.batch_size ** 2)
         self.loss = loss
@@ -366,7 +366,7 @@ class SSLGraphLoss(Chain):
         #self.lambdas = [Variable(l).to_gpu() for l in lambdas]
         self.lambdas = lambdas
         
-    def __call__(self, x_l, y_l, x_u):
+    def __call__(self, x_l, y_l, x_u, y_l_float32):
         """
         Parameters
         -----------------
@@ -378,7 +378,7 @@ class SSLGraphLoss(Chain):
             Feature of unlabeled samples.
         """
         loss = self.lambdas[0] * self.sloss(x_l, y_l) \
-               + self.lambdas[1] * self.gloss(x_l, y_l, x_u)
+               + self.lambdas[1] * self.gloss(x_l, y_l, x_u, y_l_float32)
 
         return loss
 
@@ -416,7 +416,7 @@ class GraphSSLMLPModel(Chain):
         # Set chain
         super(GraphSSLMLPModel, self).__init__(ssl_graph_loss=ssl_graph_loss)
 
-    def __call__(self, x_l, y_l, x_u):
+    def __call__(self, x_l, y_l, x_u, y_l_float32):
         """
         Parameters
         -----------------
@@ -428,5 +428,5 @@ class GraphSSLMLPModel(Chain):
             Feature of unlabeled samples.
 
         """
-        return self.ssl_graph_loss(x_l, y_l, x_u)
+        return self.ssl_graph_loss(x_l, y_l, x_u, y_l_float32)
     
