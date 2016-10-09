@@ -103,7 +103,7 @@ class CrossEntropy(Chain):
             Label.
         """
         y = self.predictor(x_l)
-        self.y = pred
+        self.pred = y
         self.accuracy = F.accuracy(y, y_l)
         self.loss = F.softmax_cross_entropy(y, y_l)
 
