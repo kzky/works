@@ -148,7 +148,6 @@ class RBF0(Link):
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-        u = - x_g_norm + 2 * x_g_y_g - y_g_norm
         
         return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
         
@@ -261,13 +260,12 @@ class RBF1(Link):
         x_g_norm = F.sum(x_g**2, axis=1)  
         y_g_norm = F.sum(y_g**2, axis=1)
         x_g_y_g = F.linear(x_g, y_g)
-        
         x_g_norm, x_g_y_g, y_g_norm = \
                                       F.broadcast(
                                           *[x_g_norm,
                                             x_g_y_g,
                                             F.expand_dims(y_g_norm, 1)])
-
+                
         return F.exp(- x_g_norm + 2 * x_g_y_g - y_g_norm)
         
 class GraphLoss1(Chain):
@@ -321,7 +319,7 @@ class GraphLoss1(Chain):
         mid_outputs_0 = classifier.mid_outputs
         f_1 = F.softmax(classifier(x_u))
         mid_outputs_1 = classifier.mid_outputs
-        
+
         L = len(self.dims[1:])
         similarities = self.similarities.values()
 
@@ -330,7 +328,7 @@ class GraphLoss1(Chain):
         for l in range(L):
             W += similarities[l](mid_outputs_0[l], mid_outputs_1[l])
 
-        # Class similarity 
+        # Class similarity
         f_0_norm = F.sum(f_0**2, axis=1)
         f_1_norm = F.sum(f_1**2, axis=1)
         f_0_f_1 = F.linear(f_0, f_1)
@@ -339,8 +337,13 @@ class GraphLoss1(Chain):
                                           *[f_0_norm,
                                             f_0_f_1,
                                             F.expand_dims(f_1_norm, 1)])
-        F_ = f_0_norm - 2 * f_0_f_1 + f_1_norm
-
+        F_ = f_0_norm -1.8 * f_0_f_1 + f_1_norm
+        #print(np.max(F_.data))
+        #print(np.min(F_.data))
+        #print(len((np.where(F_.data < 0)[0])), np.prod(F_.data.shape))
+        # 
+        #time.sleep(0.5)
+        
         loss = F.sum(W * F_) / (self.batch_size ** 2)
         self.loss = loss
 
