@@ -54,7 +54,7 @@ def main():
 
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
-        x_u, y_u_l = [to_device(x, device) for x in data_reader.get_u_train_batch()]
+        x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
         y_l_float32 = np.zeros((n_l_train_data, n_cls), dtype=np.float32)
         y_l_float32[np.arange(n_l_train_data), y_l]  = 1.
         y_l_float32 = to_device(y_l_float32)
@@ -82,8 +82,9 @@ def main():
             print("SLoss:{},GLoss:{},Accuracy:{},Time/epoch:{}[s]".format(
                 to_device(sloss.data), to_device(gloss.data),
                 to_device(acc.data) * 100, time.time() - st))
-            print("{}".format(to_device(model.sloss.pred.data)))
-            print("{}".format(y_u_l))
+            for p, y in zip(to_device(model.sloss.pred.data), y_l):
+                print(p)
+                print(y)
             epoch +=1
             st = time.time()
             
