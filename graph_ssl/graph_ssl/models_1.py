@@ -92,7 +92,7 @@ class CrossEntropy(Chain):
         super(CrossEntropy, self).__init__(predictor=predictor)
         self.loss = None
         self.accuracy = None
-        
+        self.pred = None
     def __call__(self, x_l, y_l):
         """
         Parameters
@@ -103,6 +103,7 @@ class CrossEntropy(Chain):
             Label.
         """
         y = self.predictor(x_l)
+        self.y = pred
         self.accuracy = F.accuracy(y, y_l)
         self.loss = F.softmax_cross_entropy(y, y_l)
 
