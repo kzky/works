@@ -55,7 +55,9 @@ def main():
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
         x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
-        y_l_float32 = to_device(y_l.astype(np.float32))
+        y_l_float32 = np.zeros((n_l_train_data, n_cls), dtype=np.float32)
+        y_l_float32[np.arange(n_l_train_data), y_l]  = 1.
+        y_l_float32 = to_device(y_l_float32)
         
         # Train one-step
         model.zerograds()

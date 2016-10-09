@@ -330,19 +330,19 @@ class GraphLoss1(Chain):
 
         # Class similarity
         f_0_norm = F.sum(f_0**2, axis=1)
-        f_1_norm = F.sum(f_1**2, axis=1)
-        f_0_f_1 = F.linear(f_0, f_1)
+        f_1_norm = F.sum(y_l_float32**2, axis=1)
+        f_0_f_1 = F.linear(f_0, y_l_float32)
         f_0_norm, f_0_f_1, f_1_norm = \
                                       F.broadcast(
                                           *[f_0_norm,
                                             f_0_f_1,
-                                            F.expand_dims(y_l_float32, 1)])
+                                            F.expand_dims(f_1_norm, 1)])
         F_ = f_0_norm -2. * f_0_f_1 + f_1_norm
-        print(np.max(F_.data))
-        print(np.min(F_.data))
-        print(len((np.where(F_.data < 0)[0])), np.prod(F_.data.shape))
-         
-        time.sleep(0.5)
+        #print(np.max(F_.data))
+        #print(np.min(F_.data))
+        #print(len((np.where(F_.data < 0)[0])), np.prod(F_.data.shape))
+        # 
+        #time.sleep(0.5)
         
         loss = F.sum(W * F_) / (self.batch_size ** 2)
         self.loss = loss
