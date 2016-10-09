@@ -82,8 +82,8 @@ def main():
             print("SLoss:{},GLoss:{},Accuracy:{},Time/epoch:{}[s]".format(
                 to_device(sloss.data), to_device(gloss.data),
                 to_device(acc.data) * 100, time.time() - st))
-            print(to_device(model.sloss.pred.data))
-            print(y_l)
+            print("{}".format(to_device(model.sloss.pred.data)))
+            print("{}".format(y_l))
             epoch +=1
             st = time.time()
             
