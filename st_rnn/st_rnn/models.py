@@ -227,3 +227,5 @@ class RNNLosses(Chain):
 #        )
         
         
+def forward_with_elman_rnn(onestep, elman_rnn, loss, rnn_losses):
+    pass
