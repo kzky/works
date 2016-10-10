@@ -23,6 +23,7 @@ class Elman(Chain):
             xh=L.Linear(x_in, h_out),
             hh=L.Linear(h_out, h_out),
         )
+
         self.h = None
         
     def __call__(self, x):
@@ -33,7 +34,10 @@ class Elman(Chain):
             input from the previous layer, i.e., the bottom layer of one-step RNN
         """
         h_t_1 = self.h
-        h_t = self.hh(h_t_1) + self.xh(x)
+        if h_t_1 == None:
+            h_t = self.xh(x)
+        else:
+            h_t = self.hh(h_t_1) + self.xh(x)
         self.h = h_t
         return self.h
         
@@ -77,7 +81,7 @@ class ElmanRNN(Chain):
             Input variable
         """
         h = x
-        for elman in layers.values():
+        for elman in self.layers.values():
             h = elman(h)
 
         return h
@@ -89,21 +93,22 @@ class ElmanRNN(Chain):
         -----------------
         hiddens: list of Variables
         """
-        if len(hiddens) != len(layers):
+        if len(hiddens) != len(self.layers):
             raise ValueError("Length differs between hiddens and self.layers")
             
-        for elman, h in zip(layers.values(), hiddens):
+        for elman, h in zip(self.layers.values(), hiddens):
             elman.set_state(h)
 
     def reset_states(self,):
         """Reset all states.
         """
-        for elman in layers.values():
+        for elman in self.layers.values():
             elman.reset_state()
 
     def get_states(self, ):
         """Get all states
         """
         hiddens = []
-        for elman in layers.values():
+        for elman in self.layers.values():
             hiddens.append(elman.h)
+        return hiddens
