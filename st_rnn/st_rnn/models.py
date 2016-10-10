@@ -192,17 +192,18 @@ class RNNLoss(Chain):
         self.accuracies = []
         
         unlabeled_losses = OrderedDict()
-        for t in range(T):
+        for t in range(T-1):
             l_name = "{unlabeled-loss-:03d}".format(t)
             unlabeled_losses[l_name] = UnlabeledLoss()
         
         super(Loss, self).__init__(**unlabeled_losses)
         
-    def __call__(self, y_list_, y_list):
+    def __call__(self, y_list):
         self.losses = []
         self.accuracies = []
 
-        for y_, y, uloss in zip(y_list_, y_list, self.unlabeled_losses.values()):
+        # y_{t-1} is as label, y_{t} is as prediction
+        for y, y_, uloss in zip(y_list[0:-1], y_list[1:], self.unlabeled_losses.values()):
             l = uloss(y_, y)
             self.losses.append(l)
             self.accuracies.append(l.accuracy)
