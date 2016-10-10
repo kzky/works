@@ -51,17 +51,17 @@ class Elman(Chain):
     def reset_state(self, ):
         self.h = None
 
-class ElmanRNN(Chain):
+class ElmanNet(Chain):
     """
-    One-step of ElmanNet, used with Elman
+    One-step of ElmanRNN, used with Elman
 
     Parameters
     -----------------
     dims: list
-        each element represents dimension of a linear layer
+        Each element represents dimension of a linear layer
     """
     
-    def __init__(self, dims=[784, 1000, 250, 10]):
+    def __init__(self, dims):
         layers = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
@@ -69,7 +69,7 @@ class ElmanRNN(Chain):
             l_name = "elman-{:03}".format(l)
             layers[l_name] = elman
 
-        super(ElmanRNN, self).__init__(**layers)
+        super(ElmanNet, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
             
@@ -112,3 +112,4 @@ class ElmanRNN(Chain):
         for elman in self.layers.values():
             hiddens.append(elman.h)
         return hiddens
+

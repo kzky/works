@@ -1,10 +1,10 @@
-from models import ElmanRNN
+from models import ElmanNet
 import numpy as np
 
-def test_onestep_elmanrann():
+def test_onestep_elmanrnn():
     batch_size = 32
     dims = [784, 100, 10]
-    model = ElmanRNN(dims)
+    model = ElmanNet(dims)
     x = np.random.rand(batch_size, dims[0]).astype(np.float32)
     
     states_0 = model.get_states()
