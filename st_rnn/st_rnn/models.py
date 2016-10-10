@@ -209,5 +209,4 @@ class RNNLoss(Chain):
             self.accuracies.append(l.accuracy)
 
         return self.losses
-        
-    
+
