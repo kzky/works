@@ -34,7 +34,7 @@ class Elman(Chain):
             input from the previous layer, i.e., the bottom layer of one-step RNN
         """
         h_t_1 = self.h
-        if h_t_1 == None:
+        if h_t_1 is None:
             h_t = self.xh(x)
         else:
             h_t = self.hh(h_t_1) + self.xh(x)
@@ -113,3 +113,37 @@ class ElmanNet(Chain):
             hiddens.append(elman.h)
         return hiddens
 
+class ElmanRNN(Chain):
+    """
+    ElmanNet over time.
+
+    Parameters
+    -----------------
+    dims: list
+        Each element represents dimension of a linear layer
+    T: int
+        Time length over time, i.e., the number of unroll step.
+    """
+
+    def __init__(self, dims=[784, 1000, 250, 10], T=5):
+        onestep = ElmanNet(dims)
+        super(ElmanRNN, self).__init__(
+            onestep=onestep,
+        )
+
+        self.dims = dims
+        self.T = T
+
+    def __call__(self, x_list):
+        """
+        Parameters
+        -----------------
+        x_list: list of Variables
+            Input variables over time
+        """
+        y_list = []
+        for t in range(self.T):
+            y = self.onestep(x_list[t])
+            y_list.append(y)
+        
+        return y_list
