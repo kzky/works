@@ -184,7 +184,7 @@ class UnlabeledLoss(Chain):
         self.accauracy = F.accuracy(y, t)
         return self.loss
 
-class RNNLoss(Chain):
+class RNNLosses(Chain):
     def __init__(self, T):
         
         self.T = T
@@ -196,7 +196,8 @@ class RNNLoss(Chain):
             l_name = "{unlabeled-loss-:03d}".format(t)
             unlabeled_losses[l_name] = UnlabeledLoss()
         
-        super(Loss, self).__init__(**unlabeled_losses)
+        #super(Loss, self).__init__(**unlabeled_losses)
+        self.unlabeled_losses = unlabeled_losses
         
     def __call__(self, y_list):
         self.losses = []
@@ -210,3 +211,19 @@ class RNNLoss(Chain):
 
         return self.losses
 
+#class ElmanRNNModel(Chain):
+#    """Very Plain ElmanRNN Model
+#    """
+#    def __init__(self, dims, T, T0):
+#        self.dims = dims
+#        self.T = T
+#        self.T0 = T0
+#        onestep = ElmanNet(dims)
+#        elman_rnn = ElmanRNN(onestep, T)
+#        loss = LabledLoss()
+#        rnn_losses = RNNLosses(T)
+#        super(ElmanRNNModel, self).__init__(
+#            elman_rnn=elman_rnn
+#        )
+        
+        
