@@ -125,13 +125,11 @@ class ElmanRNN(Chain):
         Time length over time, i.e., the number of unroll step.
     """
 
-    def __init__(self, dims=[784, 1000, 250, 10], T=5):
-        onestep = ElmanNet(dims)
+    #TODO: Can we set onestep net as a chain, and BP works well with intention?
+    def __init__(self, onestep, T=5):
         super(ElmanRNN, self).__init__(
             onestep=onestep,
         )
-
-        self.dims = dims
         self.T = T
 
     def __call__(self, x_list):
@@ -147,3 +145,68 @@ class ElmanRNN(Chain):
             y_list.append(y)
         
         return y_list
+
+class LabledLoss(Chain):
+    def __init__(self, ):
+        super(LabledLoss, self).__init__()
+        self.loss = None
+        self.accuracy = None
+        self.pred = None
+        
+    def __call__(self, y, t):
+        """
+        y: Variable
+            Prediction Variable of shape (bs, cls)
+        t: Variable
+            Label
+        """
+        self.loss = F.softmax_cross_entropy(y, t)
+        self.accauracy = F.accuracy(y, t)
+        return self.loss
+
+class UnlabeledLoss(Chain):
+    def __init__(self, ):
+        super(UnlabeledLoss, self).__init__()
+        self.loss = None
+        self.accuracy = None
+        self.pred = None
+        
+    def __call__(self, y_,  y):
+        """
+        y_: Variable
+            Prediction Variable of shape (bs, cls)
+        y: Variable
+            Prediction Variable of shape (bs, cls) as label
+        """
+        self.pred_ = F.softmax(y_)
+        self.pred = F.softmax(y)
+        self.loss = - F.sum(self.pred * F.log(self.pred_)) / len(y_)
+        self.accauracy = F.accuracy(y, t)
+        return self.loss
+
+class RNNLoss(Chain):
+    def __init__(self, T):
+        
+        self.T = T
+        self.losses = []
+        self.accuracies = []
+        
+        unlabeled_losses = OrderedDict()
+        for t in range(T):
+            l_name = "{unlabeled-loss-:03d}".format(t)
+            unlabeled_losses[l_name] = UnlabeledLoss()
+        
+        super(Loss, self).__init__(**unlabeled_losses)
+        
+    def __call__(self, y_list_, y_list):
+        self.losses = []
+        self.accuracies = []
+
+        for y_, y, uloss in zip(y_list_, y_list, self.unlabeled_losses.values()):
+            l = uloss(y_, y)
+            self.losses.append(l)
+            self.accuracies.append(l.accuracy)
+
+        return self.losses
+        
+    

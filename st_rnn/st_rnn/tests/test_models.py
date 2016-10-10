@@ -17,7 +17,8 @@ def test_onestep_elmanrnn():
     batch_size = 32
     dims = [784, 100, 10]
     T = 3
-    model = ElmanRNN(dims, T)
+    onestep = ElmanNet(dims)
+    model = ElmanRNN(onestep, T)
     x_list = list(np.random.rand(T, batch_size, dims[0]).astype(np.float32))
     y_list = model(x_list)
 
