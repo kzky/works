@@ -12,6 +12,7 @@ def forward_backward_update_050(
     T = rnn.T
 
     # Forward/Backward/Update in labeled graph
+    model.reset_states()
     model.cleargrads()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
@@ -21,6 +22,7 @@ def forward_backward_update_050(
     optimizer.update()
         
     # Forward/Backward/Update in unlabeled graph
+    model.reset_states()
     model.cleargrads()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
