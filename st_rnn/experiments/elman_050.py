@@ -1,7 +1,7 @@
-from st_rss.models import ElmanOnestep, ElmanNet, RNNLabeledLosses, RNNUnlabeledLosses
-from st_rss.datasets import MNISTDataReader, Separator
-from st_rss.utils import to_device
-from st_rss.elmans import forward_backward_update_050, evaluate_050
+from st_rnn.models import ElmanOnestep, ElmanNet, RNNLabeledLosses, RNNUnlabeledLosses
+from st_rnn.datasets import MNISTDataReader, Separator
+from st_rnn.utils import to_device
+from st_rnn.elmans import forward_backward_update_050, evaluate_050
 import numpy as np
 import os
 from chainer import optimizers
@@ -44,12 +44,12 @@ def main():
                                   batch_size=batch_size,
                                   n_cls=n_cls)
     model = ElmanOnestep(dims)
-    rnn = ElmanNet(onestep, T)
+    rnn = ElmanNet(model, T)
     model.to_gpu(device) if device else None
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)
-    rnn_labeled_loss = RNNLabeledLosses()
-    rnn_unlabeled_loss = RNNUnlabeledLosses()
+    rnn_labeled_loss = RNNLabeledLosses(T)
+    rnn_unlabeled_loss = RNNUnlabeledLosses(T)
     
     # Training loop
     print("# Training loop")
