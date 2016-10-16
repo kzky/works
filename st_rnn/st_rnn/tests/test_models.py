@@ -1,7 +1,7 @@
 from models import ElmanOnestep, ElmanNet
 import numpy as np
 
-def test_onestep_elmannet():
+def test_elman_onestep():
     batch_size = 32
     dims = [784, 100, 10]
     onestep = ElmanOnestep(dims)
@@ -13,7 +13,7 @@ def test_onestep_elmannet():
     for s_0, s_1 in zip(states_0, states_1):
         assert s_0 != s_1
     
-def test_onestep_elmanrnn():
+def test_elman_net():
     batch_size = 32
     dims = [784, 100, 10]
     T = 3
