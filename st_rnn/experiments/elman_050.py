@@ -51,7 +51,7 @@ def main():
     #TODO: Add gradient clip as hook
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)
-    optimizer.add_hook(chainer.optimizer.GradientClipping(5))
+    #optimizer.add_hook(chainer.optimizer.GradientHardClipping(-3, 3))
     rnn_labeled_losses = RNNLabeledLosses(T)
     rnn_unlabeled_losses = RNNUnlabeledLosses(T)
     
