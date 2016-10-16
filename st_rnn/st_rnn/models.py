@@ -33,12 +33,12 @@ class Elman(Chain):
         x: Variable
             input from the previous layer, i.e., the bottom layer of one-step RNN
         """
-        h_t_1 = self.h
-        if h_t_1 is None:
-            h_t = self.xh(x)
+        h_t0 = self.h
+        if h_t0 is None:
+            h_t1 = self.xh(x)
         else:
-            h_t = self.hh(h_t_1) + self.xh(x)
-        self.h = h_t
+            h_t1 = self.hh(h_t0) + self.xh(x)
+        self.h = h_t1
         return self.h
         
     def set_state(self, h):
