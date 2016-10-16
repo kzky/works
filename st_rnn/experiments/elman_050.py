@@ -79,8 +79,8 @@ def main():
             
             # Report
             print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
-                [to_device(loss.loss) for loss in losses],
-                [to_device(loss.accuracy) * 100 for loss in losses],
+                [to_device(loss.loss, device) for loss in losses],
+                [to_device(loss.accuracy, device) * 100 for loss in losses],
                 time.time() - st))
             
             epoch +=1
