@@ -60,7 +60,6 @@ def main():
     epoch = 1
     st = time.time()
     for i in range(n_iter):
-        print(i)
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
         x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
@@ -72,7 +71,7 @@ def main():
             x_l, y_l, x_u)
         
         # Eval
-        if (i) % iter_epoch == 0:
+        if (i+1) % iter_epoch == 0:
             print("Evaluation at {}-th epoch".format(epoch))
 
             # Get data
