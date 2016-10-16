@@ -161,7 +161,7 @@ class LabeledLoss(Chain):
             Label
         """
         self.loss = F.softmax_cross_entropy(y, t)
-        self.accauracy = F.accuracy(y, t)
+        self.accuracy = F.accuracy(y, t)
         return self.loss
 
 class UnlabeledLoss(Chain):
@@ -181,7 +181,6 @@ class UnlabeledLoss(Chain):
         self.pred_ = F.softmax(y_)
         self.pred = F.softmax(y)
         self.loss = - F.sum(self.pred * F.log(self.pred_)) / len(y_)
-        self.accauracy = F.accuracy(y, t)
         return self.loss
 
 class RNNLabeledLosses(Chain):
@@ -197,12 +196,12 @@ class RNNLabeledLosses(Chain):
         self.losses = []
         self.accuracies = []
         
-        losses = OrderedDict()
+        labeled_losses = OrderedDict()
         for t in range(T):
             l_name = "labeled-loss-{:03d}".format(t)
-            losses[l_name] = LabeledLoss()
+            labeled_losses[l_name] = LabeledLoss()
         
-        self.losses = losses
+        self.labeled_losses = labeled_losses
         
     def __call__(self, y_list, y):
         """
@@ -217,10 +216,10 @@ class RNNLabeledLosses(Chain):
         self.accuracies = []
 
         # y_{t-1} is as label, y_{t} is as prediction
-        for y_, loss in zip(y_list, self.losses.values()):
+        for y_, loss in zip(y_list, self.labeled_losses.values()):
             l = loss(y_, y)
             self.losses.append(l)
-            self.accuracies.append(l.accuracy)
+            self.accuracies.append(loss.accuracy)
 
         return self.losses
 
@@ -237,12 +236,12 @@ class RNNUnlabeledLosses(Chain):
         self.ulosses = []
         self.accuracies = []
         
-        ulosses = OrderedDict()
+        unlabeled_losses = OrderedDict()
         for t in range(T-1):
             l_name = "unlabeled-loss-{:03d}".format(t)
-            ulosses[l_name] = UnlabeledLoss()
+            unlabeled_losses[l_name] = UnlabeledLoss()
         
-        self.ulosses = ulosses
+        self.unlabeled_losses = unlabeled_losses
         
     def __call__(self, y_list):
         """
@@ -254,11 +253,9 @@ class RNNUnlabeledLosses(Chain):
         self.accuracies = []
 
         # y_{t-1} is as label, y_{t} is as prediction
-        for y, y_, uloss in zip(y_list[0:-1], y_list[1:], self.ulosses.values()):
+        for y, y_, uloss in zip(y_list[0:-1], y_list[1:], self.unlabeled_losses.values()):
             l = uloss(y_, y)
             self.ulosses.append(l)
-            self.accuracies.append(l.accuracy)
 
         return self.ulosses
-
 
