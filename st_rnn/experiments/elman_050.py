@@ -72,7 +72,7 @@ def main():
             x_l, y_l, x_u)
         
         # Eval
-        if (i+1) % iter_epoch == 0:
+        if (i) % iter_epoch == 0:
             print("Evaluation at {}-th epoch".format(epoch))
 
             # Get data
@@ -82,11 +82,10 @@ def main():
             losses = evaluate_050(rnn, rnn_labeled_losses, model,  x_l, y_l)
             
             # Report
-            print(losses[0].__class__.__name__)
             print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
-                [to_device(loss.data, device) for loss in losses],
-                [to_device(loss.accuracy.data, device) * 100 \
-                 for loss in rnn_labeled_losses],
+                [float(to_device(loss.data, device)) for loss in losses],
+                [float(to_device(accrucray.data, device)) * 100 \
+                 for accrucray in rnn_labeled_losses.accuracies],
                 time.time() - st))
             
             epoch +=1
