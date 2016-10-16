@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import time
 import chainer.functions as F
+import chainer
 
 def main():
     # Settings
@@ -46,24 +47,27 @@ def main():
     model = ElmanOnestep(dims)
     rnn = ElmanNet(model, T)
     model.to_gpu(device) if device else None
+
+    #TODO: Add gradient clip as hook
     optimizer = optimizers.Adam(learning_rate)
     optimizer.setup(model)
-    rnn_labeled_loss = RNNLabeledLosses(T)
-    rnn_unlabeled_loss = RNNUnlabeledLosses(T)
+    optimizer.add_hook(chainer.optimizer.GradientClipping(5))
+    rnn_labeled_losses = RNNLabeledLosses(T)
+    rnn_unlabeled_losses = RNNUnlabeledLosses(T)
     
     # Training loop
     print("# Training loop")
     epoch = 1
     st = time.time()
     for i in range(n_iter):
-
+        print(i)
         # Get data
         x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
         x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
 
         # Forward/Backward
         forward_backward_update_050(
-            rnn, rnn_labeled_loss, rnn_unlabeled_loss,
+            rnn, rnn_labeled_losses, rnn_unlabeled_losses,
             optimizer, model,
             x_l, y_l, x_u)
         
@@ -75,12 +79,14 @@ def main():
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
 
             # Compute loss and accuracy
-            losses = evaluate_050(rnn, rnn_labeled_loss, model,  x_l, y_l)
+            losses = evaluate_050(rnn, rnn_labeled_losses, model,  x_l, y_l)
             
             # Report
+            print(losses[0].__class__.__name__)
             print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
-                [to_device(loss.loss, device) for loss in losses],
-                [to_device(loss.accuracy, device) * 100 for loss in losses],
+                [to_device(loss.data, device) for loss in losses],
+                [to_device(loss.accuracy.data, device) * 100 \
+                 for loss in rnn_labeled_losses],
                 time.time() - st))
             
             epoch +=1

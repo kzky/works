@@ -3,8 +3,8 @@
 
 def forward_backward_update_050(
         rnn,
-        rnn_labeled_loss,
-        rnn_unlabeled_loss,
+        rnn_labeled_losses,
+        rnn_unlabeled_losses,
         optimizer,
         model, 
         x_l, y_l, x_u):
@@ -16,7 +16,7 @@ def forward_backward_update_050(
     model.cleargrads()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
-    l_losses = rnn_labeled_loss(y_list, y_l)
+    l_losses = rnn_labeled_losses(y_list, y_l)
     loss = reduce(lambda x, y: x + y, l_losses)
     loss.backward()
     optimizer.update()
@@ -26,14 +26,14 @@ def forward_backward_update_050(
     model.cleargrads()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
-    u_losses = rnn_unlabeled_loss(y_list)
+    u_losses = rnn_unlabeled_losses(y_list)
     loss = reduce(lambda x, y: x + y, u_losses)
     loss.backward()
     optimizer.update()
     
 def evaluate_050(
         rnn,
-        rnn_labeled_loss,
+        rnn_labeled_losses,
         model,
         x_l, y_l):
 
@@ -43,7 +43,7 @@ def evaluate_050(
     model.reset_states()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
-    l_losses = rnn_labeled_loss(y_list, y_l)
+    l_losses = rnn_labeled_losses(y_list, y_l)
     return l_losses
 
         
