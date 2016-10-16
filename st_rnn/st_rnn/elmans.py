@@ -34,6 +34,7 @@ def forward_backward_update_050(
 def evaluate_050(
         rnn,
         rnn_labeled_loss,
+        model
         x_l, y_l):
 
     T = rnn.T
