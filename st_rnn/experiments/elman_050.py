@@ -75,7 +75,7 @@ def main():
             x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
 
             # Compute loss and accuracy
-            losses = evaluate_050(rnn, rnn_labeled_loss, x_l, y_l)
+            losses = evaluate_050(rnn, rnn_labeled_loss, model,  x_l, y_l)
             
             # Report
             print("Loss:{},Accuracy:{},Time/epoch:{}[s]".format(
