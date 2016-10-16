@@ -18,13 +18,14 @@ class Elman(Chain):
     x_in: int
     h_out: int
     """
-    def __init__(self, x_in, h_out):
+    def __init__(self, x_in, h_out, act):
         super(Elman, self).__init__(
             xh=L.Linear(x_in, h_out),
             hh=L.Linear(h_out, h_out),
         )
 
         self.h = None
+        self.act = act
         
     def __call__(self, x):
         """One-step forward
@@ -38,7 +39,7 @@ class Elman(Chain):
             h_t1 = self.xh(x)
         else:
             h_t1 = self.hh(h_t0) + self.xh(x)
-        self.h = h_t1
+        self.h = self.act(h_t1)
         return self.h
         
     def set_state(self, h):
@@ -61,17 +62,18 @@ class ElmanOnestep(Chain):
         Each element represents dimension of a linear layer
     """
     
-    def __init__(self, dims):
+    def __init__(self, dims, act=F.relu):
         layers = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
-            elman = Elman(d_in, d_out)
+            elman = Elman(d_in, d_out, act)
             l_name = "elman-{:03}".format(l)
             layers[l_name] = elman
 
         super(ElmanOnestep, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
+        self.act = act
             
     def __call__(self, x):
         """
@@ -83,7 +85,6 @@ class ElmanOnestep(Chain):
         h = x
         for elman in self.layers.values():
             h = elman(h)
-
         return h
 
     def set_states(self,  hiddens):
