@@ -31,11 +31,13 @@ class Elman(Chain):
         """One-step forward
         Parameters
         -----------------
-        x: Variable
+        x: Variable or None
             input from the previous layer, i.e., the bottom layer of one-step RNN
         """
         h_t0 = self.h
-        if h_t0 is None:
+        if x is None:
+            h_t1 = self.hh(h_t0)
+        elif h_t0 is None:
             h_t1 = self.xh(x)
         else:
             h_t1 = self.hh(h_t0) + self.xh(x)
