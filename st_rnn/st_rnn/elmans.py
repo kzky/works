@@ -39,6 +39,7 @@ def evaluate_050(
     T = rnn.T
 
     # Forward/Backward/Update in labeled graph
+    model.reset_states()
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
     l_losses = rnn_labeled_loss(y_list, y_l)
