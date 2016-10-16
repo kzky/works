@@ -70,7 +70,7 @@ def forward_backward_update_054(
     x_list = [x_l for _ in range(T)]
     y_list = rnn(x_list)
     l_losses = rnn_labeled_losses(y_list, y_l)
-    loss = l_losses
+    loss = reduce(lambda x, y: x + y, u_losses)
     loss.backward()
     optimizer.update()
         
