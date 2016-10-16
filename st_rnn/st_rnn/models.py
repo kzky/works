@@ -146,9 +146,9 @@ class ElmanNet(Chain):
         
         return y_list
 
-class LabledLoss(Chain):
+class LabeledLoss(Chain):
     def __init__(self, ):
-        super(LabledLoss, self).__init__()
+        super(LabeledLoss, self).__init__()
         self.loss = None
         self.accuracy = None
         self.pred = None
@@ -184,32 +184,82 @@ class UnlabeledLoss(Chain):
         self.accauracy = F.accuracy(y, t)
         return self.loss
 
-class RNNLosses(Chain):
+class RNNLabeledLosses(Chain):
+    """
+    Parameters
+    -----------------
+    T: int
+    loss: LabeledLoss 
+    """
     def __init__(self, T):
         
         self.T = T
         self.losses = []
         self.accuracies = []
         
-        unlabeled_losses = OrderedDict()
-        for t in range(T-1):
-            l_name = "{unlabeled-loss-:03d}".format(t)
-            unlabeled_losses[l_name] = UnlabeledLoss()
+        losses = OrderedDict()
+        for t in range(T):
+            l_name = "labeled-loss-{:03d}".format(t)
+            losses[l_name] = LabeledLoss()
         
-        #super(Loss, self).__init__(**unlabeled_losses)
-        self.unlabeled_losses = unlabeled_losses
+        self.losses = losses
         
-    def __call__(self, y_list):
+    def __call__(self, y_list, y):
+        """
+        Parameters
+        -----------------
+        y_list: list of Variables
+            Varialbes as predictions
+        y: Variable
+            Varialbe as a label
+        """
         self.losses = []
         self.accuracies = []
 
         # y_{t-1} is as label, y_{t} is as prediction
-        for y, y_, uloss in zip(y_list[0:-1], y_list[1:], self.unlabeled_losses.values()):
-            l = uloss(y_, y)
+        for y_, loss in zip(y_list, self.losses.values()):
+            l = loss(y_, y)
             self.losses.append(l)
             self.accuracies.append(l.accuracy)
 
         return self.losses
+
+class RNNUnlabeledLosses(Chain):
+    """
+    Parameters
+    -----------------
+    T: int
+    loss: UnlabeledLoss 
+    """
+    def __init__(self, T):
+        
+        self.T = T
+        self.ulosses = []
+        self.accuracies = []
+        
+        ulosses = OrderedDict()
+        for t in range(T-1):
+            l_name = "unlabeled-loss-{:03d}".format(t)
+            ulosses[l_name] = UnlabeledLoss()
+        
+        self.ulosses = ulosses
+        
+    def __call__(self, y_list):
+        """
+        Parameters
+        -----------------
+        y_list: list of Variables
+        """
+        self.ulosses = []
+        self.accuracies = []
+
+        # y_{t-1} is as label, y_{t} is as prediction
+        for y, y_, uloss in zip(y_list[0:-1], y_list[1:], self.ulosses.values()):
+            l = uloss(y_, y)
+            self.ulosses.append(l)
+            self.accuracies.append(l.accuracy)
+
+        return self.ulosses
 
 def forward_with_elman_rnn(onestep, elman_rnn, loss, rnn_losses):
     pass
