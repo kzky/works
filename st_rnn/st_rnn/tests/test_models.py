@@ -1,10 +1,10 @@
-from models import ElmanNet, ElmanRNN
+from models import ElmanOnestep, ElmanNet
 import numpy as np
 
 def test_onestep_elmannet():
     batch_size = 32
     dims = [784, 100, 10]
-    onestep = ElmanNet(dims)
+    onestep = ElmanOnestep(dims)
     x = np.random.rand(batch_size, dims[0]).astype(np.float32)
     
     states_0 = onestep.get_states()
@@ -17,8 +17,8 @@ def test_onestep_elmanrnn():
     batch_size = 32
     dims = [784, 100, 10]
     T = 3
-    onestep = ElmanNet(dims)
-    elman_rnn = ElmanRNN(onestep, T)
+    onestep = ElmanOnestep(dims)
+    elman_rnn = ElmanNet(onestep, T)
     x_list = list(np.random.rand(T, batch_size, dims[0]).astype(np.float32))
     y_list = elman_rnn(x_list)
 

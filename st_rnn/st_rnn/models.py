@@ -51,7 +51,7 @@ class Elman(Chain):
     def reset_state(self, ):
         self.h = None
 
-class ElmanNet(Chain):
+class ElmanOnestep(Chain):
     """
     One-step of ElmanRNN, used with Elman
 
@@ -69,7 +69,7 @@ class ElmanNet(Chain):
             l_name = "elman-{:03}".format(l)
             layers[l_name] = elman
 
-        super(ElmanNet, self).__init__(**layers)
+        super(ElmanOnestep, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
             
@@ -113,9 +113,9 @@ class ElmanNet(Chain):
             hiddens.append(elman.h)
         return hiddens
 
-class ElmanRNN(Chain):
+class ElmanNet(Chain):
     """
-    ElmanNet over time.
+    ElmanOnestep over time.
 
     Parameters
     -----------------
@@ -127,7 +127,7 @@ class ElmanRNN(Chain):
 
     #TODO: Can we set onestep net as a chain, and BP works well with intention?
     def __init__(self, onestep, T=5):
-        super(ElmanRNN, self).__init__(
+        super(ElmanNet, self).__init__(
             onestep=onestep,
         )
         self.T = T
@@ -211,21 +211,5 @@ class RNNLosses(Chain):
 
         return self.losses
 
-#class ElmanRNNModel(Chain):
-#    """Very Plain ElmanRNN Model
-#    """
-#    def __init__(self, dims, T, T0):
-#        self.dims = dims
-#        self.T = T
-#        self.T0 = T0
-#        onestep = ElmanNet(dims)
-#        elman_rnn = ElmanRNN(onestep, T)
-#        loss = LabledLoss()
-#        rnn_losses = RNNLosses(T)
-#        super(ElmanRNNModel, self).__init__(
-#            elman_rnn=elman_rnn
-#        )
-        
-        
 def forward_with_elman_rnn(onestep, elman_rnn, loss, rnn_losses):
     pass
