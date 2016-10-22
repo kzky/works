@@ -244,18 +244,20 @@ class RNNUnlabeledLosses(Chain):
     Parameters
     -----------------
     T: int
-    loss: UnlabeledLoss 
+    l_type: str
+        "soft" or "hard"
     """
-    def __init__(self, T):
+    def __init__(self, T, l_type="soft"):
         
         self.T = T
+        self.l_tpye = l_type
         self.ulosses = []
         self.accuracies = []
         
         unlabeled_losses = OrderedDict()
         for t in range(T-1):
             l_name = "unlabeled-loss-{:03d}".format(t)
-            unlabeled_losses[l_name] = UnlabeledLoss()
+            unlabeled_losses[l_name] = UnlabeledLoss(l_type)
         
         self.unlabeled_losses = unlabeled_losses
         
