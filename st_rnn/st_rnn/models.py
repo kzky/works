@@ -168,8 +168,16 @@ class LabeledLoss(Chain):
         return self.loss
 
 class UnlabeledLoss(Chain):
-    def __init__(self, ):
+    """
+    Parameters
+    -----------------
+    l_type: str
+        Label type, "soft" or "hard"
+    """
+
+    def __init__(self, l_type="soft"):
         super(UnlabeledLoss, self).__init__()
+        self.l_type = l_type
         self.loss = None
         self.accuracy = None
         self.pred = None
@@ -181,9 +189,14 @@ class UnlabeledLoss(Chain):
         y: Variable
             Prediction Variable of shape (bs, cls) as label
         """
-        self.pred_ = F.softmax(y_)
-        self.pred = F.softmax(y)
-        self.loss = - F.sum(self.pred * F.log(self.pred_)) / len(y_)
+        if self.l_type == "soft": 
+            self.pred_ = F.softmax(y_)
+            self.pred = F.softmax(y)
+            self.loss = - F.sum(self.pred * F.log(self.pred_)) / len(y_)
+        elif self.l_type == "hard":
+            t = F.argmax(y, axis=0)
+            self.loss = F.softmax_cross_entropy(y_, t)
+            
         return self.loss
 
 class RNNLabeledLosses(Chain):
