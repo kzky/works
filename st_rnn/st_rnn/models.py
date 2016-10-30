@@ -200,7 +200,7 @@ class LSTM(L.LSTM):
                 volatile='auto')
             # Need to pass cell to GPU!
             device = cuda.get_device(lstm_in.data)
-            if device != -1: 
+            if device.id != -1: 
                 self.c.to_gpu(device.id)
             
         self.c, y = lstm.lstm(self.c, lstm_in)
