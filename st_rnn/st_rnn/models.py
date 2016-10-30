@@ -199,8 +199,8 @@ class LSTM(L.LSTM):
                 xp.zeros((batch, self.state_size), dtype=x.dtype),
                 volatile='auto')
             # Need to pass cell to GPU!
-            device = cuda.get_device(lstm_in)
-            self.c.to_gpu(device)
+            device = cuda.get_device(lstm_in.data)
+            self.c.to_gpu(device.id)
             
         self.c, y = lstm.lstm(self.c, lstm_in)
 
