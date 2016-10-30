@@ -194,7 +194,7 @@ class UnlabeledLoss(Chain):
             self.pred = F.softmax(y)
             self.loss = - F.sum(self.pred * F.log(self.pred_)) / len(y_)
         elif self.l_type == "hard":
-            t = F.argmax(y, axis=0)
+            t = F.argmax(y, axis=1)
             self.loss = F.softmax_cross_entropy(y_, t)
             
         return self.loss
