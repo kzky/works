@@ -7,10 +7,14 @@ from chainer import datasets, iterators, optimizers, serializers
 from chainer import Link, Chain, ChainList
 import chainer.functions as F
 import chainer.links as L
+from chainer.links import LSTM
 from collections import OrderedDict
 import logging
 import time
 
+"""
+Elman
+"""
 class Elman(Chain):
     """
     Parameters
@@ -131,6 +135,103 @@ class ElmanNet(Chain):
     #TODO: Can we set onestep net as a chain, and BP works well with intention?
     def __init__(self, onestep, T=5):
         super(ElmanNet, self).__init__(
+            onestep=onestep,
+        )
+        self.T = T
+
+    def __call__(self, x_list):
+        """
+        Parameters
+        -----------------
+        x_list: list of Variables
+            Input variables over time
+        """
+        y_list = []
+        for t in range(self.T):
+            y = self.onestep(x_list[t])
+            y_list.append(y)
+        
+        return y_list
+
+"""
+LSTM
+"""
+class LSTMOnestep(Chain):
+    """
+    One-step of LSTMRNN, used with LSTM
+
+    Parameters
+    -----------------
+    dims: list
+        Each element represents dimension of a linear layer
+    """
+    
+    def __init__(self, dims):
+        layers = OrderedDict()
+        for l, d in enumerate(zip(dims[0:-1], dims[1:])):
+            d_in, d_out = d[0], d[1]
+            lstm = LSTM(d_in, d_out)
+            l_name = "lstm-{:03}".format(l)
+            layers[l_name] = lstm
+
+        super(LSTMOnestep, self).__init__(**layers)
+        self.dims = dims
+        self.layers = layers
+            
+    def __call__(self, x):
+        """
+        Parameters
+        -----------------
+        x: Variable
+            Input variable
+        """
+        h = x
+        for lstm in self.layers.values():
+            h = lstm(h)
+        return h
+
+    def set_states(self,  hiddens):
+        """Set all states.
+        
+        Parameters
+        -----------------
+        hiddens: list of Variables
+        """
+        if len(hiddens) != len(self.layers):
+            raise ValueError("Length differs between hiddens and self.layers")
+            
+        for lstm, h in zip(self.layers.values(), hiddens):
+            lstm.set_state(h)
+
+    def reset_states(self,):
+        """Reset all states.
+        """
+        for lstm in self.layers.values():
+            lstm.reset_state()
+
+    def get_states(self, ):
+        """Get all states
+        """
+        hiddens = []
+        for lstm in self.layers.values():
+            hiddens.append(lstm.h)
+        return hiddens
+
+class LSTMNet(Chain):
+    """
+    LSTMOnestep over time.
+
+    Parameters
+    -----------------
+    dims: list
+        Each element represents dimension of a linear layer
+    T: int
+        Time length over time, i.e., the number of unroll step.
+    """
+
+    #TODO: Can we set onestep net as a chain, and BP works well with intention?
+    def __init__(self, onestep, T=5):
+        super(LSTMNet, self).__init__(
             onestep=onestep,
         )
         self.T = T
