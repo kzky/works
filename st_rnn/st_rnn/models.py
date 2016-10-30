@@ -7,7 +7,6 @@ from chainer import datasets, iterators, optimizers, serializers
 from chainer import Link, Chain, ChainList
 import chainer.functions as F
 import chainer.links as L
-from chainer.links import LSTM
 from collections import OrderedDict
 import logging
 import time
@@ -170,7 +169,7 @@ class LSTMOnestep(Chain):
         layers = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
-            lstm = LSTM(d_in, d_out)
+            lstm = L.LSTM(d_in, d_out)
             l_name = "lstm-{:03}".format(l)
             layers[l_name] = lstm
 
