@@ -1,22 +1,24 @@
 from models import MLPEnc, MLPDec, SupervizedLoss, ReconstructionLoss
 from chainer import optimizers, Variable
+import chainer.functions as F
 
 class Experiment000(object):
     """Experiment takes responsibility for a batch not for train-loop.
     """
 
     def __init__(self,
+                     device=None,
+                     learning_rate=1. * 1e-2,
+                     lambdas = [1., 1., 1.]                     
                      dims,
                      act=F.Relu,
-                     lambdas = [1., 1., 1.]
-                     learning_rate=1. * 1e-2,
                      bn=True,
                      noise=False,
                      lateral=False,
-                     test=False,
-                     device=None):
+                     test=False,):
 
         # Settting
+        self.devide = device
         self.lambdas = lambdas
         self.T = len(lambdas)
         
@@ -34,7 +36,7 @@ class Experiment000(object):
         self.optimizer.setup(model)
         self.oprimizer.use_cleargrads()
         
-    def train(self, x_l, y_l, x_u, y_u):
+    def train(self, x_l, y_l, x_u):
         # Forward
         supervised_losses = []
         recon_loss_ls = []
@@ -55,7 +57,7 @@ class Experiment000(object):
                                                self.mlp_dec.linears.values())
             recon_loss_ls.append(recon_loss_l)
 
-            # Reconstruction for (x_u, y_u)
+            # Reconstruction for (x_u, _)
             y = self.mlp_enc(x_u_recon)
             x_u_recon = self.mlp_dec(y, enc_hiddens, dec_hiddens)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,
