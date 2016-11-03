@@ -15,7 +15,9 @@ import time
 
 class MLPEnc(Chain):
 
-    def __init__(self, dims, act=F.relu,
+    def __init__(self,
+                     dims,
+                     act=F.relu,
                      bn=True,
                      noise=False,
                      lateral=False,
@@ -131,12 +133,10 @@ class SupervizedLoss(Chain):
 
     def __init__(self, ):
         super(SupervizedLoss, self).__init__()
-        self.acc = None
         self.loss = None
         
     def __call__(self, y, t):
         self.loss = F.softmax_cross_entropy(y, t)
-        self.acc = F.accuracy(y, t)
         return self.loss
 
 class ReconstructionLoss(Chain):
@@ -155,25 +155,57 @@ class ReconstructionLoss(Chain):
         
         self.loss = None
         
-    def __call__(self, x, mlp_enc, mlp_dec):
+    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
         """
         Parameters
         -----------------
-        x: Variable
-        mlp_enc: MLPEnc
-        mlp_dec: MLPDec
+        x_recon: Variable to be reconstructed as label
+        x: Variable to be reconstructed as label
+        enc_hiddens: list of Variable
+        dec_hiddens: list of Varialbe
         """
 
         # Lateral Recon Loss
         if lateral: #TODO: do something
             pass
 
-        # Recon Loss
-        x_recon = mlp_dec.linears[-1]
-        recon_loss = mean_squared_error = (x, x_recon)
+        # Reconstruction Loss
+        recon_loss = mean_squared_error = (x_recon, x)
 
         self.loss = recon_loss  #TODO: Loss add lateral recon loss
         
         return self.loss
-            
-        
+
+class Model(Chain):
+    def __init__(self,
+                     dims,
+                     act=F.Relu,
+                     bn=True,
+                     noise=False,
+                     lateral=False,
+                     test=False):
+
+        # Constrcut models
+        mlp_enc = MLPEnc(
+            dims=dims,
+            act=act,
+            bn=bn
+            noise=noise,
+            lateral=lateral,
+            test=test)
+        mlp_dec = MLPDec(
+            dims=dims,
+            act=act,
+            bn=bn
+            noise=noise,
+            lateral=lateral,
+            test=test)
+        self.supervised_loss = SupervizedLoss()
+        self.recon_loss = ReconstructionLoss()
+
+        super(Model, self).__init__(
+            mlp_enc=mlp_enc,
+            mlp_dec=mlp_dec)
+
+    def __call__(self, x_l, y_l, x_u, y_u):
+        pass
