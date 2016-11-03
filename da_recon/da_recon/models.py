@@ -91,7 +91,7 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # BatchNorm
-            if bn:  #TODO: Do something or if lateral is True
+            if bn:  #TODO: Do something if lateral is True
                 batch_norm = L.BatchNorm(d_out, decay=0.9)
                 bn_name = "bn-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
@@ -127,3 +127,53 @@ class MLPDec(Chain):
                 
         return h
             
+class SupervizedLoss(Chain):
+
+    def __init__(self, ):
+        super(SupervizedLoss, self).__init__()
+        self.acc = None
+        self.loss = None
+        
+    def __call__(self, y, t):
+        self.loss = F.softmax_cross_entropy(y, t)
+        self.acc = F.accuracy(y, t)
+        return self.loss
+
+class ReconstructionLoss(Chain):
+
+    def __init__(self,
+                     bn=True,
+                     noise=False,
+                     lateral=False,
+                     test=False):
+
+        super(ReconstructionLoss, self).__init__()
+        self.bn = bn
+        self.noise = noise
+        self.lateral = lateral
+        self.test = test
+        
+        self.loss = None
+        
+    def __call__(self, x, mlp_enc, mlp_dec):
+        """
+        Parameters
+        -----------------
+        x: Variable
+        mlp_enc: MLPEnc
+        mlp_dec: MLPDec
+        """
+
+        # Lateral Recon Loss
+        if lateral: #TODO: do something
+            pass
+
+        # Recon Loss
+        x_recon = mlp_dec.linears[-1]
+        recon_loss = mean_squared_error = (x, x_recon)
+
+        self.loss = recon_loss  #TODO: Loss add lateral recon loss
+        
+        return self.loss
+            
+        
