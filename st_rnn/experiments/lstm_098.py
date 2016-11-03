@@ -4,7 +4,7 @@ from st_rnn.utils import to_device
 from st_rnn.lstms import forward_backward_update_098, evaluate_098
 import numpy as np
 import os
-from chainer import optimizers
+from chainer import optimizers, Variable
 import numpy as np
 import sys
 import time
