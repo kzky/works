@@ -26,6 +26,7 @@ class Experiment000(object):
         self.model = MLPEncDecModel(
             dims=dims, act=act,
             bn=bn, noise=noise, lateral=lateral, test=test)
+        self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
         self.mlp_dec = self.model.mlp_dec
         self.supervised_loss = self.model.supervised_loss
