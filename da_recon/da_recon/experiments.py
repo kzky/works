@@ -1,4 +1,4 @@
-from models import MLPEncDecModel
+from da_recon.models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
 
