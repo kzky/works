@@ -9,7 +9,7 @@ class Experiment000(object):
     def __init__(self,
                      device=None,
                      learning_rate=1. * 1e-2,
-                     lambdas = [1., 1., 1.]                     
+                     lambdas = [1., 1., 1.],
                      dims,
                      act=F.Relu,
                      bn=True,
