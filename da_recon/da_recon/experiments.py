@@ -53,16 +53,16 @@ class Experiment000(object):
             # Reconstruction for (x_l, y_l)
             x_l_recon = self.mlp_dec(y)
             recon_loss_l = self.recon_loss(x_l_recon, x_l,
-                                               self.mlp_enc.linears.values(),
-                                               self.mlp_dec.linears.values())
+                                               self.mlp_enc.hiddens,
+                                               self.mlp_dec.hiddens)
             recon_loss_ls.append(recon_loss_l)
 
             # Reconstruction for (x_u, _)
             y = self.mlp_enc(x_u_recon)
-            x_u_recon = self.mlp_dec(y, enc_hiddens, dec_hiddens)
+            x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,
-                                               self.mlp_enc.linears.values(), 
-                                               self.mlp_dec.linears.values())        
+                                               self.mlp_enc.hiddens, 
+                                               self.mlp_dec.hiddens)        
             recon_loss_us.append(recon_loss_u)
 
         # Loss

@@ -55,15 +55,15 @@ class MLPEnc(Chain):
         self.bn = bn
         self.lateral = lateral
         self.test = test
-        self.mid_layers = []
+        self.hiddens = []
 
     def __call__(self, x):
         h = x
-        self.mid_layers = []
+        self.hiddens = []
         for linear, bath_norm in zip(self.layers.values(), self.batch_norms.value()):
             h_ = linear(h)
             if lateral:  #TODO: This may change
-                self.mid_layers.append(h)
+                self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
             if self.lateral: #TODO: Do something
@@ -112,15 +112,15 @@ class MLPDec(Chain):
         self.bn = bn
         self.lateral = lateral
         self.test = test
-        self.mid_layers = []
+        self.hiddens = []
             
     def __call__(self, x):
         h = x
-        self.mid_layers = []
+        self.hiddens = []
         for linear, batch_norm in zip(self.layers.values(), self.batch_nomrs.values()):
             h_ = linear(h)
             if lateral:  #TODO: This may change
-                self.mid_layers.append(h)
+                self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
             if self.lateral: #TODO: Do something
@@ -170,7 +170,7 @@ class ReconstructionLoss(Chain):
             pass
 
         # Reconstruction Loss
-        recon_loss = mean_squared_error = (x_recon, x)
+        recon_loss = F.mean_squared_error(x_recon, x)
 
         self.loss = recon_loss  #TODO: Loss add lateral recon loss
         
