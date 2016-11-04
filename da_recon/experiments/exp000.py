@@ -72,14 +72,17 @@ def main():
         
         # Eval
         if (i+1) % iter_epoch == 0:
-            print("Evaluation at {}-th epoch".format(epoch))
-
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
             exp.test(x_l, y_l)
-            epoch +=1
+
+            acc, sloss, rloss = exp.test(x_l, y_l)
+            msg = "Epoch:{},ElapsedTime{},Acc:{},SupervisedLoss,ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
+            print(msg)
+            
             st = time.time()
+            epoch +=1
             
 if __name__ == '__main__':
     main()

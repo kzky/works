@@ -116,7 +116,6 @@ class Experiment000(object):
         self.set_test()
         y = self.mlp_enc(x_l)
         acc = F.accuracy(y, y_l)
-
         losses = self.forward_for_losses(x_l, y_l, None)
         supervised_loss = losses[0]
         recon_loss = losses[1]
