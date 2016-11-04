@@ -70,7 +70,7 @@ class Experiment000(object):
             recon_l_losses.append(recon_loss_l)
 
             # Reconstruction for (x_u, _)
-            if not x_u:
+            if x_u is None:
                 recon_u_losses.append(0)
                 continue
             y = self.mlp_enc(x_u_recon)
@@ -81,10 +81,12 @@ class Experiment000(object):
             recon_u_losses.append(recon_loss_u)
 
         # Loss
-        supervised_loss = reduce(lambda x, y: x + y)
+        supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
         recon_loss_l = 0
         recon_loss_u = 0
-        for lambda_, l0, l1 in zip(self.lambdas, recon_l_losses, recon_u_losses):
+        for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
+                                       recon_l_losses,
+                                       recon_u_losses):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
@@ -92,7 +94,7 @@ class Experiment000(object):
 
     def forward(self, x_l, y_l, x_u):
         losses = self.forward_for_losses(x_l, y_l, x_u)
-        return reduce(lambda x, y: x + y)
+        return reduce(lambda x, y: x + y, losses)
 
     def backward(self, loss):
         self.model.cleargrads()

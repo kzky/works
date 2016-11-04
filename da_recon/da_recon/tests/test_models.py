@@ -8,7 +8,7 @@ def test_model():
     batch_size = 16
     dims = [784, 100, 10]
     act = F.relu
-    bn = False
+    bn = True
     noise = False
     lateral = False
     test = False
