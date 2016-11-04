@@ -7,15 +7,15 @@ class Experiment000(object):
     """
 
     def __init__(self,
-                     device=None,
-                     learning_rate=1. * 1e-2,
-                     lambdas = [1., 1., 1.],
-                     dims,
-                     act=F.Relu,
-                     bn=True,
-                     noise=False,
-                     lateral=False,
-                     test=False,):
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 lambdas = [1., 1., 1.],
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 bn=True,
+                 noise=False,
+                 lateral=False,
+                 test=False,):
 
         # Settting
         self.devide = device
@@ -33,8 +33,8 @@ class Experiment000(object):
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
-        self.optimizer.setup(model)
-        self.oprimizer.use_cleargrads()
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()
         
     def train(self, x_l, y_l, x_u):
         loss = self.forward(x_l, y_l, x_u)
@@ -56,7 +56,7 @@ class Experiment000(object):
 
         x_l_recon = x_l
         x_u_recon = x_u
-        for t in range(T):
+        for t in range(self.T):
             # Supervision for (x_l, y_l)
             y = self.mlp_enc(x_l_recon)
             supervised_loss = self.supervised_loss(y, y_l)
@@ -100,14 +100,23 @@ class Experiment000(object):
 
     def update(self, ):
         self.optimizer.update()
+
+    def set_test(self,):
+        self.mlp_enc.test = True
+        self.mlp_dec.test = True
+        
+    def unset_test(self,):        
+        self.mlp_enc.test = False
+        self.mlp_dec.test = False
         
     def test(self, x_l, y_l):
+        self.set_test()
         y = self.mlp_enc(x_l)
         acc = F.accuracy(y, y_l)
 
         losses = self.forward_for_losses(x_l, y_l, None)
         supervised_loss = losses[0]
         recon_loss = losses[1]
-
-    return acc, supervised_loss, recon_loss
+        self.unset_test()
+        return acc, supervised_loss, recon_loss
         

@@ -1,4 +1,5 @@
 from da_recon.experiments import Experiment000
+from da_recon.utils import to_device
 from da_recon.datasets import MNISTDataReader, Separator
 import numpy as np
 import os
@@ -6,6 +7,7 @@ import numpy as np
 import sys
 import time
 import chainer.functions as F
+from chainer import Variable
 
 def main():
     # Settings
@@ -22,6 +24,10 @@ def main():
     n_epoch = 100
     decay = 0.5
     act = F.relu
+    bn = True
+    noise = False
+    lateral = False
+    test = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 

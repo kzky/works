@@ -35,9 +35,9 @@ class MLPEnc(Chain):
             l_name = "mlp-enc-{:03}".format(l)
             linears[l_name] = linear
 
-            # BatchNorm
+            # BatchNormalization
             if bn:
-                batch_norm = L.BatchNorm(d_out, decay=0.9)
+                batch_norm = L.BatchNormalization(d_out, decay=0.9)
                 bn_name = "bn-enc-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
             else:
@@ -93,9 +93,9 @@ class MLPDec(Chain):
             l_name = "mlp-dec-{:03}".format(l)
             linears[l_name] = linear
 
-            # BatchNorm
+            # BatchNormalization
             if bn:  #TODO: Do something if lateral is True
-                batch_norm = L.BatchNorm(d_out, decay=0.9)
+                batch_norm = L.BatchNormalization(d_out, decay=0.9)
                 bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
             else:
