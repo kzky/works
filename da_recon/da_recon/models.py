@@ -32,7 +32,7 @@ class MLPEnc(Chain):
 
             # Linear
             linear = L.Linear(d_in, d_out)
-            l_name = "mlp-enc-{:03}".format(l)
+            l_name = "linear-enc-{:03}".format(l)
             linears[l_name] = linear
 
             # BatchNormalization
@@ -61,14 +61,13 @@ class MLPEnc(Chain):
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, bath_norm in zip(self.layers.values(), self.batch_norms.values()):
+        for linear, batch_norm in zip(self.linears.values(), self.batch_norms.values()):
             h_ = linear(h)
             if self.lateral:  #TODO: This may change
                 self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
-            if self.lateral: #TODO: Do something
-                pass
+
             h = self.act(h_)
             
         return h
@@ -90,7 +89,7 @@ class MLPDec(Chain):
 
             # Linear
             linear = L.Linear(d_in, d_out)
-            l_name = "mlp-dec-{:03}".format(l)
+            l_name = "linear-dec-{:03}".format(l)
             linears[l_name] = linear
 
             # BatchNormalization
@@ -119,14 +118,13 @@ class MLPDec(Chain):
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, batch_norm in zip(self.layers.values(), self.batch_norms.values()):
+        for linear, batch_norm in zip(self.linears.values(), self.batch_norms.values()):
             h_ = linear(h)
             if self.lateral:  #TODO: This may change
                 self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
-            if self.lateral: #TODO: Do something
-                pass
+
             h = self.act(h_)
                 
         return h
