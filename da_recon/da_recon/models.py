@@ -31,26 +31,27 @@ class MLPEnc(Chain):
             d_in, d_out = d[0], d[1]
 
             # Linear
-            linear = L.Linear(d_i, d_out)
-            l_name = "mlp-{:03}".format(l)
+            linear = L.Linear(d_in, d_out)
+            l_name = "mlp-enc-{:03}".format(l)
             linears[l_name] = linear
 
             # BatchNorm
             if bn:
                 batch_norm = L.BatchNorm(d_out, decay=0.9)
-                bn_name = "bn-{:03d}".format(l)
+                bn_name = "bn-enc-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
             else:
+                bn_name = "bn-enc-{:03d}".format(l)
                 batch_norms[bn_name] = None
                 
         layers.update(linears)
-        layers.update(batch_norms)
+        layers.update(batch_norms) if bn else None
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
-        self.batch_norms = self.batch_norms
+        self.batch_norms = batch_norms
         self.act = act
         self.bn = bn
         self.lateral = lateral
@@ -60,16 +61,16 @@ class MLPEnc(Chain):
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, bath_norm in zip(self.layers.values(), self.batch_norms.value()):
+        for linear, bath_norm in zip(self.layers.values(), self.batch_norms.values()):
             h_ = linear(h)
-            if lateral:  #TODO: This may change
+            if self.lateral:  #TODO: This may change
                 self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
             if self.lateral: #TODO: Do something
                 pass
             h = self.act(h_)
-                
+            
         return h
 
 class MLPDec(Chain):
@@ -88,26 +89,27 @@ class MLPDec(Chain):
             d_in, d_out = d[0], d[1]
 
             # Linear
-            linear = L.Linear(d_i, d_out)
-            l_name = "mlp-{:03}".format(l)
+            linear = L.Linear(d_in, d_out)
+            l_name = "mlp-dec-{:03}".format(l)
             linears[l_name] = linear
 
             # BatchNorm
             if bn:  #TODO: Do something if lateral is True
                 batch_norm = L.BatchNorm(d_out, decay=0.9)
-                bn_name = "bn-{:03d}".format(l)
+                bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
             else:
+                bn_name = "bn-dec-{:03d}".format(l)                
                 batch_norms[bn_name] = None
             
         layers.update(linears)
-        layers.update(batch_norms)
+        layers.update(batch_norms) if bn else None
 
         super(MLPDec, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
-        self.batch_norms = self.batch_norms
+        self.batch_norms = batch_norms
         self.act = act
         self.bn = bn
         self.lateral = lateral
@@ -117,9 +119,9 @@ class MLPDec(Chain):
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, batch_norm in zip(self.layers.values(), self.batch_nomrs.values()):
+        for linear, batch_norm in zip(self.layers.values(), self.batch_norms.values()):
             h_ = linear(h)
-            if lateral:  #TODO: This may change
+            if self.lateral:  #TODO: This may change
                 self.hiddens.append(h)
             if self.bn:
                 h_ = batch_norm(h_)
@@ -166,7 +168,7 @@ class ReconstructionLoss(Chain):
         """
 
         # Lateral Recon Loss
-        if lateral: #TODO: do something
+        if self.lateral: #TODO: do something
             pass
 
         # Reconstruction Loss
@@ -176,10 +178,10 @@ class ReconstructionLoss(Chain):
         
         return self.loss
 
-class Model(Chain):
+class MLPEncDecModel(Chain):
     def __init__(self,
                      dims,
-                     act=F.Relu,
+                     act=F.relu,
                      bn=True,
                      noise=False,
                      lateral=False,
@@ -189,21 +191,21 @@ class Model(Chain):
         mlp_enc = MLPEnc(
             dims=dims,
             act=act,
-            bn=bn
+            bn=bn,
             noise=noise,
             lateral=lateral,
             test=test)
         mlp_dec = MLPDec(
             dims=dims,
             act=act,
-            bn=bn
+            bn=bn,
             noise=noise,
             lateral=lateral,
             test=test)
         self.supervised_loss = SupervizedLoss()
         self.recon_loss = ReconstructionLoss()
 
-        super(Model, self).__init__(
+        super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,
             mlp_dec=mlp_dec)
 
