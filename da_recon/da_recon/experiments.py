@@ -18,7 +18,7 @@ class Experiment000(object):
                  test=False,):
 
         # Settting
-        self.devide = device
+        self.device = device
         self.lambdas = lambdas
         self.T = len(lambdas)
         
