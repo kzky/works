@@ -1,4 +1,4 @@
-from models import MLPEnc, MLPDec, SupervizedLoss, ReconstructionLoss
+from models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
 
@@ -23,7 +23,7 @@ class Experiment000(object):
         self.T = len(lambdas)
         
         # Model
-        self.model = Model(
+        self.model = MLPEncDecModel(
             dims=dims, act=act,
             bn=bn, noise=noise, lateral=lateral, test=test)
         self.mlp_enc = self.model.mlp_enc
@@ -50,7 +50,7 @@ class Experiment000(object):
             supervised_loss = self.supervised_loss(y, y_l)
             supervised_losses.append(supervised_loss)
             
-            # Reconstruction for (x_l, y_l)
+            # Reconstruction for (x_l, )
             x_l_recon = self.mlp_dec(y)
             recon_loss_l = self.recon_loss(x_l_recon, x_l,
                                                self.mlp_enc.hiddens,
