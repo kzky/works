@@ -17,7 +17,7 @@ def main():
     n_train_data = 60000
 
     dims = [inp_dim, 250, 100, out_dim]
-    lambdas = 
+    lambdas = [1., 1., 1.]
     learning_rate = 1. * 1e-3
     n_epoch = 100
     decay = 0.5
@@ -56,8 +56,10 @@ def main():
     st = time.time()
     for i in range(n_iter):
         # Get data
-        x_l, y_l = [to_device(x, device) for x in data_reader.get_l_train_batch()]
-        x_u, _ = [to_device(x, device) for x in data_reader.get_u_train_batch()]
+        x_l, y_l = [Variable(to_device(x, device)) \
+                        for x in data_reader.get_l_train_batch()]
+        x_u, _ = [Variable(to_device(x, device)) \
+                      for x in data_reader.get_u_train_batch()]
 
         # Train
         exp.train(x_l, y_l, x_u)
@@ -67,7 +69,8 @@ def main():
             print("Evaluation at {}-th epoch".format(epoch))
 
             # Get data
-            x_l, y_l = [to_device(x, device) for x in data_reader.get_test_batch()]
+            x_l, y_l = [Variable(to_device(x, device)) \
+                            for x in data_reader.get_test_batch()]
             exp.test(x_l, y_l)
             epoch +=1
             st = time.time()
