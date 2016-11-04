@@ -37,10 +37,22 @@ class Experiment000(object):
         self.oprimizer.use_cleargrads()
         
     def train(self, x_l, y_l, x_u):
+        loss = self.forward(x_l, y_l, x_u)
+        self.backward(loss)
+        self.update()
+
+    def forward_for_losses(self, x_l, y_l, x_u):
+        """
+        Returns
+        -----------
+        tuple:
+            tuple of Variables for separate loss
+        """
+
         # Forward
         supervised_losses = []
-        recon_loss_ls = []
-        recon_loss_us = []
+        recon_l_losses = []
+        recon_u_losses = []
 
         x_l_recon = x_l
         x_u_recon = x_u
@@ -55,34 +67,47 @@ class Experiment000(object):
             recon_loss_l = self.recon_loss(x_l_recon, x_l,  # Use self, x_l
                                                self.mlp_enc.hiddens,
                                                self.mlp_dec.hiddens)
-            recon_loss_ls.append(recon_loss_l)
+            recon_l_losses.append(recon_loss_l)
 
             # Reconstruction for (x_u, _)
+            if not x_u:
+                recon_u_losses.append(0)
+                continue
             y = self.mlp_enc(x_u_recon)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
                                                self.mlp_enc.hiddens, 
                                                self.mlp_dec.hiddens)        
-            recon_loss_us.append(recon_loss_u)
+            recon_u_losses.append(recon_loss_u)
 
         # Loss
         supervised_loss = reduce(lambda x, y: x + y)
         recon_loss_l = 0
         recon_loss_u = 0
-        for lambda_, l0, l1 in zip(self.lambdas, recon_loss_ls, recon_loss_us):
+        for lambda_, l0, l1 in zip(self.lambdas, recon_l_losses, recon_u_losses):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
-        loss = supervised_loss + recon_loss_l + recon_loss_u
+        return supervised_loss, recon_loss_l, recon_loss_u
 
-        # Backward
+    def forward(self, x_l, y_l, x_u):
+        losses = self.forward_for_losses(x_l, y_l, x_u)
+        return reduce(lambda x, y: x + y)
+
+    def backward(self, loss):
         self.model.cleargrads()
         loss.backward()
 
-        # Update
-        optimizer.update()
-
+    def update(self, ):
+        self.optimizer.update()
+        
     def test(self, x_l, y_l):
         y = self.mlp_enc(x_l)
-        return F.accuracy(y, y_l)
+        acc = F.accuracy(y, y_l)
+
+        losses = self.forward_for_losses(x_l, y_l, None)
+        supervised_loss = losses[0]
+        recon_loss = losses[1]
+
+    return acc, supervised_loss, recon_loss
         
