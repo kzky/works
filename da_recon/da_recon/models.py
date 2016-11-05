@@ -67,7 +67,7 @@ class MLPEnc(Chain):
         self.noise = noise
         self.lateral = lateral
         self.test = test
-        self.device = None
+        self.device = device
         self.hiddens = []
 
     def __call__(self, x):
