@@ -12,7 +12,6 @@ class Experiment000(object):
                  lambdas = [1., 1., 1.],
                  dims=[784, 250, 100, 10],
                  act=F.relu,
-                 bn=True,
                  noise=False,
                  lateral=False,
                  test=False,):
@@ -25,7 +24,7 @@ class Experiment000(object):
         # Model
         self.model = MLPEncDecModel(
             dims=dims, act=act,
-            bn=bn, noise=noise, lateral=lateral, test=test)
+            noise=noise, lateral=lateral, test=test, device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
         self.mlp_dec = self.model.mlp_dec

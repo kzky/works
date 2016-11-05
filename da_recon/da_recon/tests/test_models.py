@@ -8,23 +8,22 @@ def test_model():
     batch_size = 16
     dims = [784, 100, 10]
     act = F.relu
-    bn = True
-    noise = False
+    noise = True
     lateral = False
     test = False
 
     # Model
     model = MLPEncDecModel(
         dims=dims, act=act,
-        bn=bn, noise=noise, lateral=lateral, test=test)
+        noise=noise, lateral=lateral, test=test)
     mlp_enc = model.mlp_enc
     mlp_dec = model.mlp_dec
     supervised_loss = model.supervised_loss
     recon_loss = model.recon_loss
 
     # Data
-    x = np.random.rand(batch_size, dims[0]).astype(np.float32)
-    y = (np.random.rand(batch_size) * 10).astype(np.int32)
+    x = Variable(np.random.rand(batch_size, dims[0]).astype(np.float32))
+    y = Variable((np.random.rand(batch_size) * 10).astype(np.int32))
 
     # Forward Enc/Dec
     y_pred = mlp_enc(x)
