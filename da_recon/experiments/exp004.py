@@ -24,7 +24,6 @@ def main():
     n_epoch = 100
     decay = 0.5
     act = F.relu
-    bn = True
     noise = False
     lateral = False
     test = False
@@ -51,7 +50,6 @@ def main():
         lambdas,
         dims,
         act,
-        bn,
         noise,
         lateral,
         test)
