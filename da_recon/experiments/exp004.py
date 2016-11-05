@@ -78,7 +78,7 @@ def main():
             exp.test(x_l, y_l)
 
             acc, sloss, rloss = exp.test(x_l, y_l)
-            msg = "Epoch:{},ElapsedTime{},Acc:{},SupervisedLoss:{},ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
+            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{},ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
             print(msg)
             
             st = time.time()
