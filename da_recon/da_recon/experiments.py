@@ -2,7 +2,7 @@ from da_recon.models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
 
-class Experiment000(object):
+class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
     """
 
