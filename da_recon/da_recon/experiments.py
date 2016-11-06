@@ -1,6 +1,7 @@
 from da_recon.models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
+import numpy as np
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -167,23 +168,25 @@ class Experiment005(Experiment):
             supervised_losses.append(supervised_loss)
             
             # Reconstruction for (x_l, )
-            x_l_recon = Variable(self.mlp_dec(y).data)
+            x_l_recon = self.mlp_dec(y)
             recon_loss_l = self.recon_loss(x_l_recon, x_l,  # Use self, x_l
                                                self.mlp_enc.hiddens,
                                                self.mlp_dec.hiddens)
             recon_l_losses.append(recon_loss_l)
+            x_l_recon = Variable(x_l_recon.data)
 
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
                 continue
             y = self.mlp_enc(x_u_recon)
-            x_u_recon = Variable(self.mlp_dec(y).data)
+            x_u_recon = Variable(np.copy(self.mlp_dec(y).data))
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
                                                self.mlp_enc.hiddens, 
                                                self.mlp_dec.hiddens)        
             recon_u_losses.append(recon_loss_u)
-
+            x_u_recon = Variable(x_u_recon.data)
+            
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
         recon_loss_l = 0
@@ -319,24 +322,24 @@ class Experiment007(Experiment):
             supervised_losses.append(supervised_loss)
             
             # Reconstruction for (x_l, )
-            x_l_recon = Variable(self.mlp_dec(y).data)
+            x_l_recon = self.mlp_dec(y).data
             recon_loss_l = self.recon_loss(x_l_recon, x_l_recon_t0,  # Virtual AE
                                                self.mlp_enc.hiddens,
                                                self.mlp_dec.hiddens)
             recon_l_losses.append(recon_loss_l)
-            x_l_recon_t0 = x_l_recon
+            x_l_recon_t0 = Varialbe(x_l_recon.data)
 
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
                 continue
             y = self.mlp_enc(x_u_recon)
-            x_u_recon = Variable(self.mlp_dec(y).data)
+            x_u_recon = Variable(np.copy(self.mlp_dec(y).data))
             recon_loss_u = self.recon_loss(x_u_recon,  x_u_recon_t0,  # Virtual AE
                                                self.mlp_enc.hiddens, 
                                                self.mlp_dec.hiddens)        
             recon_u_losses.append(recon_loss_u)
-            x_u_recon_t0 = x_u_recon
+            x_u_recon_t0 = Varialbe(x_u_recon.data)
 
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
