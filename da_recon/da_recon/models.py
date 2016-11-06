@@ -123,9 +123,8 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            if bn:
-                batch_norm = L.BatchNormalization(d_out, decay=0.9,
-                                                      use_gamma=False, use_beta=False)
+            if bn and not lateral:
+                batch_norm = L.BatchNormalization(d_out, decay=0.9)
                 bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
 
@@ -153,7 +152,7 @@ class MLPDec(Chain):
         self.hiddens = []
         for linear, batch_norm in zip(self.linears.values(), self.batch_norms.values()):
             h_ = linear(h)
-            if self.lateral:
+            if self.bn or self.lateral:
                 h_ = batch_norm(h_, self.test)
                 #TODO: This may change
                 self.hiddens.append(h)
