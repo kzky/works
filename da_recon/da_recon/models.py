@@ -66,6 +66,7 @@ class MLPEnc(Chain):
         self.scale_biases = scale_biases
         self.act = act
         self.noise = noise
+        self.bn = bn
         self.lateral = lateral
         self.test = test
         self.device = device
@@ -103,7 +104,6 @@ class MLPEnc(Chain):
 class MLPDec(Chain):
 
     def __init__(self, dims, act=F.relu,
-                     noise=False,
                      bn=False,
                      lateral=False,
                      test=False,
@@ -141,6 +141,7 @@ class MLPDec(Chain):
         self.linears = linears
         self.batch_norms = batch_norms
         self.act = act
+        self.bn = bn
         self.lateral = lateral
         self.test = test
         self.device = device
@@ -226,7 +227,6 @@ class MLPEncDecModel(Chain):
         mlp_dec = MLPDec(
             dims=dims,
             act=act,
-            noise=noise,
             bn=bn,
             lateral=lateral,
             test=test,
