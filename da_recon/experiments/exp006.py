@@ -9,6 +9,25 @@ import time
 import chainer.functions as F
 from chainer import Variable
 
+
+"""
+Intermidiate good results
+
+$ python exp006.py 
+Num. of labeled samples 6000
+Num. of unlabeled samples 60000
+Num. of test samples 10000
+Num. of classes 10
+# Training loop
+Epoch:1,ElapsedTime:39.3988780975,Acc:0.938099980354,SupervisedLoss:0.778847634792,ReconstructionLoss:0.0920879468322
+Epoch:2,ElapsedTime:38.6708779335,Acc:0.945500016212,SupervisedLoss:0.704142570496,ReconstructionLoss:0.0791729390621
+Epoch:3,ElapsedTime:39.569370985,Acc:0.947600007057,SupervisedLoss:0.754851877689,ReconstructionLoss:0.0755339413881
+Epoch:4,ElapsedTime:39.672962904,Acc:0.952899992466,SupervisedLoss:0.716730058193,ReconstructionLoss:0.0686608031392
+Epoch:5,ElapsedTime:41.0056860447,Acc:0.94470000267,SupervisedLoss:0.777901411057,ReconstructionLoss:0.0788391679525
+Epoch:6,ElapsedTime:39.6937179565,Acc:0.953199982643,SupervisedLoss:0.742242634296,ReconstructionLoss:0.0663816556334
+
+"""
+
 def main():
     # Settings
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
