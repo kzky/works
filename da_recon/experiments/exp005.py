@@ -25,6 +25,7 @@ def main():
     decay = 0.5
     act = F.relu
     noise = False
+    bn = True
     lateral = False
     test = False
     iter_epoch = n_train_data / batch_size
@@ -51,6 +52,7 @@ def main():
         dims,
         act,
         noise,
+        bn,
         lateral,
         test)
 
