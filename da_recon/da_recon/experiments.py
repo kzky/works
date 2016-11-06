@@ -108,7 +108,7 @@ class Experiment(object):
         self.mlp_enc.test = True
         self.mlp_dec.test = True
         
-    def unset_test(self,):        
+    def unset_test(self,):
         self.mlp_enc.test = False
         self.mlp_dec.test = False
         
