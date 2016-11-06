@@ -24,7 +24,7 @@ def main():
     n_epoch = 100
     decay = 0.5
     act = F.relu
-    noise = True
+    noise = False
     bn = True
     lateral = False
     test = False
