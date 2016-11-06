@@ -1,4 +1,4 @@
-from da_recon.experiments import Experiment
+from da_recon.experiments import Experiment022
 from da_recon.utils import to_device
 from da_recon.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -44,7 +44,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment(
+    exp = Experiment022(
         device,
         learning_rate,
         lambdas,

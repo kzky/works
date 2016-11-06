@@ -44,7 +44,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment(
+    exp = Experiment021(
         device,
         learning_rate,
         lambdas,
