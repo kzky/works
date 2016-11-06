@@ -361,6 +361,7 @@ class Experiment007(Experiment):
 
 # Alias
 Experiment004 = Experiment
+Experiment020 = Experiment004
 Experiment021 = Experiment005
 Experiment022 = Experiment006
 Experiment023 = Experiment007
