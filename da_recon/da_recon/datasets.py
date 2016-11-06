@@ -151,7 +151,7 @@ class Separator(object):
     def _sample_indices(self, y):
         classes = set(y)
         indicies = []
-        n_for_each_classes = int(1. * len(y) / self.l)
+        n_for_each_classes = int(1. * self.l / len(classes))
         for c in classes:
             indices_for_c = np.where(y==c)[0]
             indicies += np.random.choice(indices_for_c, n_for_each_classes,
