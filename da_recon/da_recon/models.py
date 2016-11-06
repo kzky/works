@@ -76,7 +76,7 @@ class MLPEnc(Chain):
         for linear, batch_norm, scale_bias in \
           zip(self.linears.values(), self.batch_norms.values(), self.scale_biases.values()):
           
-          if self.noise and not self.lateral:
+          if self.noise and not self.lateral and not self.test:
               n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
               n_ = Variable(to_device(n, self.device))
               h_ = h + n_
