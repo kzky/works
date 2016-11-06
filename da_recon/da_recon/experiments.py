@@ -195,31 +195,6 @@ class Experiment005(Experiment):
             recon_loss_u += lambda_ * l1
 
         return supervised_loss, recon_loss_l, recon_loss_u
-        
-
-class Experiment021(Experiment005):
-    """Experiment takes responsibility for a batch not for train-loop.
-    """
-
-    def __init__(self,
-                 device=None,
-                 learning_rate=1. * 1e-2,
-                 lambdas = [1., 1., 1.],
-                 dims=[784, 250, 100, 10],
-                 act=F.relu,
-                 noise=False,
-                 lateral=False,
-                 test=False,):
-
-        super(Experiment005, self).__init__(
-            device=device,
-            learning_rate=learning_rate,
-            lambdas=lambdas,
-            dims=dims,
-            act=act,
-            noise=noise,
-            lateral=lateral,
-            test=test,)
 
 class Experiment006(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -374,3 +349,8 @@ class Experiment007(Experiment):
             recon_loss_u += lambda_ * l1
 
         return supervised_loss, recon_loss_l, recon_loss_u
+
+# Alias
+Experiment021 = Experiment005
+Experiment022 = Experiment006
+Experiment023 = Experiment007
