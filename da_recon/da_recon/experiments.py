@@ -121,3 +121,256 @@ class Experiment(object):
         self.unset_test()
         return acc, supervised_loss, recon_loss
         
+class Experiment005(Experiment):
+    """Experiment takes responsibility for a batch not for train-loop.
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 lambdas = [1., 1., 1.],
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 lateral=False,
+                 test=False,):
+
+        super(Experiment005, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            lambdas=lambdas,
+            dims=dims,
+            act=act,
+            noise=noise,
+            lateral=lateral,
+            test=test,)
+
+    def forward_for_losses(self, x_l, y_l, x_u):
+        """
+        Returns
+        -----------
+        tuple:
+            tuple of Variables for separate loss
+        """
+
+        # Forward
+        supervised_losses = []
+        recon_l_losses = []
+        recon_u_losses = []
+
+        x_l_recon = x_l
+        x_u_recon = x_u
+        for t in range(self.T):
+            # Supervision for (x_l, y_l)
+            y = self.mlp_enc(x_l_recon)
+            supervised_loss = self.supervised_loss(y, y_l)
+            supervised_losses.append(supervised_loss)
+            
+            # Reconstruction for (x_l, )
+            x_l_recon = Variable(self.mlp_dec(y).data)
+            recon_loss_l = self.recon_loss(x_l_recon, x_l,  # Use self, x_l
+                                               self.mlp_enc.hiddens,
+                                               self.mlp_dec.hiddens)
+            recon_l_losses.append(recon_loss_l)
+
+            # Reconstruction for (x_u, _)
+            if x_u is None:
+                recon_u_losses.append(0)
+                continue
+            y = self.mlp_enc(x_u_recon)
+            x_u_recon = Variable(self.mlp_dec(y).data)
+            recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
+                                               self.mlp_enc.hiddens, 
+                                               self.mlp_dec.hiddens)        
+            recon_u_losses.append(recon_loss_u)
+
+        # Loss
+        supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+        recon_loss_l = 0
+        recon_loss_u = 0
+        for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
+                                       recon_l_losses,
+                                       recon_u_losses):
+            recon_loss_l += lambda_ * l0
+            recon_loss_u += lambda_ * l1
+
+        return supervised_loss, recon_loss_l, recon_loss_u
+        
+
+class Experiment021(Experiment005):
+    """Experiment takes responsibility for a batch not for train-loop.
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 lambdas = [1., 1., 1.],
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 lateral=False,
+                 test=False,):
+
+        super(Experiment005, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            lambdas=lambdas,
+            dims=dims,
+            act=act,
+            noise=noise,
+            lateral=lateral,
+            test=test,)
+
+class Experiment006(Experiment):
+    """Experiment takes responsibility for a batch not for train-loop.
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 lambdas = [1., 1., 1.],
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 lateral=False,
+                 test=False,):
+
+        super(Experiment006, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            lambdas=lambdas,
+            dims=dims,
+            act=act,
+            noise=noise,
+            lateral=lateral,
+            test=test,)
+
+    def forward_for_losses(self, x_l, y_l, x_u):
+        """
+        Returns
+        -----------
+        tuple:
+            tuple of Variables for separate loss
+        """
+
+        # Forward
+        supervised_losses = []
+        recon_l_losses = []
+        recon_u_losses = []
+
+        x_l_recon_t0 = x_l
+        x_u_recon_t0 = x_u
+        for t in range(self.T):
+            # Supervision for (x_l, y_l)
+            y = self.mlp_enc(x_l_recon_t0)
+            supervised_loss = self.supervised_loss(y, y_l)
+            supervised_losses.append(supervised_loss)
+            
+            # Reconstruction for (x_l, )
+            x_l_recon = self.mlp_dec(y)
+            recon_loss_l = self.recon_loss(x_l_recon, x_l_recon_t0,  # Virtual AE
+                                               self.mlp_enc.hiddens,
+                                               self.mlp_dec.hiddens)
+            recon_l_losses.append(recon_loss_l)
+            x_l_recon_t0 = x_l_recon
+
+            # Reconstruction for (x_u, _)
+            if x_u is None:
+                recon_u_losses.append(0)
+                continue
+            y = self.mlp_enc(x_u_recon)
+            x_u_recon = self.mlp_dec(y)
+            recon_loss_u = self.recon_loss(x_u_recon,  x_l_recon_t0,  # Virtual AE
+                                               self.mlp_enc.hiddens, 
+                                               self.mlp_dec.hiddens)        
+            recon_u_losses.append(recon_loss_u)
+            x_u_recon_t0 = x_u_recon
+
+        # Loss
+        supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+        recon_loss_l = 0
+        recon_loss_u = 0
+        for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
+                                       recon_l_losses,
+                                       recon_u_losses):
+            recon_loss_l += lambda_ * l0
+            recon_loss_u += lambda_ * l1
+
+        return supervised_loss, recon_loss_l, recon_loss_u
+
+class Experiment007(Experiment):
+    """Experiment takes responsibility for a batch not for train-loop.
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 lambdas = [1., 1., 1.],
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 lateral=False,
+                 test=False,):
+
+        super(Experiment007, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            lambdas=lambdas,
+            dims=dims,
+            act=act,
+            noise=noise,
+            lateral=lateral,
+            test=test,)
+
+    def forward_for_losses(self, x_l, y_l, x_u):
+        """
+        Returns
+        -----------
+        tuple:
+            tuple of Variables for separate loss
+        """
+
+        # Forward
+        supervised_losses = []
+        recon_l_losses = []
+        recon_u_losses = []
+
+        x_l_recon_t0 = x_l
+        x_u_recon_t0 = x_u
+        for t in range(self.T):
+            # Supervision for (x_l, y_l)
+            y = self.mlp_enc(x_l_recon_t0)
+            supervised_loss = self.supervised_loss(y, y_l)
+            supervised_losses.append(supervised_loss)
+            
+            # Reconstruction for (x_l, )
+            x_l_recon = Variable(self.mlp_dec(y).data)
+            recon_loss_l = self.recon_loss(x_l_recon, x_l_recon_t0,  # Virtual AE
+                                               self.mlp_enc.hiddens,
+                                               self.mlp_dec.hiddens)
+            recon_l_losses.append(recon_loss_l)
+            x_l_recon_t0 = x_l_recon
+
+            # Reconstruction for (x_u, _)
+            if x_u is None:
+                recon_u_losses.append(0)
+                continue
+            y = self.mlp_enc(x_u_recon)
+            x_u_recon = Variable(self.mlp_dec(y).data)
+            recon_loss_u = self.recon_loss(x_u_recon,  x_l_recon_t0,  # Virtual AE
+                                               self.mlp_enc.hiddens, 
+                                               self.mlp_dec.hiddens)        
+            recon_u_losses.append(recon_loss_u)
+            x_u_recon_t0 = x_u_recon
+
+        # Loss
+        supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+        recon_loss_l = 0
+        recon_loss_u = 0
+        for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
+                                       recon_l_losses,
+                                       recon_u_losses):
+            recon_loss_l += lambda_ * l0
+            recon_loss_u += lambda_ * l1
+
+        return supervised_loss, recon_loss_l, recon_loss_u
