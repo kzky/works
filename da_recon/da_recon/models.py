@@ -78,8 +78,8 @@ class MLPEnc(Chain):
         for linear, batch_norm, scale_bias in \
           zip(self.linears.values(), self.batch_norms.values(), self.scale_biases.values()):
 
-          # Add noise if 
-          if self.noise and not self.lateral and not self.test:
+          # Add noise
+          if self.noise and not self.bn and not self.lateral and not self.test:
               if np.random.randint(0, 2):
                   n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                   n_ = Variable(to_device(n, self.device))
