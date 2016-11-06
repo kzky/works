@@ -55,7 +55,7 @@ class MLPEnc(Chain):
                 
         layers.update(linears)
         layers.update(batch_norms) if lateral else None
-        layers.update(scale_bias) if lateral else None
+        layers.update(scale_biases) if lateral else None
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
