@@ -104,6 +104,7 @@ class MLPDec(Chain):
 
     def __init__(self, dims, act=F.relu,
                      noise=False,
+                     bn=False,
                      lateral=False,
                      test=False,
                      device=None):
