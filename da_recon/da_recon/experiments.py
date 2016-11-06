@@ -1,7 +1,6 @@
 from da_recon.models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
-import numpy as np
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -180,7 +179,7 @@ class Experiment005(Experiment):
                 recon_u_losses.append(0)
                 continue
             y = self.mlp_enc(x_u_recon)
-            x_u_recon = Variable(np.copy(self.mlp_dec(y).data))
+            x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
                                                self.mlp_enc.hiddens, 
                                                self.mlp_dec.hiddens)        
@@ -334,7 +333,7 @@ class Experiment007(Experiment):
                 recon_u_losses.append(0)
                 continue
             y = self.mlp_enc(x_u_recon)
-            x_u_recon = Variable(np.copy(self.mlp_dec(y).data))
+            x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon,  x_u_recon_t0,  # Virtual AE
                                                self.mlp_enc.hiddens, 
                                                self.mlp_dec.hiddens)        
