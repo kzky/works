@@ -132,7 +132,6 @@ class Experiment005(Experiment):
                  lambdas = [1., 1., 1.],
                  dims=[784, 250, 100, 10],
                  act=F.relu,
-                 bn=False,
                  noise=False,
                  bn=False,                 
                  lateral=False,
