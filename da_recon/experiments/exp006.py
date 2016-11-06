@@ -11,9 +11,9 @@ from chainer import Variable
 
 
 """
-Intermidiate good results
+#1. Intermidiate good results (Not using BatchNorm)
 
-$ python exp006.py 
+$ python exp006.py
 Num. of labeled samples 6000
 Num. of unlabeled samples 60000
 Num. of test samples 10000
@@ -25,6 +25,27 @@ Epoch:3,ElapsedTime:39.569370985,Acc:0.947600007057,SupervisedLoss:0.75485187768
 Epoch:4,ElapsedTime:39.672962904,Acc:0.952899992466,SupervisedLoss:0.716730058193,ReconstructionLoss:0.0686608031392
 Epoch:5,ElapsedTime:41.0056860447,Acc:0.94470000267,SupervisedLoss:0.777901411057,ReconstructionLoss:0.0788391679525
 Epoch:6,ElapsedTime:39.6937179565,Acc:0.953199982643,SupervisedLoss:0.742242634296,ReconstructionLoss:0.0663816556334
+
+#2. Intermidiate good results (Using BatchNorm and Noise even in test)
+Depending on datasets?
+/home/kzk/datasets/mnist/{l_train_good_results.npz, u_train_good_results.npz}
+
+-> No
+It did not depend on randomly sampled dataset because even if running experiments some time, the results are almost the same, 95% accuracy.
+
+ python exp006.py
+Num. of labeled samples 6000
+Num. of unlabeled samples 60000
+Num. of test samples 10000
+Num. of classes 10
+# Training loop
+Epoch:1,ElapsedTime:80.6847538948,Acc:0.950900018215,SupervisedLoss:1.08128976822,ReconstructionLoss:0.136103391647
+Epoch:2,ElapsedTime:79.8726809025,Acc:0.947399973869,SupervisedLoss:0.84667134285,ReconstructionLoss:0.125570893288
+Epoch:3,ElapsedTime:78.6997539997,Acc:0.954400002956,SupervisedLoss:0.675140738487,ReconstructionLoss:0.121869444847
+Epoch:4,ElapsedTime:78.8419821262,Acc:0.950999975204,SupervisedLoss:0.671376407146,ReconstructionLoss:0.120546206832
+Epoch:5,ElapsedTime:79.7258489132,Acc:0.95450001955,SupervisedLoss:0.615385890007,ReconstructionLoss:0.121254965663
+Epoch:6,ElapsedTime:79.6311910152,Acc:0.954400002956,SupervisedLoss:0.648241519928,ReconstructionLoss:0.113617710769
+Epoch:7,ElapsedTime:79.8232250214,Acc:0.953800022602,
 
 """
 
