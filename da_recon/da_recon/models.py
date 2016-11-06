@@ -39,7 +39,7 @@ class MLPEnc(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            if lateral:
+            if bn:
                 batch_norm = L.BatchNormalization(d_out, decay=0.9,
                                                       use_gamma=False, use_beta=False)
                 bn_name = "bn-enc-{:03d}".format(l)
@@ -55,8 +55,8 @@ class MLPEnc(Chain):
                 scale_biases[sb_name] = None
                 
         layers.update(linears)
-        layers.update(batch_norms) if lateral else None
-        layers.update(scale_biases) if lateral else None
+        layers.update(batch_norms) if bn else None
+        layers.update(scale_biases) if bn else None
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
@@ -91,10 +91,11 @@ class MLPEnc(Chain):
               h_ = batch_norm(h_, self.test)
               if self.noise and not self.test:
                   n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
-              n_ = Variable(to_device(n, self.device))
-              h_ = h_ + n_
+                  n_ = Variable(to_device(n, self.device))
+                  h_ = h_ + n_
               h_ = scale_bias(h_)
-              #TODO: This may change
+
+          #TODO: This may change
           if self.lateral:              
               self.hiddens.append(h)
           h = self.act(h_)
@@ -122,7 +123,7 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            if lateral:
+            if bn:
                 batch_norm = L.BatchNormalization(d_out, decay=0.9,
                                                       use_gamma=False, use_beta=False)
                 bn_name = "bn-dec-{:03d}".format(l)
@@ -133,7 +134,7 @@ class MLPDec(Chain):
                 batch_norms[bn_name] = None
             
         layers.update(linears)
-        layers.update(batch_norms) if lateral else None
+        layers.update(batch_norms) if bn else None
 
         super(MLPDec, self).__init__(**layers)
         self.dims = dims
@@ -214,7 +215,6 @@ class MLPEncDecModel(Chain):
                      lateral=False,
                      test=False,
                      device=None):
-
         # Constrcut models
         mlp_enc = MLPEnc(
             dims=dims,
