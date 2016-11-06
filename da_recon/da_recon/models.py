@@ -20,6 +20,7 @@ class MLPEnc(Chain):
                      dims,
                      act=F.relu,
                      noise=False,
+                     bn=False,
                      lateral=False,
                      test=False,
                      device=None):
@@ -75,7 +76,8 @@ class MLPEnc(Chain):
         self.hiddens = []
         for linear, batch_norm, scale_bias in \
           zip(self.linears.values(), self.batch_norms.values(), self.scale_biases.values()):
-          
+
+          # Add noise if 
           if self.noise and not self.lateral and not self.test:
               if np.random.randint(0, 2):
                   n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
@@ -84,13 +86,15 @@ class MLPEnc(Chain):
 
           h_ = linear(h)
           
-          if self.lateral:
+          if self.bn:
               h_ = batch_norm(h_)
-              n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
+              if self.noise and not self.test:
+                  n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
               n_ = Variable(to_device(n, self.device))
               h_ = h_ + n_
               h_ = scale_bias(h_)
               #TODO: This may change
+          if self.lateral:              
               self.hiddens.append(h)
           h = self.act(h_)
           
@@ -204,6 +208,7 @@ class MLPEncDecModel(Chain):
                      dims,
                      act=F.relu,
                      noise=False,
+                     bn=False,
                      lateral=False,
                      test=False,
                      device=None):
@@ -213,6 +218,7 @@ class MLPEncDecModel(Chain):
             dims=dims,
             act=act,
             noise=noise,
+            bn=bn,
             lateral=lateral,
             test=test,
             device=device)
@@ -220,6 +226,7 @@ class MLPEncDecModel(Chain):
             dims=dims,
             act=act,
             noise=noise,
+            bn=bn,
             lateral=lateral,
             test=test,
             device=device)

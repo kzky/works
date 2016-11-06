@@ -13,6 +13,7 @@ class Experiment(object):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 bn=False,
                  lateral=False,
                  test=False,):
 
@@ -24,7 +25,7 @@ class Experiment(object):
         # Model
         self.model = MLPEncDecModel(
             dims=dims, act=act,
-            noise=noise, lateral=lateral, test=test, device=device)
+            noise=noise, nb=bn, lateral=lateral, test=test, device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
         self.mlp_dec = self.model.mlp_dec
@@ -131,7 +132,9 @@ class Experiment005(Experiment):
                  lambdas = [1., 1., 1.],
                  dims=[784, 250, 100, 10],
                  act=F.relu,
+                 bn=False,
                  noise=False,
+                 bn=False,                 
                  lateral=False,
                  test=False,):
 
@@ -142,6 +145,7 @@ class Experiment005(Experiment):
             dims=dims,
             act=act,
             noise=noise,
+            bn=bn,
             lateral=lateral,
             test=test,)
 
@@ -209,6 +213,7 @@ class Experiment006(Experiment):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 bn=False,
                  lateral=False,
                  test=False,):
 
@@ -219,6 +224,7 @@ class Experiment006(Experiment):
             dims=dims,
             act=act,
             noise=noise,
+            bn=bn,
             lateral=lateral,
             test=test,)
 
@@ -286,6 +292,7 @@ class Experiment007(Experiment):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 bn=False,
                  lateral=False,
                  test=False,):
 
@@ -296,6 +303,7 @@ class Experiment007(Experiment):
             dims=dims,
             act=act,
             noise=noise,
+            bn=bn,
             lateral=lateral,
             test=test,)
 
