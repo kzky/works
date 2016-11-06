@@ -253,7 +253,7 @@ class Experiment006(Experiment):
             if x_u is None:
                 recon_u_losses.append(0)
                 continue
-            y = self.mlp_enc(x_u_recon)
+            y = self.mlp_enc(x_u_recon_t0)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon,  x_l_recon_t0,  # Virtual AE
                                                self.mlp_enc.hiddens, 
