@@ -87,7 +87,7 @@ class MLPEnc(Chain):
           h_ = linear(h)
           
           if self.bn:
-              h_ = batch_norm(h_)
+              h_ = batch_norm(h_, self.test)
               if self.noise and not self.test:
                   n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
               n_ = Variable(to_device(n, self.device))
@@ -151,7 +151,7 @@ class MLPDec(Chain):
         for linear, batch_norm in zip(self.linears.values(), self.batch_norms.values()):
             h_ = linear(h)
             if self.lateral:
-                h_ = batch_norm(h_)
+                h_ = batch_norm(h_, self.test)
                 #TODO: This may change
                 self.hiddens.append(h)
             h = self.act(h_)
