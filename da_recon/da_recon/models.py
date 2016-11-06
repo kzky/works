@@ -86,7 +86,7 @@ class MLPEnc(Chain):
           
           if self.lateral:
               h_ = batch_norm(h_)
-              n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
+              n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
               n_ = Variable(to_device(n, self.device))
               h_ = h_ + n_
               h_ = scale_bias(h_)
