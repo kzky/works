@@ -136,7 +136,7 @@ class Separator(object):
         data = np.load(fpath)
         n = len(data["x"])
         idxs = np.arange(n)
-        idxs_l = np.random.choice(idxs, size=self.l, replace=False)
+        idxs_l = self._sample_indices(y)
         idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
 
         ldata = {}
@@ -147,6 +147,16 @@ class Separator(object):
         udata["y"] = data["y"][idxs_u]
 
         return ldata, udata
+
+    def _sample_indices(self, y):
+        classes = set(y)
+        indecies = []
+        n_for_each_classes = int(1. * len(y) / self.l)
+        for c in classes:
+            indices_for_c = np.where(y==c)[0]
+            indices += np.random.choice(indices_for_c, n_for_each_classes,
+                                            replace=False)
+        return indices
         
     def _save_ssl_data(self, fpath, ldata, udata):
         dpath = os.path.dirname(fpath)
