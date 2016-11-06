@@ -360,6 +360,17 @@ class Experiment007(Experiment):
         return supervised_loss, recon_loss_l, recon_loss_u
 
 # Alias
+Experiment004 = Experiment
 Experiment021 = Experiment005
 Experiment022 = Experiment006
 Experiment023 = Experiment007
+
+Experiment068 = Experiment004
+Experiment069 = Experiment005 
+Experiment070 = Experiment006 
+Experiment071 = Experiment007 
+Experiment084 = Experiment020 
+Experiment085 = Experiment021 
+Experiment086 = Experiment022 
+Experiment087 = Experiment023 
+
