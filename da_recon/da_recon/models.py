@@ -84,7 +84,7 @@ class MLPEnc(Chain):
             if self.bn:
                 h = batch_norm(h, self.test)
                 if self.noise and not self.test:
-                    n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
+                    n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
                     h = h + n_
             
