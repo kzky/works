@@ -29,7 +29,6 @@ class MLPEnc(Chain):
         layers = {}
         linears = OrderedDict()
         batch_norms = OrderedDict()
-        scale_biases = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
 
@@ -40,30 +39,21 @@ class MLPEnc(Chain):
 
             # Normalization and BatchCorrection
             if bn:
-                batch_norm = L.BatchNormalization(d_out, decay=0.9,
-                                                      use_gamma=False, use_beta=False)
+                batch_norm = L.BatchNormalization(d_out, decay=0.9)
                 bn_name = "bn-enc-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
-                scale_bias = \
-                  L.Scale(W_shape=(d_out, ), bias_term=True, bias_shape=(d_out, ))
-                sb_name = "sb-enc-{:03d}".format(l)
-                scale_biases[sb_name] = scale_bias
             else:
                 bn_name = "bn-enc-{:03d}".format(l)
                 batch_norms[bn_name] = None
-                sb_name = "sb-enc-{:03d}".format(l)
-                scale_biases[sb_name] = None
-                
+
         layers.update(linears)
         layers.update(batch_norms) if bn else None
-        layers.update(scale_biases) if bn else None
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
-        self.scale_biases = scale_biases
         self.act = act
         self.noise = noise
         self.bn = bn
@@ -76,9 +66,9 @@ class MLPEnc(Chain):
         h = x
         self.hiddens = []
         for i, layers in enumerate(zip(
-            self.linears.values(), self.batch_norms.values(), self.scale_biases.values())):
+            self.linears.values(), self.batch_norms.values())):
 
-            linear, batch_norm, scale_bias = layers
+            linear, batch_norm = layers
 
             # Add noise
             if self.noise and not self.bn and not self.lateral and not self.test:
@@ -95,7 +85,6 @@ class MLPEnc(Chain):
                     n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
                     h_ = h_ + n_
-                h_ = scale_bias(h_)
              
             h = self.act(h_)
 
