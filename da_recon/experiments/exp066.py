@@ -26,7 +26,7 @@ def main():
     act = F.relu
     noise = False
     bn = True
-    lateral = False
+    lateral = True
     test = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
