@@ -75,24 +75,24 @@ class MLPEnc(Chain):
                 if np.random.randint(0, 2):
                     n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
-                    h_ = h + n_
+                    h = h + n_
 
             # Linear
-            h_ = linear(h)
+            h = linear(h)
 
             # Batchnorm
             if self.bn:
-                h_ = batch_norm(h_, self.test)
+                h = batch_norm(h, self.test)
                 if self.noise and not self.test:
                     n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
-                    h_ = h_ + n_
+                    h = h + n_
             
             if self.lateral and i != len(self.dims) - 2:
                 self.hiddens.append(h)
 
             # Activation
-            h = self.act(h_)
+            h = self.act(h)
 
         return h
 
@@ -181,15 +181,15 @@ class MLPDec(Chain):
             linear, batch_norm = layers
 
             # Linear
-            h_ = linear(h)
+            h = linear(h)
 
             # Batchnorm
             if self.bn or self.lateral:
-                h_ = batch_norm(h_, self.test)
+                h = batch_norm(h, self.test)
 
             # Activation
             if not self.lateral:
-                h = self.act(h_)
+                h = self.act(h)
 
             # Denoise
             if self.lateral and i != len(self.dims) - 2:
