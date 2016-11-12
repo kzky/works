@@ -180,13 +180,18 @@ class MLPDec(Chain):
             self.linears.values(), self.batch_norms.values())):
             linear, batch_norm = layers
 
+            # Linear
             h_ = linear(h)
 
+            # Batchnorm
             if self.bn or self.lateral:
                 h_ = batch_norm(h_, self.test)
 
-            h = self.act(h_)
+            # Activation
+            if not self.lateral:
+                h = self.act(h_)
 
+            # Denoise
             if self.lateral and i != len(self.dims) - 2:
                 self.hiddens.append(h)
                 denoise = self.denoises.values()[i]
