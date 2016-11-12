@@ -76,35 +76,46 @@ class MLPEnc(Chain):
                     n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
                     h_ = h + n_
-             
+
+            # Linear
             h_ = linear(h)
-             
+
+            # Batchnorm
             if self.bn:
                 h_ = batch_norm(h_, self.test)
                 if self.noise and not self.test:
                     n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
                     h_ = h_ + n_
-             
-            h = self.act(h_)
-
+            
             if self.lateral and i != len(self.dims) - 2:
                 self.hiddens.append(h)
-          
+
+            # Activation
+            h = self.act(h_)
+
         return h
 
 class Denoise(Chain):
     def __init__(self, dim):
         super(Denoise, self).__init__(
-            a=L.Scale(W_shape=(dim, )),
-            b=L.Scale(W_shape=(dim, )),
-            c=L.Scale(W_shape=(dim, )),
-            d=L.Bias(shape=(dim, )),
+            a0=L.Scale(W_shape=(dim, )),
+            a1=L.Scale(W_shape=(dim, )),
+            a2=L.Scale(W_shape=(dim, )),
+            a3=L.Bias(shape=(dim, )),
+            a4=L.Bias(shape=(dim, )),
+            b0=L.Scale(W_shape=(dim, )),
+            b1=L.Scale(W_shape=(dim, )),
+            b2=L.Scale(W_shape=(dim, )),
+            b3=L.Bias(shape=(dim, )),
             )
 
     def __call__(self, x, y):
         xy = x * y
-        return self.d(self.a(x) + self.b(y) + self.c(xy))
+        a = self.a3(self.a0(x) + self.a1(y) + self.a2(xy))
+        b = self.b3(self.b0(x) + self.b1(y) + self.b2(xy))
+        
+        return b + self.a4 * F.sigmoid(a)
         
 class MLPDec(Chain):
 
@@ -139,6 +150,7 @@ class MLPDec(Chain):
                 bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = None
 
+            # Denoise
             if lateral and l != 0:
                 dn_name = "dn-dec-{:03d}".format(l)
                 denoises[dn_name] = Denoise(d_in)
