@@ -60,6 +60,7 @@ class Experiment(object):
         for t in range(self.T):
             # Supervision for (x_l, y_l)
             y = self.mlp_enc(x_l_recon)
+            
             supervised_loss = self.supervised_loss(y, y_l)
             supervised_losses.append(supervised_loss)
             
@@ -69,7 +70,7 @@ class Experiment(object):
                                                self.mlp_enc.hiddens,
                                                self.mlp_dec.hiddens)
             recon_l_losses.append(recon_loss_l)
-
+                
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
@@ -375,3 +376,4 @@ Experiment085 = Experiment021
 Experiment086 = Experiment022 
 Experiment087 = Experiment023 
 
+Experiment064 = Experiment068

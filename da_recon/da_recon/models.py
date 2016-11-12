@@ -75,44 +75,62 @@ class MLPEnc(Chain):
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, batch_norm, scale_bias in \
-          zip(self.linears.values(), self.batch_norms.values(), self.scale_biases.values()):
+        for i, layers in enumerate(zip(
+            self.linears.values(), self.batch_norms.values(), self.scale_biases.values())):
 
-          # Add noise
-          if self.noise and not self.bn and not self.lateral and not self.test:
-              if np.random.randint(0, 2):
-                  n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
-                  n_ = Variable(to_device(n, self.device))
-                  h_ = h + n_
+            linear, batch_norm, scale_bias = layers
 
-          h_ = linear(h)
-          
-          if self.bn:
-              h_ = batch_norm(h_, self.test)
-              if self.noise and not self.test:
-                  n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
-                  n_ = Variable(to_device(n, self.device))
-                  h_ = h_ + n_
-              h_ = scale_bias(h_)
+            # Add noise
+            if self.noise and not self.bn and not self.lateral and not self.test:
+                if np.random.randint(0, 2):
+                    n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
+                    n_ = Variable(to_device(n, self.device))
+                    h_ = h + n_
+             
+            h_ = linear(h)
+             
+            if self.bn:
+                h_ = batch_norm(h_, self.test)
+                if self.noise and not self.test:
+                    n = np.random.normal(0, 0.03, h_.data.shape).astype(np.float32)
+                    n_ = Variable(to_device(n, self.device))
+                    h_ = h_ + n_
+                h_ = scale_bias(h_)
+             
+            h = self.act(h_)
 
-          #TODO: This may change
-          if self.lateral:              
-              self.hiddens.append(h)
-          h = self.act(h_)
+            if self.lateral and i != len(self.dims) - 2:
+                self.hiddens.append(h)
           
         return h
-  
+
+class Denoise(Chain):
+    def __init__(self, dim):
+        super(Denoise, self).__init__(
+            a=L.Scale(W_shape=(dim, )),
+            b=L.Scale(W_shape=(dim, )),
+            c=L.Scale(W_shape=(dim, )),
+            d=L.Bias(shape=(dim, )),
+            )
+
+    def __call__(self, x, y):
+        xy = x * y
+        return self.d(self.a(x) + self.b(y) + self.c(xy))
+        
 class MLPDec(Chain):
 
     def __init__(self, dims, act=F.relu,
                      bn=False,
                      lateral=False,
                      test=False,
+                     mlp_enc=None,
                      device=None):
         # Setup layers
         layers = {}
         linears = OrderedDict()
         batch_norms = OrderedDict()
+        denoises = OrderedDict()
+        
         dims_reverse = dims[::-1]
         for l, d in enumerate(zip(dims_reverse[0:-1], dims_reverse[1:])):
             d_in, d_out = d[0], d[1]
@@ -123,7 +141,7 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            if bn and not lateral:
+            if bn:
                 batch_norm = L.BatchNormalization(d_out, decay=0.9)
                 bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = batch_norm
@@ -131,33 +149,49 @@ class MLPDec(Chain):
             else:
                 bn_name = "bn-dec-{:03d}".format(l)
                 batch_norms[bn_name] = None
-            
+
+            if lateral and l != 0:
+                dn_name = "dn-dec-{:03d}".format(l)
+                denoises[dn_name] = Denoise(d_in)
+                                
         layers.update(linears)
         layers.update(batch_norms) if bn else None
-
+        layers.update(denoises) if lateral else None
+        
         super(MLPDec, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
+        self.denoises = denoises
         self.act = act
         self.bn = bn
         self.lateral = lateral
         self.test = test
         self.device = device
         self.hiddens = []
+        self.mlp_enc = mlp_enc
             
     def __call__(self, x):
         h = x
         self.hiddens = []
-        for linear, batch_norm in zip(self.linears.values(), self.batch_norms.values()):
+        for i, layers in enumerate(zip(
+            self.linears.values(), self.batch_norms.values())):
+            linear, batch_norm = layers
+
             h_ = linear(h)
+
             if self.bn or self.lateral:
                 h_ = batch_norm(h_, self.test)
-                #TODO: This may change
-                self.hiddens.append(h)
+
             h = self.act(h_)
-                
+
+            if self.lateral and i != len(self.dims) - 2:
+                self.hiddens.append(h)
+                denoise = self.denoises.values()[i]
+                h_enc = self.mlp_enc.hiddens[::-1][i]
+                h = denoise(h_enc, h)
+
         return h
             
 class SupervizedLoss(Chain):
@@ -229,6 +263,7 @@ class MLPEncDecModel(Chain):
             bn=bn,
             lateral=lateral,
             test=test,
+            mlp_enc=mlp_enc,
             device=device)
         self.supervised_loss = SupervizedLoss()
         self.recon_loss = ReconstructionLoss()
