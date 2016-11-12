@@ -115,7 +115,7 @@ class Denoise(Chain):
         a = self.a3(self.a0(x) + self.a1(y) + self.a2(xy))
         b = self.b3(self.b0(x) + self.b1(y) + self.b2(xy))
         
-        return b + self.a4 * F.sigmoid(a)
+        return b + self.a4(F.sigmoid(a))
         
 class MLPDec(Chain):
 
