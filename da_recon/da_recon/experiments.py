@@ -26,7 +26,8 @@ class Experiment(object):
         # Model
         self.model = MLPEncDecModel(
             dims=dims, act=act,
-            noise=noise, bn=bn, lateral=lateral, test=test, device=device)
+            noise=noise, bn=bn, lateral=lateral, test=test, entropy=entropy,
+            device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
         self.mlp_dec = self.model.mlp_dec
@@ -99,8 +100,8 @@ class Experiment(object):
                                        recon_u_losses):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
-        entropy_loss = 0
 
+        entropy_loss = 0
         if self.entropy:
             entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
 
@@ -148,7 +149,8 @@ class Experiment005(Experiment):
                  noise=False,
                  bn=False,                 
                  lateral=False,
-                 test=False,):
+                 test=False,
+                 entropy=False):
 
         super(Experiment005, self).__init__(
             device=device,
@@ -159,7 +161,8 @@ class Experiment005(Experiment):
             noise=noise,
             bn=bn,
             lateral=lateral,
-            test=test,)
+            test=test,
+            entropy=entropy,)
 
     def forward_for_losses(self, x_l, y_l, x_u):
         """
@@ -202,8 +205,14 @@ class Experiment005(Experiment):
             recon_u_losses.append(recon_loss_u)
             x_u_recon = Variable(x_u_recon.data)
             
+            # EntropyLoss
+            if self.entropy:
+                entropy_loss = self.entropy_loss(y)
+                entropy_losses.append(entropy_loss)
+            
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+
         recon_loss_l = 0
         recon_loss_u = 0
         for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
@@ -212,7 +221,11 @@ class Experiment005(Experiment):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
-        return supervised_loss, recon_loss_l, recon_loss_u
+        entropy_loss = 0
+        if self.entropy:
+            entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
+
+        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
 
 class Experiment006(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -227,7 +240,8 @@ class Experiment006(Experiment):
                  noise=False,
                  bn=False,
                  lateral=False,
-                 test=False,):
+                 test=False,
+                 entropy=False):
 
         super(Experiment006, self).__init__(
             device=device,
@@ -238,7 +252,8 @@ class Experiment006(Experiment):
             noise=noise,
             bn=bn,
             lateral=lateral,
-            test=test,)
+            test=test,
+            entropy=entropy,)
 
     def forward_for_losses(self, x_l, y_l, x_u):
         """
@@ -281,8 +296,14 @@ class Experiment006(Experiment):
             recon_u_losses.append(recon_loss_u)
             x_u_recon_t0 = x_u_recon
 
+            # EntropyLoss
+            if self.entropy:
+                entropy_loss = self.entropy_loss(y)
+                entropy_losses.append(entropy_loss)
+            
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+
         recon_loss_l = 0
         recon_loss_u = 0
         for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
@@ -291,7 +312,11 @@ class Experiment006(Experiment):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
-        return supervised_loss, recon_loss_l, recon_loss_u
+        entropy_loss = 0
+        if self.entropy:
+            entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
+
+        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
 
 class Experiment007(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -306,7 +331,8 @@ class Experiment007(Experiment):
                  noise=False,
                  bn=False,
                  lateral=False,
-                 test=False,):
+                 test=False,
+                 entropy=False):
 
         super(Experiment007, self).__init__(
             device=device,
@@ -317,7 +343,8 @@ class Experiment007(Experiment):
             noise=noise,
             bn=bn,
             lateral=lateral,
-            test=test,)
+            test=test,
+            entropy=entropy)
 
     def forward_for_losses(self, x_l, y_l, x_u):
         """
@@ -360,8 +387,14 @@ class Experiment007(Experiment):
             recon_u_losses.append(recon_loss_u)
             x_u_recon_t0 = Variable(x_u_recon.data)
 
+            # EntropyLoss
+            if self.entropy:
+                entropy_loss = self.entropy_loss(y)
+                entropy_losses.append(entropy_loss)
+            
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+
         recon_loss_l = 0
         recon_loss_u = 0
         for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
@@ -370,8 +403,13 @@ class Experiment007(Experiment):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
-        return supervised_loss, recon_loss_l, recon_loss_u
+        entropy_loss = 0
+        if self.entropy:
+            entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
 
+        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
+
+    
 # Alias
 Experiment004 = Experiment
 Experiment020 = Experiment004
@@ -397,4 +435,4 @@ Experiment081 = Experiment085
 Experiment082 = Experiment086
 Experiment083 = Experiment087
 
-
+Experiment068 = Experiment128
