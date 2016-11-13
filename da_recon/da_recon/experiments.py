@@ -180,7 +180,8 @@ class Experiment005(Experiment):
         supervised_losses = []
         recon_l_losses = []
         recon_u_losses = []
-
+        entropy_losses = []
+        
         x_l_recon = x_l
         x_u_recon = x_u
         for t in range(self.T):
@@ -273,6 +274,7 @@ class Experiment006(Experiment):
         supervised_losses = []
         recon_l_losses = []
         recon_u_losses = []
+        entropy_losses = []
 
         x_l_recon_t0 = x_l
         x_u_recon_t0 = x_u
@@ -366,6 +368,7 @@ class Experiment007(Experiment):
         supervised_losses = []
         recon_l_losses = []
         recon_u_losses = []
+        entropy_losses = []
 
         x_l_recon_t0 = x_l
         x_u_recon_t0 = x_u
