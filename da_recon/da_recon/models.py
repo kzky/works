@@ -248,7 +248,7 @@ class ReconstructionLoss(Chain):
 
 class EntropyLoss(Chain):
     def __init__(self, ):
-        super(EntropyRegularization, self).__init__()
+        super(EntropyLoss, self).__init__()
 
     def __call__(self, y):
         s = F.softmax(y)
