@@ -79,7 +79,9 @@ class Experiment(object):
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
+                entropy_losses.append(0)
                 continue
+
             y = self.mlp_enc(x_u_recon)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
@@ -198,7 +200,9 @@ class Experiment005(Experiment):
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
+                entropy_losses.append(0)
                 continue
+
             y = self.mlp_enc(x_u_recon)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
@@ -289,7 +293,9 @@ class Experiment006(Experiment):
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
+                entropy_losses.append(0)
                 continue
+
             y = self.mlp_enc(x_u_recon_t0)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon,  x_u_recon_t0,  # Virtual AE
@@ -380,7 +386,9 @@ class Experiment007(Experiment):
             # Reconstruction for (x_u, _)
             if x_u is None:
                 recon_u_losses.append(0)
+                entropy_losses.append(0)
                 continue
+
             y = self.mlp_enc(x_u_recon_t0)
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon,  x_u_recon_t0,  # Virtual AE
