@@ -19,6 +19,7 @@ class Experiment(object):
                  entropy=False):
 
         # Settting
+        self.entropy = entropy
         self.device = device
         self.lambdas = lambdas
         self.T = len(lambdas)
@@ -33,6 +34,7 @@ class Experiment(object):
         self.mlp_dec = self.model.mlp_dec
         self.supervised_loss = self.model.supervised_loss
         self.recon_loss = self.model.recon_loss
+        self.entropy_loss = self.model.entropy_loss
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
@@ -435,4 +437,4 @@ Experiment081 = Experiment085
 Experiment082 = Experiment086
 Experiment083 = Experiment087
 
-Experiment068 = Experiment128
+Experiment128 = Experiment068
