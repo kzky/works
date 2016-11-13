@@ -239,11 +239,23 @@ class ReconstructionLoss(Chain):
             pass
 
         # Reconstruction Loss
-        recon_loss = F.mean_squared_error(x_recon, x)
+        d = np.prod(x.data.shape[1:])
+        recon_loss = F.mean_squared_error(x_recon, x) / d
 
         self.loss = recon_loss  #TODO: Loss add lateral recon loss
         
         return self.loss
+
+class EntropyLoss(Chain):
+    def __init__(self, ):
+        super(EntropyRegularization, self).__init__()
+
+    def __call__(self, y):
+        s = F.softmax(y)
+        log_s = F.log_softmax(y)
+        N = s.data.shape[0]
+        # - * - is + due to maximizing entropy
+        return F.sum(s*log_s) / N  # over batch
 
 class MLPEncDecModel(Chain):
     def __init__(self,
@@ -253,6 +265,7 @@ class MLPEncDecModel(Chain):
                      bn=False,
                      lateral=False,
                      test=False,
+                     entropy=False,
                      device=None):
         # Constrcut models
         mlp_enc = MLPEnc(
@@ -273,6 +286,7 @@ class MLPEncDecModel(Chain):
             device=device)
         self.supervised_loss = SupervizedLoss()
         self.recon_loss = ReconstructionLoss()
+        self.entropy_loss = EntropyLoss()
 
         super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,

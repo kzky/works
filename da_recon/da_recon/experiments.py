@@ -15,7 +15,8 @@ class Experiment(object):
                  noise=False,
                  bn=False,
                  lateral=False,
-                 test=False,):
+                 test=False,
+                 entropy=False):
 
         # Settting
         self.device = device
@@ -54,6 +55,7 @@ class Experiment(object):
         supervised_losses = []
         recon_l_losses = []
         recon_u_losses = []
+        entropy_losses = []
 
         x_l_recon = x_l
         x_u_recon = x_u
@@ -82,8 +84,14 @@ class Experiment(object):
                                                self.mlp_dec.hiddens)        
             recon_u_losses.append(recon_loss_u)
 
+            # EntropyLoss
+            if self.entropy:
+                entropy_loss = self.entropy_loss(y)
+                entropy_losses.append(entropy_loss)
+            
         # Loss
         supervised_loss = reduce(lambda x, y: x + y, supervised_losses)
+
         recon_loss_l = 0
         recon_loss_u = 0
         for lambda_, l0, l1 in zip(self.lambdas,  # Use coefficients for ulosses
@@ -91,8 +99,12 @@ class Experiment(object):
                                        recon_u_losses):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
+        entropy_loss = 0
 
-        return supervised_loss, recon_loss_l, recon_loss_u
+        if self.entropy:
+            entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
+
+        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
 
     def forward(self, x_l, y_l, x_u):
         losses = self.forward_for_losses(x_l, y_l, x_u)
@@ -186,7 +198,7 @@ class Experiment005(Experiment):
             x_u_recon = self.mlp_dec(y)
             recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
                                                self.mlp_enc.hiddens, 
-                                               self.mlp_dec.hiddens)        
+                                               self.mlp_dec.hiddens)
             recon_u_losses.append(recon_loss_u)
             x_u_recon = Variable(x_u_recon.data)
             
