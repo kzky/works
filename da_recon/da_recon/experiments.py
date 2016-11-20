@@ -450,7 +450,7 @@ class Experiment070_1(Experiment006):
             test=test,
             entropy=entropy,)
 
-        self.pseudo_supervised_loss = self.model.peudo_supervised_loss
+        self.ne_loss = self.model.ne_loss
 
     def forward_for_losses(self, x_l, y_l, x_u):
         """
@@ -462,8 +462,8 @@ class Experiment070_1(Experiment006):
 
         # Forward
         supervised_losses = []
-        pseudo_l_supervised_losses = []
-        pseudo_u_supervised_losses = []
+        ne_l_losses = []
+        ne_u_losses = []
         recon_l_losses = []
         recon_u_losses = []
         entropy_losses = []
@@ -477,8 +477,9 @@ class Experiment070_1(Experiment006):
             supervised_loss = self.supervised_loss(y, y_l)
             supervised_losses.append(supervised_loss)
             
-            if t > 1:  # Pseudo Supervision
-                pseudo_l_supervised_loss = self.pseudo_supervised_loss(y, y_p_l)
+            if t > 1:  # Negative Entropy
+                ne_l_loss = self.ne_loss(y, y_p_l)
+                ne_l_losses.append(ne_l_loss)
             y_p_l = y
             
             # Reconstruction for (x_l, )
@@ -493,8 +494,8 @@ class Experiment070_1(Experiment006):
             if x_u is None:
                 recon_u_losses.append(0)
                 entropy_losses.append(0)
-                pseudo_l_supervised_losses.append(0)
-                pseudo_u_supervised_losses.append(0)
+                ne_l_losses.append(0)
+                ne_u_losses.append(0)
                 continue
 
             y = self.mlp_enc(x_u_recon_t0)
@@ -505,8 +506,9 @@ class Experiment070_1(Experiment006):
             recon_u_losses.append(recon_loss_u)
             x_u_recon_t0 = x_u_recon
 
-            if t > 1:  # Pseudo Supervision
-                pseudo_u_supervised_loss = self.pseudo_supervised_loss(y, y_p_u)
+            if t > 1:  # Negative Entropy
+                ne_u_loss = self.ne_loss(y)
+                ne_u_losses.append(ne_l_loss)
             y_p_u = y
 
             # EntropyLoss
@@ -529,8 +531,13 @@ class Experiment070_1(Experiment006):
         if self.entropy:
             entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
 
-        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
-    
+        # Negative Entropy Loss
+        ne_loss = 0
+        for lambda_, l0, l1 in zip(self.lambdas, ne_l_losses, ne_u_losses):
+            ne_loss += lambda_ * (l0 + l1)
+
+        return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss, ne_loss
+
 # Alias
 Experiment004 = Experiment
 Experiment020 = Experiment004
