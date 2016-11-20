@@ -246,6 +246,19 @@ class ReconstructionLoss(Chain):
         
         return self.loss
 
+class PseudoLabelLoss(Chain):
+
+    def __init__(self, test=False):
+        self.test = test
+
+
+    def __call__(self, y, t)
+        t_normalized = F.softmax(y)
+        log_softmax = F.log_softmax(y)
+        n = y.data.shape[0]
+
+        return F.sum(t_normalized * log_softmax) / N
+
 class EntropyLoss(Chain):
     def __init__(self, ):
         super(EntropyLoss, self).__init__()
