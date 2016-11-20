@@ -19,7 +19,7 @@ def main():
     n_train_data = 60000
 
     dims = [inp_dim, 250, 100, out_dim]
-    lambdas = [1., 1., 1.]
+    lambdas = [1., 1., 1., 1., 1., 1.]
     learning_rate = 1. * 1e-3
     n_epoch = 100
     decay = 0.5
