@@ -476,8 +476,8 @@ class Experiment070_1(Experiment070):
             supervised_losses.append(supervised_loss)
             
             if t > 1:  # Pseudo Supervision
-                pseudo_l_supervised_loss = self.pseudo_supervised_losses(y, y_l_p)
-            y_l_p = y
+                pseudo_l_supervised_loss = self.pseudo_supervised_losses(y, y_p_l)
+            y_p_l = y
             
             # Reconstruction for (x_l, )
             x_l_recon = self.mlp_dec(y)
@@ -504,8 +504,8 @@ class Experiment070_1(Experiment070):
             x_u_recon_t0 = x_u_recon
 
             if t > 1:  # Pseudo Supervision
-                pseudo_u_supervised_loss = self.pseudo_supervised_losses(y, y_u_p)
-            y_u_p = y
+                pseudo_u_supervised_loss = self.pseudo_supervised_losses(y, y_p_u)
+            y_p_u = y
 
             # EntropyLoss
             if self.entropy:
