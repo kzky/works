@@ -478,7 +478,7 @@ class Experiment070_1(Experiment006):
             supervised_losses.append(supervised_loss)
             
             if t > 1:  # Negative Entropy
-                ne_l_loss = self.ne_loss(y, y_p_l)
+                ne_l_loss = self.ne_loss(y)
                 ne_l_losses.append(ne_l_loss)
             y_p_l = y
             
