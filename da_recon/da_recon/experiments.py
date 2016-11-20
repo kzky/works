@@ -422,7 +422,7 @@ class Experiment007(Experiment):
 
         return supervised_loss, recon_loss_l, recon_loss_u, entropy_loss
 
-class Experiment070_1(Experiment070):
+class Experiment070_1(Experiment006):
     """Experiment takes responsibility for a batch not for train-loop.
     """
 
@@ -450,6 +450,8 @@ class Experiment070_1(Experiment070):
             test=test,
             entropy=entropy,)
 
+        self.pseudo_supervised_loss = self.model.peudo_supervised_loss
+
     def forward_for_losses(self, x_l, y_l, x_u):
         """
         Returns
@@ -476,7 +478,7 @@ class Experiment070_1(Experiment070):
             supervised_losses.append(supervised_loss)
             
             if t > 1:  # Pseudo Supervision
-                pseudo_l_supervised_loss = self.pseudo_supervised_losses(y, y_p_l)
+                pseudo_l_supervised_loss = self.pseudo_supervised_loss(y, y_p_l)
             y_p_l = y
             
             # Reconstruction for (x_l, )
@@ -504,7 +506,7 @@ class Experiment070_1(Experiment070):
             x_u_recon_t0 = x_u_recon
 
             if t > 1:  # Pseudo Supervision
-                pseudo_u_supervised_loss = self.pseudo_supervised_losses(y, y_p_u)
+                pseudo_u_supervised_loss = self.pseudo_supervised_loss(y, y_p_u)
             y_p_u = y
 
             # EntropyLoss

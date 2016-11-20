@@ -246,7 +246,7 @@ class ReconstructionLoss(Chain):
         
         return self.loss
 
-class PseudoLabelLoss(Chain):
+class PseudoSupervisedLoss(Chain):
     """Compute cross entropy between y_t and y_{t+1}.
     """
 
@@ -254,7 +254,7 @@ class PseudoLabelLoss(Chain):
         self.test = test
 
 
-    def __call__(self, y, t)
+    def __call__(self, y, t):
         t_normalized = F.softmax(y)
         log_softmax = F.log_softmax(y)
         n = y.data.shape[0]
@@ -302,6 +302,8 @@ class MLPEncDecModel(Chain):
         self.supervised_loss = SupervizedLoss()
         self.recon_loss = ReconstructionLoss()
         self.entropy_loss = EntropyLoss()
+
+        self.peudo_supervised_loss = PseudoSupervisedLoss()
 
         super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,
