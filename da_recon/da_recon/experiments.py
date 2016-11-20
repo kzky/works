@@ -594,7 +594,7 @@ class Experiment070_2(Experiment006):
             supervised_losses.append(supervised_loss)
             
             if t > 1:  # Pseudo Supervised Loss
-                pseudo_supervised_l_loss = self.pseudo_supervised_loss(y)
+                pseudo_supervised_l_loss = self.pseudo_supervised_loss(y, y_p_l)
                 pseudo_supervised_l_losses.append(pseudo_supervised_l_loss)
             y_p_l = y
             
@@ -623,7 +623,7 @@ class Experiment070_2(Experiment006):
             x_u_recon_t0 = x_u_recon
 
             if t > 1:  # Pseudo Supervised Loss
-                pseudo_supervised_u_loss = self.pseudo_supervised_loss(y)
+                pseudo_supervised_u_loss = self.pseudo_supervised_loss(y, y_p_u)
                 pseudo_supervised_u_losses.append(pseudo_supervised_l_loss)
             y_p_u = y
 
@@ -712,7 +712,7 @@ class Experiment070_3(Experiment006):
             supervised_losses.append(supervised_loss)
             
             if t > 1:  # KL Divergence Loss
-                kl_l_loss = self.kl_loss(y)
+                kl_l_loss = self.kl_loss(y, y_p_l)
                 kl_l_losses.append(kl_l_loss)
             y_p_l = y
             
@@ -741,7 +741,7 @@ class Experiment070_3(Experiment006):
             x_u_recon_t0 = x_u_recon
 
             if t > 1:  # KL Divergence Loss
-                kl_u_loss = self.kl_loss(y)
+                kl_u_loss = self.kl_loss(y, y_p_u)
                 kl_u_losses.append(kl_l_loss)
             y_p_u = y
 
@@ -829,7 +829,7 @@ class Experiment070_4(Experiment006):
                 supervised_losses.append(supervised_loss)
                 
             if t > 1:  # Pseudo Supervised Loss
-                pseudo_supervised_l_loss = self.pseudo_supervised_loss(y)
+                pseudo_supervised_l_loss = self.pseudo_supervised_loss(y, y_p_l)
                 pseudo_supervised_l_losses.append(pseudo_supervised_l_loss)
             y_p_l = y
             
@@ -858,7 +858,7 @@ class Experiment070_4(Experiment006):
             x_u_recon_t0 = x_u_recon
 
             if t > 1:  # Pseudo Supervised Loss
-                pseudo_supervised_u_loss = self.pseudo_supervised_loss(y)
+                pseudo_supervised_u_loss = self.pseudo_supervised_loss(y, y_p_u)
                 pseudo_supervised_u_losses.append(pseudo_supervised_l_loss)
             y_p_u = y
 
