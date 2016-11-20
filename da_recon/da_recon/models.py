@@ -247,6 +247,8 @@ class ReconstructionLoss(Chain):
         return self.loss
 
 class PseudoLabelLoss(Chain):
+    """Compute cross entropy between y_t and y_{t+1}.
+    """
 
     def __init__(self, test=False):
         self.test = test
@@ -257,7 +259,7 @@ class PseudoLabelLoss(Chain):
         log_softmax = F.log_softmax(y)
         n = y.data.shape[0]
 
-        return F.sum(t_normalized * log_softmax) / N
+        return - F.sum(t_normalized * log_softmax) / n
 
 class EntropyLoss(Chain):
     def __init__(self, ):
