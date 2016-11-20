@@ -800,7 +800,7 @@ class Experiment070_4(Experiment006):
             test=test,
             entropy=entropy,)
 
-        self.pseudo_supervised = self.model.pseudo_supervised
+        self.pseudo_supervised_loss = self.model.pseudo_supervised_loss
 
     def forward_for_losses(self, x_l, y_l, x_u):
         """
