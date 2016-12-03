@@ -220,14 +220,15 @@ class ReconstructionLoss(Chain):
 
         # Lateral Recon Loss
         recon_loss = 0
-        if self.rc:
+        if self.rc and enc_hiddens is not None:
             for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
                 d = np.prod(h0.data.shape[1:])
                 recon_loss += F.mean_squared_error(h0, h1) / d
 
         # Reconstruction Loss
-        d = np.prod(x.data.shape[1:])
-        recon_loss += F.mean_squared_error(x_recon, x) / d
+        if x_recon is not None:
+            d = np.prod(x.data.shape[1:])
+            recon_loss += F.mean_squared_error(x_recon, x) / d
 
         self.loss = recon_loss
         
