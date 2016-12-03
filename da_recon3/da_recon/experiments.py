@@ -13,6 +13,7 @@ class Experiment(object):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 rc=False,
                  lateral=False):
 
         # Settting
@@ -23,7 +24,7 @@ class Experiment(object):
         # Model
         self.model = MLPEncDecModel(
             dims=dims, act=act,
-            noise=noise, lateral=lateral,
+            noise=noise, rc=rc, lateral=lateral,
             device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
@@ -125,6 +126,7 @@ class Experiment070_3(Experiment):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 rc=False,
                  lateral=False):
         
         super(Experiment070_3, self).__init__(
@@ -134,6 +136,7 @@ class Experiment070_3(Experiment):
             dims=dims,
             act=act,
             noise=noise,
+            rc=rc,
             lateral=lateral)
 
         self.kl_loss = self.model.kl_loss
@@ -219,6 +222,7 @@ class Experiment000(Experiment):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
+                 rc=False,
                  lateral=False):
 
         super(Experiment000, self).__init__(
@@ -228,6 +232,7 @@ class Experiment000(Experiment):
             dims=dims,
             act=act,
             noise=noise,
+            rc=rc,
             lateral=lateral)
 
         self.pseudo_supervised_loss = self.model.pseudo_supervised_loss
@@ -307,4 +312,9 @@ class Experiment000(Experiment):
             pseudo_supervised_loss += lambda_ * (l0 + l1)
 
         return supervised_loss, recon_loss_l, recon_loss_u, pseudo_supervised_loss
+
+
+# Alias
+Experiment001 = Experiment000
+Experiment005 = Experiment000
 

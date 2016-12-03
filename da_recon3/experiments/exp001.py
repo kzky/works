@@ -1,4 +1,4 @@
-from da_recon.experiments import Experiment000
+from da_recon.experiments import Experiment001
 from da_recon.utils import to_device
 from da_recon.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -25,7 +25,7 @@ def main():
     decay = 0.5
     act = F.relu
     noise = False
-    rc = False
+    rc = True
     lateral = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
@@ -44,7 +44,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment000(
+    exp = Experiment001(
         device,
         learning_rate,
         lambdas,

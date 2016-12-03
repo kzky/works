@@ -20,6 +20,7 @@ class MLPEnc(Chain):
                      dims,
                      act=F.relu,
                      noise=False,
+                     rc=False,
                      lateral=False,
                      device=None):
 
@@ -50,6 +51,7 @@ class MLPEnc(Chain):
         self.batch_norms = batch_norms
         self.act = act
         self.noise = noise
+        self.rc = rc
         self.lateral = lateral
         self.device = device
         self.hiddens = []
@@ -63,7 +65,7 @@ class MLPEnc(Chain):
             linear, batch_norm = layers
 
             # Add noise
-            if self.noise and not self.lateral and not test:
+            if self.noise and not test:
                 if np.random.randint(0, 2):
                     n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
@@ -74,16 +76,13 @@ class MLPEnc(Chain):
 
             # Batchnorm
             h = batch_norm(h, test)
-            if self.noise and not test:
-                n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
-                n_ = Variable(to_device(n, self.device))
-                h = h + n_
-            
-            if self.lateral and i != len(self.dims) - 2:
-                self.hiddens.append(h)
 
             # Activation
             h = self.act(h)
+
+            # RC after non-linearity
+            if self.rc and i != len(self.dims) - 2:
+                self.hiddens.append(h)
 
         return h
 
@@ -111,6 +110,7 @@ class Denoise(Chain):
 class MLPDec(Chain):
 
     def __init__(self, dims, act=F.relu,
+                     rc=False,
                      lateral=False,
                      mlp_enc=None,
                      device=None):
@@ -150,6 +150,7 @@ class MLPDec(Chain):
         self.batch_norms = batch_norms
         self.denoises = denoises
         self.act = act
+        self.rc = rc
         self.lateral = lateral
         self.device = device
         self.hiddens = []
@@ -168,17 +169,20 @@ class MLPDec(Chain):
             # Batchnorm
             h = batch_norm(h, test)
 
-            # Activation
-            if not self.lateral:
+            # Activation, no need for non-linearity for RC of x
+            if not self.lateral != len(self.dims) - 2:
                 h = self.act(h)
 
             # Denoise
             if self.lateral and i != len(self.dims) - 2:
-                self.hiddens.append(h)
                 denoise = self.denoises.values()[i]
                 h_enc = self.mlp_enc.hiddens[::-1][i]
                 h = denoise(h_enc, h)
 
+            # RC after non-linearity
+            if self.rc and i != len(self.dims) - 2:
+                self.hiddens.append(h)
+                
         return h
             
 class SupervizedLoss(Chain):
@@ -195,10 +199,12 @@ class ReconstructionLoss(Chain):
 
     def __init__(self,
                      noise=False,
+                     rc=False,
                      lateral=False):
 
         super(ReconstructionLoss, self).__init__()
         self.noise = noise
+        self.rc = rc
         self.lateral = lateral
         self.loss = None
         
@@ -213,14 +219,17 @@ class ReconstructionLoss(Chain):
         """
 
         # Lateral Recon Loss
-        if self.lateral: #TODO: do something
-            pass
+        recon_loss = 0
+        if self.rc:
+            for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
+                d = np.prod(h0.data.shape[1:])
+                recon_loss += F.mean_squared_error(h0, h1) / d
 
         # Reconstruction Loss
         d = np.prod(x.data.shape[1:])
-        recon_loss = F.mean_squared_error(x_recon, x) / d
+        recon_loss += F.mean_squared_error(x_recon, x) / d
 
-        self.loss = recon_loss  #TODO: Loss add lateral recon loss
+        self.loss = recon_loss
         
         return self.loss
 
@@ -259,6 +268,7 @@ class MLPEncDecModel(Chain):
                      dims,
                      act=F.relu,
                      noise=False,
+                     rc=False,
                      lateral=False,
                      device=None):
         # Constrcut models
@@ -266,17 +276,20 @@ class MLPEncDecModel(Chain):
             dims=dims,
             act=act,
             noise=noise,
+            rc=rc,
             lateral=lateral,
             device=device)
         mlp_dec = MLPDec(
             dims=dims,
             act=act,
+            rc=rc,
             lateral=lateral,
             mlp_enc=mlp_enc,
             device=device)
         self.supervised_loss = SupervizedLoss()
-        self.recon_loss = ReconstructionLoss()
+        self.recon_loss = ReconstructionLoss(noise, rc, lateral)
         self.pseudo_supervised_loss = PseudoSupervisedLoss()
+        self.kl_loss = KLLoss()
 
         super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,
