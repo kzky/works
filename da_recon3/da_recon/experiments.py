@@ -95,7 +95,7 @@ class Experiment(object):
 
         return supervised_loss, recon_loss_l, recon_loss_u
 
-    def forward(self, x_l, y_l, x_u, test):
+    def forward(self, x_l, y_l, x_u, test=False):
         losses = self.forward_for_losses(x_l, y_l, x_u)
         return reduce(lambda x, y: x + y, losses)
 
@@ -219,8 +219,7 @@ class Experiment000(Experiment):
                  dims=[784, 250, 100, 10],
                  act=F.relu,
                  noise=False,
-                 lateral=False,
-                 test=False):
+                 lateral=False):
 
         super(Experiment000, self).__init__(
             device=device,
@@ -229,8 +228,7 @@ class Experiment000(Experiment):
             dims=dims,
             act=act,
             noise=noise,
-            lateral=lateral,
-            test=test)
+            lateral=lateral)
 
         self.pseudo_supervised_loss = self.model.pseudo_supervised_loss
 

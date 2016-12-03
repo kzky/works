@@ -63,7 +63,7 @@ class MLPEnc(Chain):
             linear, batch_norm = layers
 
             # Add noise
-            if self.noise and not self.bn and not self.lateral and not test:
+            if self.noise and not self.lateral and not test:
                 if np.random.randint(0, 2):
                     n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
                     n_ = Variable(to_device(n, self.device))
@@ -140,7 +140,7 @@ class MLPDec(Chain):
                 denoises[dn_name] = Denoise(d_in)
                                 
         layers.update(linears)
-        layers.update(batch_norms) if bn else None
+        layers.update(batch_norms)
         layers.update(denoises) if lateral else None
         
         super(MLPDec, self).__init__(**layers)
@@ -166,8 +166,7 @@ class MLPDec(Chain):
             h = linear(h)
 
             # Batchnorm
-            if self.bn or self.lateral:
-                h = batch_norm(h, test)
+            h = batch_norm(h, test)
 
             # Activation
             if not self.lateral:
@@ -230,6 +229,7 @@ class PseudoSupervisedLoss(Chain):
     """
 
     def __init__(self, ):
+        pass
 
     def __call__(self, y, t):
         t_normalized = F.softmax(t)
@@ -243,7 +243,8 @@ class KLLoss(Chain):
     """
 
     def __init__(self, ):
-
+        pass
+        
     def __call__(self, y, t):
         t_normalized = F.softmax(t)
         t_log_softmax = F.log_softmax(t)
