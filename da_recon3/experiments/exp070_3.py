@@ -25,9 +25,7 @@ def main():
     decay = 0.5
     act = F.relu
     noise = False
-    bn = True
     lateral = False
-    test = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -52,9 +50,7 @@ def main():
         dims,
         act,
         noise,
-        bn,
-        lateral,
-        test)
+        lateral)
 
     # Training loop
     print("# Training loop")
@@ -75,9 +71,8 @@ def main():
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
-            exp.test(x_l, y_l)
-
-            acc, sloss, rloss = exp.test(x_l, y_l)
+            
+            acc, sloss, rloss = exp.test(x_l, y_l, True)
             msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{},ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
             print(msg)
             

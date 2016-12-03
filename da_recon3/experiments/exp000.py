@@ -1,4 +1,4 @@
-from da_recon.experiments import Experiment070_2
+from da_recon.experiments import Experiment000
 from da_recon.utils import to_device
 from da_recon.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -25,9 +25,7 @@ def main():
     decay = 0.5
     act = F.relu
     noise = False
-    bn = True
     lateral = False
-    test = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -45,16 +43,14 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment070_2(
+    exp = Experiment000(
         device,
         learning_rate,
         lambdas,
         dims,
         act,
         noise,
-        bn,
-        lateral,
-        test)
+        lateral)
 
     # Training loop
     print("# Training loop")
@@ -75,9 +71,8 @@ def main():
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
-            exp.test(x_l, y_l)
 
-            acc, sloss, rloss = exp.test(x_l, y_l)
+            acc, sloss, rloss = exp.test(x_l, y_l, True)
             msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{},ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
             print(msg)
             
