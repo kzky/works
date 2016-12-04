@@ -23,14 +23,10 @@ class MLPGenerator(Chain):
             linear2=L.Linear(750, 500),
             linear3=L.Linear(1000, 750),
             linear4=L.Linear(784, 1000),
-            bn0=L.BatchNormalization(250, use_gamma=False, use_beta=False),
-            bn1=L.BatchNormalization(500, use_gamma=False, use_beta=False),
-            bn2=L.BatchNormalization(750, use_gamma=False, use_beta=False),
-            bn3=L.BatchNormalization(1000, use_gamma=False, use_beta=False),
-            sb0=L.Scale(W_shape=250, bias_term=True),
-            sb1=L.Scale(W_shape=500, bias_term=True),
-            sb2=L.Scale(W_shape=750, bias_term=True),
-            sb3=L.Scale(W_shape=1000, bias_term=True),
+            bn0=L.BatchNormalization(250), 
+            bn1=L.BatchNormalization(500), 
+            bn2=L.BatchNormalization(750), 
+            bn3=L.BatchNormalization(1000)
             )
 
         self.act = act
@@ -52,25 +48,21 @@ class MLPGenerator(Chain):
         h = self.linear0(h)
         h = self.bn0(h)
         h = h + self.gerate(h)
-        h = self.sb0(h)
         h = self.act(h)
 
         h = self.linear1(h)
         h = self.bn1(h)
         h = h + self.gerate(h)
-        h = self.sb1(h)
         h = self.act(h)
 
         h = self.linear2(h)
         h = self.bn2(h)
         h = h + self.gerate(h)
-        h = self.sb2(h)
         h = self.act(h)
 
         h = self.linear3(h)
         h = self.bn3(h)
         h = h + self.gerate(h)
-        h = self.sb3(h)
         h = self.act(h)
 
         h = self.linear4(h)
@@ -87,14 +79,10 @@ class MLPEncoder(Chain):
             linear2=L.Linear(750, 500),
             linear3=L.Linear(500, 250),
             linear4=L.Linear(250, 20),  # bottleneck
-            bn0=L.BatchNormalization(1000, use_gamma=False, use_beta=False),
-            bn1=L.BatchNormalization(750, use_gamma=False, use_beta=False),
-            bn2=L.BatchNormalization(500, use_gamma=False, use_beta=False),
-            bn3=L.BatchNormalization(250, use_gamma=False, use_beta=False),
-            sb0=L.Scale(W_shape=1000, bias_term=True),
-            sb1=L.Scale(W_shape=750, bias_term=True),
-            sb2=L.Scale(W_shape=500, bias_term=True),
-            sb3=L.Scale(W_shape=250, bias_term=True),
+            bn0=L.BatchNormalization(1000),
+            bn1=L.BatchNormalization(750),
+            bn2=L.BatchNormalization(500), 
+            bn3=L.BatchNormalization(250), 
             )
 
         self.act = act
@@ -106,22 +94,18 @@ class MLPEncoder(Chain):
     def __call__(x, ):
         h = self.linear0(h)
         h = self.bn0(h)
-        h = self.sb0(h)
         h = self.act(h)
 
         h = self.linear1(h)
         h = self.bn1(h)
-        h = self.sb1(h)
         h = self.act(h)
 
         h = self.linear2(h)
         h = self.bn2(h)
-        h = self.sb2(h)
         h = self.act(h)
 
         h = self.linear3(h)
         h = self.bn3(h)
-        h = self.sb3(h)
         h = self.act(h)
 
         h = self.linear4(h)
@@ -138,14 +122,10 @@ class MLPDecoder(Chain):
             linear2=L.Linear(750, 500),
             linear3=L.Linear(1000, 750),
             linear4=L.Linear(784, 1000),
-            bn0=L.BatchNormalization(250, use_gamma=False, use_beta=False),
-            bn1=L.BatchNormalization(500, use_gamma=False, use_beta=False),
-            bn2=L.BatchNormalization(750, use_gamma=False, use_beta=False),
-            bn3=L.BatchNormalization(1000, use_gamma=False, use_beta=False),
-            sb0=L.Scale(W_shape=250, bias_term=True),
-            sb1=L.Scale(W_shape=500, bias_term=True),
-            sb2=L.Scale(W_shape=750, bias_term=True),
-            sb3=L.Scale(W_shape=1000, bias_term=True),
+            bn0=L.BatchNormalization(250),
+            bn1=L.BatchNormalization(500),
+            bn2=L.BatchNormalization(750),
+            bn3=L.BatchNormalization(1000)
             )
 
         self.act = act
@@ -162,22 +142,18 @@ class MLPDecoder(Chain):
         """
         h = self.linear0(h)
         h = self.bn0(h)
-        h = self.sb0(h)
         h = self.act(h)
 
         h = self.linear1(h)
         h = self.bn1(h)
-        h = self.sb1(h)
         h = self.act(h)
 
         h = self.linear2(h)
         h = self.bn2(h)
-        h = self.sb2(h)
         h = self.act(h)
 
         h = self.linear3(h)
         h = self.bn3(h)
-        h = self.sb3(h)
         h = self.act(h)
 
         h = self.linear4(h)
@@ -186,7 +162,7 @@ class MLPDecoder(Chain):
     def set_encoder(self, encoder):
         self.encoder = encoder
 
-class ReconLoss(Chain):
+class ReconstructionLoss(Chain):
 
     def __init__(self, ):
         pass
