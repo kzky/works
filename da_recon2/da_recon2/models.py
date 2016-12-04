@@ -20,7 +20,7 @@ class MLPBranch(Chain):
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
     def __init__(self, dim, act=F.relu, sigma=0.03):
-        super(MLPGenerator, self).__init__(
+        super(MLPBranch, self).__init__(
             linear0=L.Linear(110, dim/2),   # 100 random seeeds and labels
             linear1=L.Linear(dim/2, dim),
             bn0=L.BatchNormalization(2*dim), 
@@ -77,8 +77,9 @@ class MLPGenerator(Chain):
             
     def __call__(bs, dim=100, y=None, test=False):
         self.hiddens = []
-        # Linear/BatchNorm/Branch/Nonlinear
         z = generate(bs, dim)        
+
+        # Linear/BatchNorm/Branch/Nonlinear
         h = self.linear0(z)
         h = self.bn0(h, test)
         z = self.generate(bs, dim)
@@ -124,7 +125,8 @@ class MLPEncoder(Chain):
             linear1=L.Linear(1000, 750),
             linear2=L.Linear(750, 500),
             linear3=L.Linear(500, 250),
-            linear4=L.Linear(250, 100),  # bottleneck
+            linear_mu=L.Linear(250, 100),
+            linear_sigma=L.Linear(250, 100),
             bn0=L.BatchNormalization(1000),
             bn1=L.BatchNormalization(750),
             bn2=L.BatchNormalization(500), 
@@ -133,9 +135,18 @@ class MLPEncoder(Chain):
 
         self.act = act
         self.device = device
-        self.generator = None
         self.hiddens = []
+        self.mu = None
+        self.log_sigma_2 = None
+        self.sigma_2 = None
 
+    def generate(self, h):
+        bs, dim = h.shape
+        if self.device:
+            return cp.random.randn(bs, dim)
+        else:
+            return np.random.randn(bs, dim)
+        
     def __call__(x, test=False):
         self.hiddens = []
 
@@ -160,20 +171,24 @@ class MLPEncoder(Chain):
         h = self.act(h)
         self.hiddens.append(h)
 
-        h = self.linear4(h)
-        return h
+        # Variational
+        self.mu = self.linear_mu(h)
+        self.log_sigma_2 = self.linear_sigma(h)
+        self.sigma_2 = F.exp(self.log_sigma_2)
+        sigma = F.sqrt(self.sigma_2)
+        r = self.generate(mu)
+        z = self.mu + self.sigma * r
         
-    def set_generator(self, generator):
-        self.generator = generator
+        return h
 
 class MLPDecoder(Chain):
     def __init__(self, act=F.relu, device=None):
         super(MLPDecoder, self).__init__(
-            linear0=L.Linear(250, 100),
-            linear1=L.Linear(500, 250),
-            linear2=L.Linear(750, 500),
-            linear3=L.Linear(1000, 750),
-            linear4=L.Linear(784, 1000),
+            linear0=L.Linear(100, 250),
+            linear1=L.Linear(250, 500),
+            linear2=L.Linear(500, 750),
+            linear3=L.Linear(750, 1000),
+            linear4=L.Linear(1000, 784),
             bn0=L.BatchNormalization(250),
             bn1=L.BatchNormalization(500),
             bn2=L.BatchNormalization(750),
@@ -219,7 +234,6 @@ class MLPDecoder(Chain):
         return h
 
 class ReconstructionLoss(Chain):
-
     def __init__(self, ):
         self.loss = None
 
@@ -232,14 +246,14 @@ class ReconstructionLoss(Chain):
         enc_hiddens: list of Variable
         dec_hiddens: list of Varialbe
         """
-        # Lateral Recon Loss
+        # Recon Loss for Feature
         recon_loss = 0
-        if self.rc and enc_hiddens is not None:
+        if enc_hiddens is not None:
             for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
                 d = np.prod(h0.data.shape[1:])
                 recon_loss += F.mean_squared_error(h0, h1) / d
 
-        # Reconstruction Loss
+        # Reconstruction Loss for Sample 
         if x_recon is not None:
             d = np.prod(x.data.shape[1:])
             recon_loss += F.mean_squared_error(x_recon, x) / d
@@ -247,4 +261,26 @@ class ReconstructionLoss(Chain):
         self.loss = recon_loss
         
         return self.loss
+
+class VariationalLoss(Chain):
+    def __init__(self, ):
+        self.loss = None
+
+    def __call__(self, mu, sigma_2, log_sigma_2):
+        bs = mu.shape[0]
+        return F.sum(1 + log_sigma_2 - mu**2 - sigma_2) / 2 / bs  # Explicit KL form
+        
+class MLPModel(Chain):
+    def __init__(self, act=F.relu, sigma=0.03, device=None):
+        super(MLPModel, self).__init__(
+            mlp_gen = MLPGenerator(act, sigma, device)
+            mlp_enc = MLPEncoder(act, device)
+            mlp_dec = MLPDecoder(act, device)
+        )
+
+        self.recon_loss = ReconstructionLoss()
+        self.variational_loss = VariationalLoss()
+
+    def __call__(x, test=False):
+        pass
         
