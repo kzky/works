@@ -15,8 +15,9 @@ import logging
 import time
 from utils import to_device
 
+
 class MLPGenerator(Chain):
-    def __init__(self, act=F.relu, sigma=0.03, test=False, device=None):
+    def __init__(self, act=F.relu, sigma=0.03, device=None):
         super(MLPGenerator, self).__init__(
             linear0=L.Linear(250, 20),  
             linear1=L.Linear(500, 250),
@@ -31,7 +32,6 @@ class MLPGenerator(Chain):
 
         self.act = act
         self.sigma = sigma
-        self.test = test
         self.device = device
 
         self.hiddens = []
@@ -43,25 +43,25 @@ class MLPGenerator(Chain):
         else:
             return cp.random.randn(shape)
 
-    def __call__(y, z):
+    def __call__(y, z, test=False):
         h = F.vstack([y, z])
         h = self.linear0(h)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = h + self.gerate(h)
         h = self.act(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = h + self.gerate(h)
         h = self.act(h)
 
         h = self.linear2(h)
-        h = self.bn2(h)
+        h = self.bn2(h, test)
         h = h + self.gerate(h)
         h = self.act(h)
 
         h = self.linear3(h)
-        h = self.bn3(h)
+        h = self.bn3(h, test)
         h = h + self.gerate(h)
         h = self.act(h)
 
@@ -72,7 +72,7 @@ class MLPEncoder(Chain):
     """Ladder-like architecture.
     """
     
-    def __init__(self, act=F.relu, test=False, device=None):
+    def __init__(self, act=F.relu, device=None):
         super(MLPEncoder, self).__init__(
             linear0=L.Linear(784, 1000),
             linear1=L.Linear(1000, 750),
@@ -86,26 +86,25 @@ class MLPEncoder(Chain):
             )
 
         self.act = act
-        self.test = test
         self.device = device
         self.generator = None
         self.hiddens = []
 
-    def __call__(x, ):
+    def __call__(x, test=False):
         h = self.linear0(h)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
 
         h = self.linear2(h)
-        h = self.bn2(h)
+        h = self.bn2(h, test)
         h = self.act(h)
 
         h = self.linear3(h)
-        h = self.bn3(h)
+        h = self.bn3(h, test)
         h = self.act(h)
 
         h = self.linear4(h)
@@ -115,7 +114,7 @@ class MLPEncoder(Chain):
         self.generator = generator
 
 class MLPDecoder(Chain):
-    def __init__(self, act=F.relu, test=False, device=None):
+    def __init__(self, act=F.relu, device=None):
         super(MLPDecoder, self).__init__(
             linear0=L.Linear(250, 20),  
             linear1=L.Linear(500, 250),
@@ -129,11 +128,10 @@ class MLPDecoder(Chain):
             )
 
         self.act = act
-        self.test = test
         self.device = device
         self.encoder = None
     
-    def __call__(h):
+    def __call__(h, test=False):
         """
         Parameters
         -----------------
@@ -141,19 +139,19 @@ class MLPDecoder(Chain):
             Shape of h is the same as that of (y; z), which is the input for Genrator.
         """
         h = self.linear0(h)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
 
         h = self.linear2(h)
-        h = self.bn2(h)
+        h = self.bn2(h, test)
         h = self.act(h)
 
         h = self.linear3(h)
-        h = self.bn3(h)
+        h = self.bn3(h, test)
         h = self.act(h)
 
         h = self.linear4(h)
@@ -165,7 +163,30 @@ class MLPDecoder(Chain):
 class ReconstructionLoss(Chain):
 
     def __init__(self, ):
-        pass
+        self.loss = None
 
-    def __call__(self, ):
-        pass
+    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
+        """
+        Parameters
+        -----------------
+        x_recon: Variable to be reconstructed as label
+        x: Variable to be reconstructed as label
+        enc_hiddens: list of Variable
+        dec_hiddens: list of Varialbe
+        """
+        # Lateral Recon Loss
+        recon_loss = 0
+        if self.rc and enc_hiddens is not None:
+            for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
+                d = np.prod(h0.data.shape[1:])
+                recon_loss += F.mean_squared_error(h0, h1) / d
+
+        # Reconstruction Loss
+        if x_recon is not None:
+            d = np.prod(x.data.shape[1:])
+            recon_loss += F.mean_squared_error(x_recon, x) / d
+
+        self.loss = recon_loss
+        
+        return self.loss
+        
