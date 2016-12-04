@@ -430,6 +430,10 @@ class Experiment017(Experiment):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
 
+        kl_loss = 0
+        for lambda_, l0, l1 in zip(self.lambdas, kl_l_losses, kl_u_losses):
+            kl_loss += lambda_ * (l0 + l1)
+            
         return supervised_loss, recon_loss_l, recon_loss_u, kl_loss
 
 class Experiment019(Experiment):
@@ -542,6 +546,10 @@ class Experiment019(Experiment):
                                        recon_u_losses):
             recon_loss_l += lambda_ * l0
             recon_loss_u += lambda_ * l1
+
+        kl_loss = 0
+        for lambda_, l0, l1 in zip(self.lambdas, kl_l_losses, kl_u_losses):
+            kl_loss += lambda_ * (l0 + l1)
 
         return supervised_loss, recon_loss_l, recon_loss_u, kl_loss
 
