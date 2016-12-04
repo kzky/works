@@ -13,6 +13,7 @@ from collections import OrderedDict
 import logging
 import time
 from utils import to_device
+import os
 
 class MNISTDataReader(object):
     """DataReader

@@ -29,10 +29,13 @@ def main():
     n_epoch = 100
     decay = 0.5
     act = F.relu
+    sigma = 0.3
+    ncls = n_cls
     dim = 100
     noise = False
     rc_feet = "Gen-Enc"
     rc_sample = "Gen-Enc"
+    gan_loss = "No"
     
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
@@ -55,10 +58,13 @@ def main():
         device,
         learning_rate,
         act,
+        sigma,
+        n_cls,
         dim,
         noise,
-        rc,
-        lateral)
+        rc_feet,
+        rc_sample,
+        gan_loss)
 
     # Training loop
     print("# Training loop")
@@ -71,7 +77,7 @@ def main():
         # Get data
         x_l_, y_l_ = data_reader.get_l_train_batch()
         x_l = Variable(to_device(x_l_, device))
-        y_l = Variable(to_device(to_onehot(y_l_), device))
+        y_l = Variable(to_device(to_onehot(y_l_, ncls), device))
         x_u, _ = [Variable(to_device(x, device)) \
                       for x in data_reader.get_u_train_batch()]
 
@@ -79,17 +85,18 @@ def main():
         exp.train(x_l, y_l, x_u)
         
         # Eval
-        if (i+1) % iter_epoch == 0:
+        if (i) % iter_epoch == 0:
+            bs = 16
             # Generate
             ## for unlabel
-            x_gen_u = exp.generate(20, dim, y=None, test=True)
-            x_u = to_device(x_gen.data, None)
+            x_u_ = exp.generate(20, dim)
+            x_u = to_device(x_u_.data, None)
 
             ## for label
             y_ = np.random.choice(n_cls, 20)
-            y = to_onehot(y_)
-            x_gen_l = exp.generate(16, dim, y, test=True)
-            x_l = to_device(x_gen.data, None)
+            y = to_onehot(y_, ncls)
+            x_l_ = exp.generate(bs, dim)
+            x_l = to_device(x_l_.data, None)
             
             # Save images
             dpath1 = os.path.join(dpath0, "{:05d}".format(epoch))
@@ -101,7 +108,8 @@ def main():
                 fpath = os.path.join(dpath1, "{:05}_l.png".format(i))
                 cv2.imwrite(fpath, img)
                 
-            # Save
+            # Save model
+            fpath = os.path.join(dpath0, "DARECON_{:05d}.model".format(epoch))
             serializers.save_hdf5(fpath, exp.model)
             
             st = time.time()

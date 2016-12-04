@@ -19,25 +19,28 @@ class MLPBranch(Chain):
     """MLP Branch
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
-    def __init__(self, dim, act=F.relu, sigma=0.03, device=None):
+    def __init__(self, dim, ncls, act=F.relu, sigma=0.03, device=None):
         super(MLPBranch, self).__init__(
             linear0=L.Linear(110, dim/2),   # 100 random seeeds and labels
             linear1=L.Linear(dim/2, dim),
             bn0=L.BatchNormalization(dim/2), 
             bn1=L.BatchNormalization(dim), 
         )
+        self.dim = dim
+        self.ncls = ncls
         self.act = act
-        self.sigma = sigma
+        self.sigma = cuda.to_gpu(sigma, device)
         self.device = device
 
-    def concat(self, z, y=None, dim=10):
+    def concat(self, z, y=None, ncls=10):
         bs = z.shape[0]
         if y is None:
             if self.device:
-                y = cp.zeros((bs, dim))
+                y_ = cuda.to_gpu(cp.zeros((bs, ncls)).astype(cp.float32), self.device)
+                y = Variable(y_)
             else:
-                y = np.zeros((bs, dim)).astype(np.float32)
-        return F.concat((z, y))
+                y = np.zeros((bs, ncls)).astype(np.float32)
+        return F.concat((z, y), axis=1)
 
     def __call__(self, z, y=None, test=False):
         z = self.concat(z, y)
@@ -48,10 +51,12 @@ class MLPBranch(Chain):
 
         h = self.linear1(h)
         h = self.bn1(h)
+
+        
         return h
 
 class MLPGenerator(Chain):
-    def __init__(self, act=F.relu, sigma=0.03, device=None):
+    def __init__(self, ncls=10, act=F.relu, sigma=0.03, device=None):
         super(MLPGenerator, self).__init__(
             linear0=L.Linear(100, 250),  
             linear1=L.Linear(250, 500),
@@ -62,12 +67,12 @@ class MLPGenerator(Chain):
             bn1=L.BatchNormalization(500), 
             bn2=L.BatchNormalization(750), 
             bn3=L.BatchNormalization(1000),
-            branch0=MLPBranch(250, act, sigma, device),
-            branch1=MLPBranch(500, act, sigma, device),
-            branch2=MLPBranch(750, act, sigma, device),
-            branch3=MLPBranch(1000, act, sigma, device),
+            branch0=MLPBranch(250, ncls, act, sigma, device),
+            branch1=MLPBranch(500, ncls, act, sigma, device),
+            branch2=MLPBranch(750, ncls, act, sigma, device),
+            branch3=MLPBranch(1000, ncls, act, sigma, device),
             )
-
+        self.ncls = ncls
         self.act = act
         self.sigma = sigma
         self.device = device
@@ -75,13 +80,14 @@ class MLPGenerator(Chain):
 
     def generate(self, bs, dim=100):
         if self.device:
-            return cp.random.randn(bs, dim) * self.sigma
+            r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
+            return r * self.sigma
         else:
-            return np.random.randn(bs, dim).astype(np.float32) * self.sigma
+            return Variable(np.random.randn(bs, dim).astype(np.float32)) * self.sigma
             
     def __call__(self, bs, dim=100, y=None, test=False):
         self.hiddens = []
-        z = self.generate(bs, dim)        
+        z = self.generate(bs, dim)
 
         # Linear/BatchNorm/Branch/Nonlinear
         h = self.linear0(z)
@@ -143,14 +149,15 @@ class MLPEncoder(Chain):
         self.mu = None
         self.log_sigma_2 = None
         self.sigma_2 = None
-        self._sigma = sigma
+        self._sigma = cuda.to_gpu(sigma, device)
 
     def generate(self, h):
         bs, dim = h.shape
         if self.device:
-            return cp.random.randn(bs, dim) * self._sigma
+            r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
+            return r * self._sigma
         else:
-            return np.random.randn(bs, dim).astype(np.float32) * self._sigma
+            return Variable(np.random.randn(bs, dim).astype(np.float32)) * self._sigma
         
     def __call__(self, x, test=False):
         self.hiddens = []
@@ -184,7 +191,7 @@ class MLPEncoder(Chain):
         r = self.generate(self.mu)
         z = self.mu + sigma * r
         
-        return h
+        return z
 
 class MLPDecoder(Chain):
     def __init__(self, act=F.relu, device=None):
@@ -276,9 +283,9 @@ class VariationalLoss(Chain):
         return F.sum(1 + log_sigma_2 - mu**2 - sigma_2) / 2 / bs  # Explicit KL form
         
 class MLPModel(Chain):
-    def __init__(self, act=F.relu, sigma=0.03, device=None):
+    def __init__(self, ncls=10, act=F.relu, sigma=0.03, device=None):
         super(MLPModel, self).__init__(
-            mlp_gen = MLPGenerator(act, sigma, device),
+            mlp_gen = MLPGenerator(ncls, act, sigma, device),
             mlp_enc = MLPEncoder(act, sigma, device),
             mlp_dec = MLPDecoder(act, device)
         )

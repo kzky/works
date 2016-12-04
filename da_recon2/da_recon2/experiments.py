@@ -1,5 +1,7 @@
 """Experiments
 """
+from da_recon2.models import MLPModel
+
 import numpy as np
 import chainer
 import chainer.variable as variable
@@ -20,9 +22,10 @@ class Experiment(object):
     """
     def __init__(self,
                  device=None,
-                 learning_rate=1. * 1e-2
+                 learning_rate=1. * 1e-2,
                  act=F.relu,
                  sigma=0.3,
+                 ncls=10,
                  dim=100,
                  noise=False,
                  rc_feet="Gen-Enc",
@@ -30,6 +33,7 @@ class Experiment(object):
                  gan_loss="Gen-Enc"):
 
         # Setting
+        self.device = device
         self.act = act
         self.sigma = sigma
         self.dim = dim
@@ -39,7 +43,7 @@ class Experiment(object):
         self.gan_loss = gan_loss
 
         # Model
-        self.model = MLPModel(act=act, sigma=sigm, devcie=device)
+        self.model = MLPModel(ncls, act=act, sigma=sigma, device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_gen = self.model.mlp_gen
         self.mlp_dec = self.model.mlp_dec
@@ -64,7 +68,7 @@ class Experiment(object):
         x_gen = self.mlp_gen(bs, self.dim, y, test)
 
         # Loss
-        l = self.forward_for_loss(x_recon, x_gen):
+        l = self.forward_for_loss(x, x_recon, x_gen)
 
         return l
 
@@ -72,19 +76,20 @@ class Experiment(object):
         self.optimizer.update()
         
     def train(self, x_l, y_l, x_u, y_u=None, test=False):
-        loss_l = self.foward(x_l, y_l test=False)
-        loss_u = self.foward(x_u, y_u, test=False)
+        loss_l = self.forward(x_l, y_l, test=False)
+        loss_u = self.forward(x_u, y_u, test=False)
         loss = loss_l + loss_u
         loss.backward()
         self.update()
 
-    def generate(self, bs):
+    def generate(self, bs, dim):
         return self.mlp_gen(bs, dim, y=None, test=True)
         
 
-    def forward_for_loss(x, x_recon, x_gen):
+    def forward_for_loss(self, x, x_recon, x_gen):
         # Variational Loss
-        v_loss = self.variational_loss(self.mlp_enc.sigma_2, self.mlp_enc.log_sigma_2)
+        v_loss = self.variational_loss(self.mlp_enc.mu,
+                                       self.mlp_enc.sigma_2, self.mlp_enc.log_sigma_2)
 
         # Recon Loss for sample
         recon_loss = \
