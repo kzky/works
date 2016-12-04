@@ -765,7 +765,7 @@ class Experiment070_3(Experiment006):
         if self.entropy:
             entropy_loss = reduce(lambda x, y: x + y, entropy_losses)
 
-        # Negative Entropy Loss
+        # KL loss
         kl_loss = 0
         for lambda_, l0, l1 in zip(self.lambdas, kl_l_losses, kl_u_losses):
             kl_loss += lambda_ * (l0 + l1)
