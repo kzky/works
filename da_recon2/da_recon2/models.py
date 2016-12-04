@@ -19,31 +19,35 @@ class MLPBranch(Chain):
     """MLP Branch
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
-    def __init__(self, dim, act=F.relu, sigma=0.03):
+    def __init__(self, dim, act=F.relu, sigma=0.03, device=None):
         super(MLPBranch, self).__init__(
             linear0=L.Linear(110, dim/2),   # 100 random seeeds and labels
             linear1=L.Linear(dim/2, dim),
-            bn0=L.BatchNormalization(2*dim), 
+            bn0=L.BatchNormalization(dim/2), 
             bn1=L.BatchNormalization(dim), 
         )
+        self.act = act
+        self.sigma = sigma
+        self.device = device
 
-    def concate(z, y=None, dim=10):
+    def concat(self, z, y=None, dim=10):
         bs = z.shape[0]
         if y is None:
             if self.device:
                 y = cp.zeros((bs, dim))
             else:
-                y = np.zeros((bs, dim))
-        return F.concate(z, y)
+                y = np.zeros((bs, dim)).astype(np.float32)
+        return F.concat((z, y))
 
-    def __call__(z, y=None, test=False):
-        z = self.concate(z, y)
+    def __call__(self, z, y=None, test=False):
+        z = self.concat(z, y)
+
         h = self.linear0(z)
         h = self.bn0(h)
         h = self.act(h)
 
-        h = self.linear0(z)
-        h = self.bn0(h)
+        h = self.linear1(h)
+        h = self.bn1(h)
         return h
 
 class MLPGenerator(Chain):
@@ -58,10 +62,10 @@ class MLPGenerator(Chain):
             bn1=L.BatchNormalization(500), 
             bn2=L.BatchNormalization(750), 
             bn3=L.BatchNormalization(1000),
-            branch0=MLPBranch(250),
-            branch1=MLPBranch(500),
-            branch2=MLPBranch(750),
-            branch3=MLPBranch(1000),
+            branch0=MLPBranch(250, act, sigma, device),
+            branch1=MLPBranch(500, act, sigma, device),
+            branch2=MLPBranch(750, act, sigma, device),
+            branch3=MLPBranch(1000, act, sigma, device),
             )
 
         self.act = act
@@ -71,13 +75,13 @@ class MLPGenerator(Chain):
 
     def generate(self, bs, dim=100):
         if self.device:
-            return cp.random.randn(bs, dim)
+            return cp.random.randn(bs, dim) * self.sigma
         else:
-            return np.random.randn(bs, dim)
+            return np.random.randn(bs, dim).astype(np.float32) * self.sigma
             
-    def __call__(bs, dim=100, y=None, test=False):
+    def __call__(self, bs, dim=100, y=None, test=False):
         self.hiddens = []
-        z = generate(bs, dim)        
+        z = self.generate(bs, dim)        
 
         # Linear/BatchNorm/Branch/Nonlinear
         h = self.linear0(z)
@@ -119,7 +123,7 @@ class MLPEncoder(Chain):
     """Ladder-like architecture.
     """
     
-    def __init__(self, act=F.relu, device=None):
+    def __init__(self, act=F.relu, sigma=0.3, device=None):
         super(MLPEncoder, self).__init__(
             linear0=L.Linear(784, 1000),
             linear1=L.Linear(1000, 750),
@@ -139,19 +143,20 @@ class MLPEncoder(Chain):
         self.mu = None
         self.log_sigma_2 = None
         self.sigma_2 = None
+        self._sigma = sigma
 
     def generate(self, h):
         bs, dim = h.shape
         if self.device:
-            return cp.random.randn(bs, dim)
+            return cp.random.randn(bs, dim) * self._sigma
         else:
-            return np.random.randn(bs, dim)
+            return np.random.randn(bs, dim).astype(np.float32) * self._sigma
         
-    def __call__(x, test=False):
+    def __call__(self, x, test=False):
         self.hiddens = []
 
         # Linear/BatchNorm/Branch/Nonlinear
-        h = self.linear0(h)
+        h = self.linear0(x)
         h = self.bn0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
@@ -168,16 +173,16 @@ class MLPEncoder(Chain):
 
         h = self.linear3(h)
         h = self.bn3(h, test)
-        h = self.act(h)
+        h = self.act(h)  #TODO: should use tanh?
         self.hiddens.append(h)
 
         # Variational
         self.mu = self.linear_mu(h)
         self.log_sigma_2 = self.linear_sigma(h)
-        self.sigma_2 = F.exp(self.log_sigma_2)
+        self.sigma_2 = F.exp(self.log_sigma_2)  #TODO: consider nan problem
         sigma = F.sqrt(self.sigma_2)
-        r = self.generate(mu)
-        z = self.mu + self.sigma * r
+        r = self.generate(self.mu)
+        z = self.mu + sigma * r
         
         return h
 
@@ -200,7 +205,7 @@ class MLPDecoder(Chain):
         self.encoder = None
         self.hiddens = []
     
-    def __call__(h, test=False):
+    def __call__(self, h, test=False):
         """
         Parameters
         -----------------
@@ -273,14 +278,14 @@ class VariationalLoss(Chain):
 class MLPModel(Chain):
     def __init__(self, act=F.relu, sigma=0.03, device=None):
         super(MLPModel, self).__init__(
-            mlp_gen = MLPGenerator(act, sigma, device)
-            mlp_enc = MLPEncoder(act, device)
+            mlp_gen = MLPGenerator(act, sigma, device),
+            mlp_enc = MLPEncoder(act, sigma, device),
             mlp_dec = MLPDecoder(act, device)
         )
 
         self.recon_loss = ReconstructionLoss()
         self.variational_loss = VariationalLoss()
 
-    def __call__(x, test=False):
+    def __call__(self, x, test=False):
         pass
         
