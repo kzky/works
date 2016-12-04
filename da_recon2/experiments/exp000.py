@@ -85,7 +85,7 @@ def main():
         exp.train(x_l, y_l, x_u)
         
         # Eval
-        if (i) % iter_epoch == 0:
+        if (i + 1) % iter_epoch == 0:
             bs = 16
             # Generate
             ## for unlabel
