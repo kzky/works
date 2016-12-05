@@ -108,7 +108,7 @@ def main():
             x_u_ = exp.generate(20, dim)
             x_u = (to_device(x_u_.data, None) * 255.)\
                 .astype(np.int32)\
-                .reshape(128, 28, 28)
+                .reshape(bs, 28, 28)
 
             ## for label
             y_ = np.random.choice(n_cls, 20)
@@ -116,7 +116,7 @@ def main():
             x_l_ = exp.generate(bs, dim)
             x_l = (to_device(x_l_.data, None) * 255.)\
                 .astype(np.int32)\
-                .reshape(128, 28, 28)
+                .reshape(bs, 28, 28)
             
             # Save images
             dpath1 = os.path.join(dpath0, "{:05d}".format(epoch))
