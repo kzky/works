@@ -105,13 +105,13 @@ def main():
             bs = 16
             # Generate
             ## for unlabel
-            x_u_ = exp.generate(20, dim)
+            x_u_ = exp.generate(bs, dim)
             x_u = (to_device(x_u_.data, None) * 255.)\
                 .astype(np.int32)\
                 .reshape(bs, 28, 28)
 
             ## for label
-            y_ = np.random.choice(n_cls, 20)
+            y_ = np.random.choice(n_cls, bs)
             y = to_onehot(y_, ncls)
             x_l_ = exp.generate(bs, dim)
             x_l = (to_device(x_l_.data, None) * 255.)\
