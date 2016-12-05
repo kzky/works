@@ -88,7 +88,7 @@ def main():
         exp.train(x_l, y_l, x_u)
         v_losses.append(exp.v_loss_data)
         recon_losses.append(exp.recon_loss_data)
-        recon_feet_losses.append(exp.recon_feet_loss_dat)
+        recon_feet_losses.append(exp.recon_feet_loss_data)
         
         # Eval
         if (i + 1) % iter_epoch == 0:
@@ -106,13 +106,17 @@ def main():
             # Generate
             ## for unlabel
             x_u_ = exp.generate(20, dim)
-            x_u = (to_device(x_u_.data, None) * 255.).astype(np.int32).reshape(28, 28)
+            x_u = (to_device(x_u_.data, None) * 255.)\
+                .astype(np.int32)\
+                .reshape(128, 28, 28)
 
             ## for label
             y_ = np.random.choice(n_cls, 20)
             y = to_onehot(y_, ncls)
             x_l_ = exp.generate(bs, dim)
-            x_l = (to_device(x_l_.data, None) * 255.).astype(np.int32).reshape(28, 28)
+            x_l = (to_device(x_l_.data, None) * 255.)\
+                .astype(np.int32)\
+                .reshape(128, 28, 28)
             
             # Save images
             dpath1 = os.path.join(dpath0, "{:05d}".format(epoch))
