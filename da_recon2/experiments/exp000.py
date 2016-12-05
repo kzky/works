@@ -90,13 +90,13 @@ def main():
             # Generate
             ## for unlabel
             x_u_ = exp.generate(20, dim)
-            x_u = to_device(x_u_.data, None)
+            x_u = (to_device(x_u_.data, None) * 255.).astype(np.int32)
 
             ## for label
             y_ = np.random.choice(n_cls, 20)
             y = to_onehot(y_, ncls)
             x_l_ = exp.generate(bs, dim)
-            x_l = to_device(x_l_.data, None)
+            x_l = (to_device(x_l_.data, None) * 255.).astype(np.int32)
             
             # Save images
             dpath1 = os.path.join(dpath0, "{:05d}".format(epoch))
