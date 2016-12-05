@@ -79,6 +79,7 @@ class Experiment(object):
         loss_l = self.forward(x_l, y_l, test=False)
         loss_u = self.forward(x_u, y_u, test=False)
         loss = loss_l + loss_u
+        print(loss.data)
         loss.backward()
         self.update()
 

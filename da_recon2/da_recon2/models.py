@@ -52,7 +52,6 @@ class MLPBranch(Chain):
         h = self.linear1(h)
         h = self.bn1(h)
 
-        
         return h
 
 class MLPGenerator(Chain):
