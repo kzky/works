@@ -123,6 +123,9 @@ class MLPGenerator(Chain):
 
         h = self.linear4(h)
         return h
+        
+        #TODO: tanh?
+        #return F.tanh(h)
 
 class MLPEncoder(Chain):
     """Ladder-like architecture.

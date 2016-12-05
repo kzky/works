@@ -125,7 +125,7 @@ def main():
                 fpath = os.path.join(dpath1, "{:05}_u.png".format(i))
                 cv2.imwrite(fpath, img)
             for i, img in enumerate(x_l):
-                fpath = os.path.join(dpath1, "{:05}_l.png".format(i))
+                fpath = os.path.join(dpath1, "{:05}_l_{:03}.png".format(i, y_[i]))
                 cv2.imwrite(fpath, img)
                 
             # Save model
