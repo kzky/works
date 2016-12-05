@@ -56,6 +56,11 @@ class Experiment(object):
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
 
+        # Loss
+        self.v_loss = None
+        self.recon_loss = None
+        self.recon_feet_loss = None
+
     def forward(self, x, y=None, test=False):
         # Encode
         z = self.mlp_enc(x)
@@ -92,13 +97,13 @@ class Experiment(object):
         # Variational Loss
         v_loss = self.variational_loss(self.mlp_enc.mu,
                                        self.mlp_enc.sigma_2, self.mlp_enc.log_sigma_2)
-        print("VLoss{}".format(v_loss.data))
+        self.v_loss = cuda.to_cpu(v_loss.data)
         
         # Recon Loss for sample
         recon_loss = \
                      self.recon_loss(x_recon, x, None, None) \
                      + self.recon_loss(x_gen, x, None, None)
-        print("ReconLoss{}".format(recon_loss.data))
+        self.recon_loss = cuda.to_cpu(recon_loss.data)
         
         # Recon Loss for feature
         enc_hiddens = self.mlp_enc.hiddens
@@ -107,7 +112,7 @@ class Experiment(object):
         recon_feet_loss = \
                           self.recon_loss(None, None, enc_hiddens, dec_hiddens) \
                           + self.recon_loss(None, None, enc_hiddens, gen_hiddens)
-        print("ReconFeatLoss{}".format(recon_feet_loss.data))
+        self.recon_feet_loss = cuda.to_cpu(recon_feet_loss.data)
         
         loss = recon_loss + recon_feet_loss
         return loss

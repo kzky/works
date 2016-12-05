@@ -73,6 +73,9 @@ def main():
     utime = int(st)
     dpath0 = "./{}_{}".format(os.path.basename(__file__), utime)
     os.mkdir(dpath0)
+    v_losses = []
+    recon_losses = []
+    recon_feet_losses = []
     for i in range(n_iter):
         # Get data
         x_l_, y_l_ = data_reader.get_l_train_batch()
@@ -83,10 +86,21 @@ def main():
 
         # Train
         exp.train(x_l, y_l, x_u)
+        v_losses.append(exp.v_loss)
+        recon_losses.append(exp.recon_loss)
+        recon_feet_losses.append(exp.recon_feet_loss)
         
         # Eval
         if (i + 1) % iter_epoch == 0:
-            print("Epoch{:03d}".format(epoch))
+            v_loss = np.mean(v_losses)
+            recon_loss = np.mean(recon_losses)
+            recon_feet_loss = np.mean(recon_feet_losses)
+            msg = "Epoch{:03d},VLoss:{},RLoss:{},RFLoss:{}".format(
+                epoch, v_loss, recon_loss, recon_feet_loss)
+            print(msg)
+            v_losses = []
+            recon_losses = []
+            recon_feet_losses = []
             
             bs = 16
             # Generate
