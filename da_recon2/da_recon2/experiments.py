@@ -72,30 +72,33 @@ class Experiment(object):
 
         return l
 
-    def update(self, ):
-        self.optimizer.update()
-        
     def train(self, x_l, y_l, x_u, y_u=None, test=False):
+        # Forward
         loss_l = self.forward(x_l, y_l, test=False)
         loss_u = self.forward(x_u, y_u, test=False)
         loss = loss_l + loss_u
-        print(loss.data)
+
+        # Backward
+        self.model.cleargrads()
         loss.backward()
-        self.update()
+
+        #Update
+        self.optimizer.update()
 
     def generate(self, bs, dim):
         return self.mlp_gen(bs, dim, y=None, test=True)
         
-
     def forward_for_loss(self, x, x_recon, x_gen):
         # Variational Loss
         v_loss = self.variational_loss(self.mlp_enc.mu,
                                        self.mlp_enc.sigma_2, self.mlp_enc.log_sigma_2)
-
+        print("VLoss{}".format(v_loss.data))
+        
         # Recon Loss for sample
         recon_loss = \
                      self.recon_loss(x_recon, x, None, None) \
                      + self.recon_loss(x_gen, x, None, None)
+        print("ReconLoss{}".format(recon_loss.data))
         
         # Recon Loss for feature
         enc_hiddens = self.mlp_enc.hiddens
@@ -104,7 +107,8 @@ class Experiment(object):
         recon_feet_loss = \
                           self.recon_loss(None, None, enc_hiddens, dec_hiddens) \
                           + self.recon_loss(None, None, enc_hiddens, gen_hiddens)
-
+        print("ReconFeatLoss{}".format(recon_feet_loss.data))
+        
         loss = recon_loss + recon_feet_loss
         return loss
 
