@@ -86,9 +86,9 @@ def main():
 
         # Train
         exp.train(x_l, y_l, x_u)
-        v_losses.append(exp.v_loss)
-        recon_losses.append(exp.recon_loss)
-        recon_feet_losses.append(exp.recon_feet_loss)
+        v_losses.append(exp.v_loss_data)
+        recon_losses.append(exp.recon_loss_data)
+        recon_feet_losses.append(exp.recon_feet_loss_dat)
         
         # Eval
         if (i + 1) % iter_epoch == 0:
