@@ -77,21 +77,28 @@ class MLPGenerator(Chain):
         self.device = device
         self.hiddens = []
 
-    def generate(self, bs, dim=100):
+    def generate_norm(self, bs, dim=100):
         if self.device:
             r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
             return r * self.sigma
         else:
             return Variable(np.random.randn(bs, dim).astype(np.float32)) * self.sigma
+
+    def generate_unif(self, bs, dim=100):
+        if self.device:
+            r = Variable(cuda.to_gpu(cp.random.uniform(-1, 1, (bs, dim)).astype(cp.float32), self.device))
+            return r * self.sigma
+        else:
+            return Variable(np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)) * self.sigma
             
     def __call__(self, bs, dim=100, y=None, test=False):
         self.hiddens = []
-        z = self.generate(bs, dim)
+        z = self.generate_norm(bs, dim)
 
         # Linear/BatchNorm/Branch/Nonlinear
         h = self.linear0(z)
         h = self.bn0(h, test)
-        z = self.generate(bs, dim)
+        z = self.generate_unif(bs, dim)
         b = self.branch0(z, y, test)
         h = h + b
         h = self.act(h)
@@ -99,7 +106,7 @@ class MLPGenerator(Chain):
 
         h = self.linear1(h)
         h = self.bn1(h, test)
-        z = self.generate(bs, dim)
+        z = self.generate_unif(bs, dim)
         b = self.branch1(z, y, test)
         h = h + b        
         h = self.act(h)
@@ -107,7 +114,7 @@ class MLPGenerator(Chain):
         
         h = self.linear2(h)
         h = self.bn2(h, test)
-        z = self.generate(bs, dim)
+        z = self.generate_unif(bs, dim)
         b = self.branch2(z, y, test)
         h = h + b        
         h = self.act(h)
@@ -115,7 +122,7 @@ class MLPGenerator(Chain):
 
         h = self.linear3(h)
         h = self.bn3(h, test)
-        z = self.generate(bs, dim)
+        z = self.generate_unif(bs, dim)
         b = self.branch3(z, y, test)
         h = h + b        
         h = self.act(h)
@@ -125,7 +132,7 @@ class MLPGenerator(Chain):
         return h
         
         #TODO: tanh?
-        #return F.tanh(h)
+        return F.tanh(h)
 
 class MLPEncoder(Chain):
     """Ladder-like architecture.
@@ -153,14 +160,21 @@ class MLPEncoder(Chain):
         self.sigma_2 = None
         self._sigma = cuda.to_gpu(sigma, device)
 
-    def generate(self, h):
+    def generate_norm(self, h):
         bs, dim = h.shape
         if self.device:
             r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
             return r * self._sigma
         else:
             return Variable(np.random.randn(bs, dim).astype(np.float32)) * self._sigma
-        
+
+    def generate_unif(self, bs, dim=100):
+        if self.device:
+            r = Variable(cuda.to_gpu(cp.random.uniform(-1, 1, (bs, dim)).astype(cp.float32), self.device))
+            return r * self.sigma
+        else:
+            return Variable(np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)) * self.sigma
+            
     def __call__(self, x, test=False):
         self.hiddens = []
 
@@ -190,7 +204,7 @@ class MLPEncoder(Chain):
         self.log_sigma_2 = self.linear_sigma(h)
         self.sigma_2 = F.exp(self.log_sigma_2)  #TODO: consider nan problem
         sigma = F.sqrt(self.sigma_2)
-        r = self.generate(self.mu)
+        r = self.generate_norm(self.mu)
         z = self.mu + sigma * r
         
         return z
