@@ -296,7 +296,9 @@ class VariationalLoss(Chain):
 
     def __call__(self, mu, sigma_2, log_sigma_2):
         bs = mu.shape[0]
-        return F.sum(1 + log_sigma_2 - mu**2 - sigma_2) / 2 / bs  # Explicit KL form
+        kl = F.sum(1 + log_sigma_2 - mu**2 - sigma_2) / 2 / bs  # Explicit KL form
+        kl = -kl  # maximize kl means to minimize -kl
+        return kl
         
 class MLPModel(Chain):
     def __init__(self, ncls=10, act=F.relu, sigma=0.03, device=None):
