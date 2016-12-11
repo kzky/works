@@ -51,7 +51,7 @@ class EncNet(Chain):
 class Encoder(Chain):
     def __init__(self, device=None):
         super(Encoder, self).__init__(
-            encnet0=EncNet((780, 1000)),
+            encnet0=EncNet((784, 1000)),
             encnet1=EncNet((1000, 500)),
             encnet2=EncNet((500, 250)),
             encnet3=EncNet((250, 100)),
@@ -129,7 +129,7 @@ class Decoder(Chain):
             decnet1=DecNet((100, 250)),
             decnet2=DecNet((250, 500)),
             decnet3=DecNet((500, 1000)),
-            decnet4=DecNet((1000, 780)),
+            decnet4=DecNet((1000, 784)),
         )
         self.hiddens = []
         
@@ -246,15 +246,26 @@ class Generator(Chain):
         return h_v
 
 class Discriminator(Chain):
+    def __init__(self, act=F.relu, device=None):
+        super(Discriminator, self).__init__(
+            linear0=L.Linear(784, 1000),
+            linear1=L.Linear(1000, 500),
+            linear2=L.Linear(500, 250),
+            linear3=L.Linear(250, 100),
+            linear4=L.Linear(100, 1),
+        )
+        self.act = act
+        
+    def __call__(self, x):
+        h = self.linear0(x)
+        h = self.linear1(self.act(h))
+        h = self.linear2(self.act(h))
+        h = self.linear3(self.act(h)) 
+        h = self.linear4(self.act(h)) 
+        
+        return F.sigmoid(h)
 
-    def __init__(self, device=None):
-        pass
-
-    def __call__(self, ):
-        pass
-
-
-class Reconstruction(Chain):
+class ReconstructionLoss(Chain):
     def __init__(self, ):
         pass
 
@@ -262,5 +273,16 @@ class Reconstruction(Chain):
         d = np.prod(x.shape[1:])
         l = F.mean_squared_error(x, y) / d
         return l
-        
+
+class GanLoss(Chain):
+    def __init__(self, device=None):
+        pass
+
+    def __call__(self, d_gen, d=None):
+        if x:
+            return F.log(d) + F.log(1 - d_gen)
+        else:
+            return F.log(1 - d_gen)
+
+    
         
