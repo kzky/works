@@ -49,12 +49,12 @@ class EncNet(Chain):
             return Variable(np.random.randn(bs, d).astype(np.float32)) * self.sigma
 
 class Encoder(Chain):
-    def __init__(self, device=None):
+    def __init__(self, act=F.relu, device=None):
         super(Encoder, self).__init__(
-            encnet0=EncNet((784, 1000)),
-            encnet1=EncNet((1000, 500)),
-            encnet2=EncNet((500, 250)),
-            encnet3=EncNet((250, 100)),
+            encnet0=EncNet((784, 1000), act, device),
+            encnet1=EncNet((1000, 500), act, device),
+            encnet2=EncNet((500, 250), act, device),
+            encnet3=EncNet((250, 100), act, device),
         )
         self.sigma = 0.3
         self.hiddens = []
@@ -157,11 +157,22 @@ class Decoder(Chain):
 
         return h
 
+class EncDecModel(Chain):
+    #TODO: necessary?
+    def __init__(self, act=F.relu, device=None):
+        super(EncDecModel, self).__init__(
+            encoder = Encoder(act, device),
+            decoder = Decoder(device)
+        )
+
+    def __call__(self, x, y, noise=False, test=False):
+        pass
+
 class MLPBranch(Chain):
     """MLP Branch
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
-    def __init__(self, dim, fix=False, device=None):
+    def __init__(self, dim, device=None):
         d_inp, d_out = dim
         super(MLPBranch, self).__init__(
             linear0=L.Linear(d_inp, d_out),
