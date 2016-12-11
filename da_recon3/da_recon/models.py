@@ -93,7 +93,7 @@ class Denoise(Chain):
             a1=L.Scale(W_shape=(dim, )),
             a2=L.Scale(W_shape=(dim, )),
             a3=L.Bias(shape=(dim, )),
-            a4=L.Bias(shape=(dim, )),
+            a4=L.Scale(shape=(dim, )),
             b0=L.Scale(W_shape=(dim, )),
             b1=L.Scale(W_shape=(dim, )),
             b2=L.Scale(W_shape=(dim, )),
