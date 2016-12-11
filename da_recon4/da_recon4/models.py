@@ -133,20 +133,25 @@ class Decoder(Chain):
         )
         self.hiddens = []
         
-    def __call__(self, h, enc_hiddens, test=False):
+    def __call__(self, h, y, enc_hiddens, test=False):
         self.hiddens = []
         L = len(enc_hiddens)
         
         h = self.bn(h, test)
-        h = decnet0(enc_hiddens[L-1], h)
+        h_l = F.concat(enc_hiddens[L-1], y)
+        h = decnet0(h_l, h)
         self.hiddens.apppend(h)
-        h = decnet1(enc_hiddens[L-2], h)
+        h_l = F.concat(enc_hiddens[L-2], y)
+        h = decnet1(h_l, h)
         self.hiddens.apppend(h)
-        h = decnet2(enc_hiddens[L-3], h)
+        h_l = F.concat(enc_hiddens[L-3], y)
+        h = decnet2(h_l, h)
         self.hiddens.apppend(h)
-        h = decnet3(enc_hiddens[L-4], h)
+        h_l = F.concat(enc_hiddens[L-4], y)
+        h = decnet3(h_l, h)
         self.hiddens.apppend(h)
-        h = decnet4(enc_hiddens[L-5], h)
+        h_l = F.concat(enc_hiddens[L-5], y)
+        h = decnet4(h_l, h)
         h = F.tanh(h)  # align input
         self.hiddens.apppend(h)
 
@@ -220,17 +225,22 @@ class Generator(Chain):
                 decnet4=decnet4,
             )
 
-    def __call__(self, bs):
+    def __call__(self, bs, y):
         h_v = self.top(bs)
         h_l = self.branch0(bs)
+        h_l = F.concat(h_l, y)
         h_v = self.decnet0(h_l, h_t)
         h_l = self.branch1(bs)
+        h_l = F.concat(h_l, y)
         h_v = self.decnet1(h_l, h_v)
         h_l = self.branch2(bs)
+        h_l = F.concat(h_l, y)
         h_v = self.decnet2(h_l, h_v)
         h_l = self.branch3(bs)
+        h_l = F.concat(h_l, y)
         h_v = self.decnet3(h_l, h_v)
         h_l = self.branch4(bs)
+        h_l = F.concat(h_l, y)
         h_v = self.decnet4(h_l, h_v)
 
         return h_v
