@@ -15,302 +15,242 @@ import logging
 import time
 from utils import to_device
 
+#TODO: wscale
+
+class EncNet(Chain):
+    """Encoder Component
+    """
+    def __init__(self, dim, act=F.relu, device=None, ):
+        d_inp, d_out = dim
+        super(EncNet, self).__init__(
+            linear=L.Linear(d_inp, d_out),
+            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
+            sb=L.Scale(W_shape=d_out, bias_term=True)
+        )
+        self.sigma = 0.3
+        self.act = act
+
+    def __call__(self, h, noise=False, test=False):
+        h = self.linear(h)
+        h = self.bn(h, test)
+        if noise:
+            h = h + self.generate_norm_noise(h)
+        h = self.sb(h)
+        h = self.act(h)
+        return h
+
+    def generate_norm_noise(self, h):
+        bs, d = h.shape
+        if self.device:
+            r = Variable(
+                cuda.to_gpu(cp.random.randn(bs, d).astype(cp.float32), self.device))
+            return r * self.sigma
+        else:
+            return Variable(np.random.randn(bs, d).astype(np.float32)) * self.sigma
+
+class Encoder(Chain):
+    def __init__(self, device=None):
+        super(Encoder, self).__init__(
+            encnet0=EncNet((780, 1000)),
+            encnet1=EncNet((1000, 500)),
+            encnet2=EncNet((500, 250)),
+            encnet3=EncNet((250, 100)),
+        )
+        self.sigma = 0.3
+        self.hiddens = []
+        
+    def __call__(self, x, noise=False, test=False, ):
+        self.hiddens = []
+
+        if noise:
+            x = x + self.encnet0.generate_norm_noise(x)
+        self.hiddens.append(h)
+        h = encnet0(x, noise, test)
+        self.hiddens.append(h)
+        h = encnet1(h, noise, test)
+        self.hiddens.append(h)
+        h = encnet2(h, noise, test)
+        self.hiddens.append(h)
+        h = encnet3(h, noise, test)
+        self.hiddens.append(h)
+
+        return h
+
+class Denoise(Chain):
+    def __init__(self, dim, device=None):
+        #TODO: Initialization
+        super(Denoise, self).__init__(
+            a0=L.Scale(W_shape=(dim, )),
+            a1=L.Scale(W_shape=(dim, )),
+            a2=L.Scale(W_shape=(dim, )),
+            a3=L.Bias(shape=(dim, )),
+            a4=L.Scale(shape=(dim, )),
+            b0=L.Scale(W_shape=(dim, )),
+            b1=L.Scale(W_shape=(dim, )),
+            b2=L.Scale(W_shape=(dim, )),
+            b3=L.Bias(shape=(dim, )),
+            )
+
+    def __call__(self, x, y):
+        """
+        x: Varialbe
+            Varialbe of lateral
+        y: Varialbe
+            Varialbe of vertial
+        """
+        xy = x * y
+        a = self.a3(self.a0(x) + self.a1(y) + self.a2(xy))
+        b = self.b3(self.b0(x) + self.b1(y) + self.b2(xy))
+        
+        return b + self.a4(F.sigmoid(a))
+        
+class DecNet(Chain):
+    """Decoder Component
+    """
+    def __init__(self, dim, device=None):
+        d_inp, d_out = dim
+        super(DecNet, self).__init__(
+            linear=L.Linear(d_inp, d_out),
+            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
+            denoise=Denoise(d_out),
+        )
+
+    def __call__(self, z, h, test=False):
+        h = self.linear(h)
+        h = self.bn(h)
+        h = self.denoise(z, h)
+        return h
+        
+class Decoder(Chain):
+    def __init__(self, device=None):
+        super(Decoder, self).__init__(
+            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
+            decnet0=DecNet((100, 100)),
+            decnet1=DecNet((100, 250)),
+            decnet2=DecNet((250, 500)),
+            decnet3=DecNet((500, 1000)),
+            decnet4=DecNet((1000, 780)),
+        )
+        self.hiddens = []
+        
+    def __call__(self, h, enc_hiddens, test=False):
+        self.hiddens = []
+        L = len(enc_hiddens)
+        
+        h = self.bn(h, test)
+        h = decnet0(enc_hiddens[L-1], h)
+        self.hiddens.apppend(h)
+        h = decnet1(enc_hiddens[L-2], h)
+        self.hiddens.apppend(h)
+        h = decnet2(enc_hiddens[L-3], h)
+        self.hiddens.apppend(h)
+        h = decnet3(enc_hiddens[L-4], h)
+        self.hiddens.apppend(h)
+        h = decnet4(enc_hiddens[L-5], h)
+        h = F.tanh(h)  # align input
+        self.hiddens.apppend(h)
+
+        return h
+
 class MLPBranch(Chain):
     """MLP Branch
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
-    def __init__(self, dim, ncls, act=F.relu, sigma=0.03, device=None):
+    def __init__(self, dim, fix=False, device=None):
+        d_inp, d_out = dim
         super(MLPBranch, self).__init__(
-            linear0=L.Linear(110, dim/2),   # 100 random seeeds and labels
-            linear1=L.Linear(dim/2, dim),
-            bn0=L.BatchNormalization(dim/2), 
-            bn1=L.BatchNormalization(dim), 
+            linear0=L.Linear(d_inp, d_out),
+            linear1=L.Linear(d_out, d_out),
+            bn0=L.Batchnorm(d_out),
+            # Align domain of denoising function's input
+            bn1=L.Batchnorm(d_out, use_gamma=False, use_beta=False),
         )
-        self.dim = dim
-        self.ncls = ncls
-        self.act = act
-        self.sigma = cuda.to_gpu(sigma, device)
-        self.device = device
-
-    def concat(self, z, y=None, ncls=10):
-        bs = z.shape[0]
-        if y is None:
-            if self.device:
-                y_ = cuda.to_gpu(cp.zeros((bs, ncls)).astype(cp.float32), self.device)
-                y = Variable(y_)
-            else:
-                y = np.zeros((bs, ncls)).astype(np.float32)
-        return F.concat((z, y), axis=1)
-
-    def __call__(self, z, y=None, test=False):
-        z = self.concat(z, y)
-
-        h = self.linear0(z)
+        self.dim = d_inp
+        
+    def __call__(self, bs, ):
+        u = self.generate_unif(bs, self.dim)
+        h = self.linear0(u)
         h = self.bn0(h)
-        h = self.act(h)
-
         h = self.linear1(h)
         h = self.bn1(h)
-
         return h
-
-class MLPGenerator(Chain):
-    def __init__(self, ncls=10, act=F.relu, sigma=0.03, device=None):
-        super(MLPGenerator, self).__init__(
-            linear0=L.Linear(100, 250),  
-            linear1=L.Linear(250, 500),
-            linear2=L.Linear(500, 750),
-            linear3=L.Linear(750, 1000),
-            linear4=L.Linear(1000, 784),
-            bn0=L.BatchNormalization(250), 
-            bn1=L.BatchNormalization(500), 
-            bn2=L.BatchNormalization(750), 
-            bn3=L.BatchNormalization(1000),
-            branch0=MLPBranch(250, ncls, act, sigma, device),
-            branch1=MLPBranch(500, ncls, act, sigma, device),
-            branch2=MLPBranch(750, ncls, act, sigma, device),
-            branch3=MLPBranch(1000, ncls, act, sigma, device),
-            )
-        self.ncls = ncls
-        self.act = act
-        self.sigma = sigma
-        self.device = device
-        self.hiddens = []
-
-    def generate_norm(self, bs, dim=100):
-        if self.device:
-            r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
-            return r * self.sigma
-        else:
-            return Variable(np.random.randn(bs, dim).astype(np.float32)) * self.sigma
-
+                        
     def generate_unif(self, bs, dim=100):
         if self.device:
-            r = Variable(cuda.to_gpu(cp.random.uniform(-1, 1, (bs, dim)).astype(cp.float32), self.device))
-            return r * self.sigma
+            r = Variable(cuda.to_gpu(
+                cp.random.uniform(-1, 1, (bs, dim)).astype(cp.float32), self.device))
+            return r
         else:
-            return Variable(np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)) * self.sigma
-            
-    def __call__(self, bs, dim=100, y=None, test=False):
-        self.hiddens = []
-        z = self.generate_norm(bs, dim)
+            return Variable(np.random.uniform(-1, 1, (bs, dim)).astype(np.float32))
 
-        # Linear/BatchNorm/Branch/Nonlinear
-        h = self.linear0(z)
-        h = self.bn0(h, test)
-        z = self.generate_unif(bs, dim)
-        b = self.branch0(z, y, test)
-        h = h + b
-        h = self.act(h)
-        self.hiddens.append(h)
+class Generator(Chain):
 
-        h = self.linear1(h)
-        h = self.bn1(h, test)
-        z = self.generate_unif(bs, dim)
-        b = self.branch1(z, y, test)
-        h = h + b        
-        h = self.act(h)
-        self.hiddens.append(h)
-        
-        h = self.linear2(h)
-        h = self.bn2(h, test)
-        z = self.generate_unif(bs, dim)
-        b = self.branch2(z, y, test)
-        h = h + b        
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear3(h)
-        h = self.bn3(h, test)
-        z = self.generate_unif(bs, dim)
-        b = self.branch3(z, y, test)
-        h = h + b        
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear4(h)
-        return h
-        
-        #TODO: tanh?
-        return F.tanh(h)
-
-class MLPEncoder(Chain):
-    """Ladder-like architecture.
-    """
-    
-    def __init__(self, act=F.relu, sigma=0.3, device=None):
-        super(MLPEncoder, self).__init__(
-            linear0=L.Linear(784, 1000),
-            linear1=L.Linear(1000, 750),
-            linear2=L.Linear(750, 500),
-            linear3=L.Linear(500, 250),
-            linear_mu=L.Linear(250, 100),
-            linear_sigma=L.Linear(250, 100),
-            bn0=L.BatchNormalization(1000),
-            bn1=L.BatchNormalization(750),
-            bn2=L.BatchNormalization(500), 
-            bn3=L.BatchNormalization(250), 
+    def __init__(self, decoder, fix=False, device=None):
+        decnet0 = decoder.decnet0 
+        decnet1 = decoder.decnet1 
+        decnet2 = decoder.decnet2 
+        decnet3 = decoder.decnet3
+        decnet4 = decoder.decnet4
+        rdim = 100
+        if fix:
+            super(Generator, self).__init__(
+                top=MLPBranch((rdim, 100)),
+                branch0=MLPBranch((rdim, 250)),
+                branch1=MLPBranch((rdim, 500)),
+                branch2=MLPBranch((rdim, 500)),
+                branch3=MLPBranch((rdim, 1000)),
+            )
+            self.decnet0 = decnet0
+            self.decnet1 = decnet1
+            self.decnet2 = decnet2
+            self.decnet3 = decnet3
+            self.decnet4 = decnet4
+        else:
+            super(Generator, self).__init__(
+                top=MLPBranch((rdim, 100)),
+                branch0=MLPBranch((rdim, 100)),
+                branch1=MLPBranch((rdim, 250)),
+                branch2=MLPBranch((rdim, 500)),
+                branch3=MLPBranch((rdim, 500)),
+                branch4=MLPBranch((rdim, 1000)),
+                decnet0=decnet0,
+                decnet1=decnet1,
+                decnet2=decnet2,
+                decnet3=decnet3,
+                decnet4=decnet4,
             )
 
-        self.act = act
-        self.device = device
-        self.hiddens = []
-        self.mu = None
-        self.log_sigma_2 = None
-        self.sigma_2 = None
-        self._sigma = cuda.to_gpu(sigma, device)
+    def __call__(self, bs):
+        h_v = self.top(bs)
+        h_l = self.branch0(bs)
+        h_v = self.decnet0(h_l, h_t)
+        h_l = self.branch1(bs)
+        h_v = self.decnet1(h_l, h_v)
+        h_l = self.branch2(bs)
+        h_v = self.decnet2(h_l, h_v)
+        h_l = self.branch3(bs)
+        h_v = self.decnet3(h_l, h_v)
+        h_l = self.branch4(bs)
+        h_v = self.decnet4(h_l, h_v)
 
-    def generate_norm(self, h):
-        bs, dim = h.shape
-        if self.device:
-            r = Variable(cuda.to_gpu(cp.random.randn(bs, dim).astype(cp.float32), self.device))
-            return r * self._sigma
-        else:
-            return Variable(np.random.randn(bs, dim).astype(np.float32)) * self._sigma
+        return h_v
 
-    def generate_unif(self, bs, dim=100):
-        if self.device:
-            r = Variable(cuda.to_gpu(cp.random.uniform(-1, 1, (bs, dim)).astype(cp.float32), self.device))
-            return r * self.sigma
-        else:
-            return Variable(np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)) * self.sigma
-            
-    def __call__(self, x, test=False):
-        self.hiddens = []
+class Discriminator(Chain):
 
-        # Linear/BatchNorm/Branch/Nonlinear
-        h = self.linear0(x)
-        h = self.bn0(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear1(h)
-        h = self.bn1(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear2(h)
-        h = self.bn2(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear3(h)
-        h = self.bn3(h, test)
-        h = self.act(h)  #TODO: should use tanh?
-        self.hiddens.append(h)
-
-        # Variational
-        self.mu = self.linear_mu(h)
-        self.log_sigma_2 = self.linear_sigma(h)
-        self.sigma_2 = F.exp(self.log_sigma_2)  #TODO: consider nan problem
-        sigma = F.sqrt(self.sigma_2)
-        r = self.generate_norm(self.mu)
-        z = self.mu + sigma * r
-        
-        return z
-
-class MLPDecoder(Chain):
-    def __init__(self, act=F.relu, device=None):
-        super(MLPDecoder, self).__init__(
-            linear0=L.Linear(100, 250),
-            linear1=L.Linear(250, 500),
-            linear2=L.Linear(500, 750),
-            linear3=L.Linear(750, 1000),
-            linear4=L.Linear(1000, 784),
-            bn0=L.BatchNormalization(250),
-            bn1=L.BatchNormalization(500),
-            bn2=L.BatchNormalization(750),
-            bn3=L.BatchNormalization(1000)
-            )
-
-        self.act = act
-        self.device = device
-        self.encoder = None
-        self.hiddens = []
-    
-    def __call__(self, h, test=False):
-        """
-        Parameters
-        -----------------
-        h: Variable
-            Shape of h is the same as that of (y; z), which is the input for Genrator.
-        """
-        self.hiddens = []
-
-        # Linear/BatchNorm/Branch/Nonlinear
-        h = self.linear0(h)
-        h = self.bn0(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear1(h)
-        h = self.bn1(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear2(h)
-        h = self.bn2(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear3(h)
-        h = self.bn3(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-
-        h = self.linear4(h)
-        return h
-
-class ReconstructionLoss(Chain):
-    def __init__(self, ):
-        self.loss = None
-
-    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
-        """
-        Parameters
-        -----------------
-        x_recon: Variable to be reconstructed as label
-        x: Variable to be reconstructed as label
-        enc_hiddens: list of Variable
-        dec_hiddens: list of Varialbe
-        """
-        # Recon Loss for Feature
-        recon_loss = 0
-        if enc_hiddens is not None:
-            for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
-                d = np.prod(h0.data.shape[1:])
-                recon_loss += F.mean_squared_error(h0, h1) / d
-
-        # Reconstruction Loss for Sample 
-        if x_recon is not None:
-            d = np.prod(x.data.shape[1:])
-            recon_loss += F.mean_squared_error(x_recon, x) / d
-
-        self.loss = recon_loss
-        
-        return self.loss
-
-class VariationalLoss(Chain):
-    def __init__(self, ):
-        self.loss = None
-
-    def __call__(self, mu, sigma_2, log_sigma_2):
-        bs = mu.shape[0]
-        kl = F.sum(1 + log_sigma_2 - mu**2 - sigma_2) / 2 / bs  # Explicit KL form
-        kl = -kl  # maximize kl means to minimize -kl
-        return kl
-        
-class MLPModel(Chain):
-    def __init__(self, ncls=10, act=F.relu, sigma=0.03, device=None):
-        super(MLPModel, self).__init__(
-            mlp_gen = MLPGenerator(ncls, act, sigma, device),
-            mlp_enc = MLPEncoder(act, sigma, device),
-            mlp_dec = MLPDecoder(act, device)
-        )
-
-        self.recon_loss = ReconstructionLoss()
-        self.variational_loss = VariationalLoss()
-
-    def __call__(self, x, test=False):
+    def __init__(self, device=None):
         pass
+
+    def __call__(self, ):
+        pass
+
+
+class Reconstruction(Chain):
+    def __init__(self, ):
+        pass
+
+    def __call__(self, x, y):
+        d = np.prod(x.shape[1:])
+        l = F.mean_squared_error(x, y) / d
+        return l
+        
         
