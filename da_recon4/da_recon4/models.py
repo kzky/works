@@ -80,21 +80,22 @@ class Encoder(Chain):
 class Combinator(Chain):
     """Two AMLP
     """
-    def __init__(self, dim, act=F.relu, device=None):
+    def __init__(self, dim, n_cls=10, act=F.relu, device=None):
         super(Combinator, self).__init__(
-            linear0=L.Linear(3*dim, 2*dim),
+            linear0=L.Linear(3*dim + n_cls, 2*dim),
             linear1=L.Linear(2*dim, dim),
             )
         self.act = act
         
-    def __call__(self, h_l, h_v):
+    def __call__(self, h_l, h_v, y):
         """
         h_l: Varialbe
             Varialbe of lateral
         h_v: Varialbe
             Varialbe of vertial
         """
-        h = F.concat((h_l, h_v, h_l*h_v))
+        mul = h_l*h_v
+        h = F.concat((h_l, h_v, mul, y))
         h = self.act(self.linear0(h))
         h = self.act(self.linear1(h))
         return h
@@ -102,14 +103,14 @@ class Combinator(Chain):
 class DecNet(Chain):
     """Decoder Component
     """
-    def __init__(self, dim, act=F.relu, device=None):
+    def __init__(self, dim, n_cls=10, act=F.relu, device=None):
         if len(dim) == 1:
             d_inp, = dim
             self.top = True
             super(DecNet, self).__init__(
                 bn=L.BatchNormalization(d_inp, decay=0.9,
                                         use_gamma=False, use_beta=False),
-                combinator=Combinator(d_inp, act, device),
+                combinator=Combinator(d_inp, n_cls, act, device),
             )
         else:
             self.top = False
@@ -118,10 +119,10 @@ class DecNet(Chain):
                 linear=L.Linear(d_inp, d_out),
                 bn=L.BatchNormalization(d_out, decay=0.9,
                                         use_gamma=False, use_beta=False),
-                combinator=Combinator(d_out, act, device),
+                combinator=Combinator(d_out, n_cls, act, device),
             )
 
-    def __call__(self, h_l, h_v, test=False):
+    def __call__(self, h_l, h_v, y, test=False):
         """
         h_l: Varialbe
             Varialbe of lateral
@@ -131,38 +132,42 @@ class DecNet(Chain):
         if not self.top:
             h_v = self.linear(h_v)
         h_v = self.bn(h_v)
-        h_v = self.combinator(h_l, h_v)
+        h_v = self.combinator(h_l, h_v, y)
         return h_v
         
 class Decoder(Chain):
     def __init__(self, n_cls=10, act=F.relu, device=None):
         super(Decoder, self).__init__(
-            decnet0=DecNet((100+n_cls, )),
-            decnet1=DecNet((100+n_cls, 250+n_cls)),
-            decnet2=DecNet((250+n_cls, 500+n_cls)),
-            decnet3=DecNet((500+n_cls, 1000+n_cls)),
-            decnet4=DecNet((1000+n_cls, 784+n_cls)),
+            decnet0=DecNet((100, )),
+            decnet1=DecNet((100, 250)),
+            decnet2=DecNet((250, 500)),
+            decnet3=DecNet((500, 1000)),
+            decnet4=DecNet((1000, 784)),
         )
         self.hiddens = []
         
     def __call__(self, h_v, enc_hiddens, y, test=False):
         self.hiddens = []
         L = len(enc_hiddens)
-        h_v = F.concat((h_v, y))
-        h_l = F.concat((enc_hiddens[L-1], y))
-        h_v = self.decnet0(h_l, h_v)
+
+        h_l = enc_hiddens[L-1]
+        h_v = self.decnet0(h_l, h_v, y)
         self.hiddens.append(h_v)
-        h_l = F.concat((enc_hiddens[L-2], y))
-        h_v = self.decnet1(h_l, h_v)
+
+        h_l = enc_hiddens[L-2]
+        h_v = self.decnet1(h_l, h_v, y)
         self.hiddens.append(h_v)
-        h_l = F.concat((enc_hiddens[L-3], y))
-        h_v = self.decnet2(h_l, h_v)
+
+        h_l = enc_hiddens[L-3]
+        h_v = self.decnet2(h_l, h_v, y)
         self.hiddens.append(h_v)
-        h_l = F.concat((enc_hiddens[L-4], y))
-        h_v = self.decnet3(h_l, h_v)
+
+        h_l = enc_hiddens[L-4]
+        h_v = self.decnet3(h_l, h_v, y)
         self.hiddens.append(h_v)
-        h_l = F.concat((enc_hiddens[L-5], y))
-        h_v = self.decnet4(h_l, h_v)
+
+        h_l = enc_hiddens[L-5]
+        h_v = self.decnet4(h_l, h_v, y)
         h_v = F.tanh(h_v)  # align input
         self.hiddens.append(h_v)
 
@@ -193,6 +198,7 @@ class BranchNet(Chain):
             bn1=L.BatchNormalization(d_out, use_gamma=False, use_beta=False),
         )
         self.dim = d_inp
+        self.device = device
         
     def __call__(self, bs, ):
         u = self.generate_unif(bs, self.dim)
@@ -212,7 +218,7 @@ class BranchNet(Chain):
 
 class Generator(Chain):
 
-    def __init__(self, decoder, fix=False, device=None):
+    def __init__(self, decoder, n_cls=10, fix=False, device=None):
         decnet0 = decoder.decnet0 
         decnet1 = decoder.decnet1 
         decnet2 = decoder.decnet2 
@@ -222,10 +228,11 @@ class Generator(Chain):
         if fix:
             super(Generator, self).__init__(
                 top=BranchNet((rdim, 100)),
-                branch0=BranchNet((rdim, 250)),
-                branch1=BranchNet((rdim, 500)),
-                branch2=BranchNet((rdim, 500)),
-                branch3=BranchNet((rdim, 1000)),
+                branch0=BranchNet((rdim, 100), device=device),
+                branch1=BranchNet((rdim, 250), device=device),
+                branch2=BranchNet((rdim, 500), device=device),
+                branch3=BranchNet((rdim, 500), device=device),
+                branch4=BranchNet((rdim, 1000), device=device),
             )
             self.decnet0 = decnet0
             self.decnet1 = decnet1
@@ -235,11 +242,11 @@ class Generator(Chain):
         else:
             super(Generator, self).__init__(
                 top=BranchNet((rdim, 100)),
-                branch0=BranchNet((rdim, 100)),
-                branch1=BranchNet((rdim, 250)),
-                branch2=BranchNet((rdim, 500)),
-                branch3=BranchNet((rdim, 500)),
-                branch4=BranchNet((rdim, 1000)),
+                branch0=BranchNet((rdim, 100), device=device),
+                branch1=BranchNet((rdim, 250), device=device),
+                branch2=BranchNet((rdim, 500), device=device),
+                branch3=BranchNet((rdim, 500), device=device),
+                branch4=BranchNet((rdim, 1000), device=device),
                 decnet0=decnet0,
                 decnet1=decnet1,
                 decnet2=decnet2,
@@ -249,18 +256,26 @@ class Generator(Chain):
 
     def __call__(self, bs, y):
         h_v = self.top(bs)
+        h_v = F.concat((h_v, y))
         h_l = self.branch0(bs)
         h_l = F.concat((h_l, y))
         h_v = self.decnet0(h_l, h_v)
+
         h_l = self.branch1(bs)
         h_l = F.concat((h_l, y))
         h_v = self.decnet1(h_l, h_v)
+
         h_l = self.branch2(bs)
         h_l = F.concat((h_l, y))
         h_v = self.decnet2(h_l, h_v)
+
+        print(h_v.shape)
         h_l = self.branch3(bs)
+        print(h_l.shape)
         h_l = F.concat((h_l, y))
+        print(h_l.shape)
         h_v = self.decnet3(h_l, h_v)
+
         h_l = self.branch4(bs)
         h_l = F.concat((h_l, y))
         h_v = self.decnet4(h_l, h_v)
