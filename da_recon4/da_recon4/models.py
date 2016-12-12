@@ -231,8 +231,8 @@ class Generator(Chain):
                 branch0=BranchNet((rdim, 100), device=device),
                 branch1=BranchNet((rdim, 250), device=device),
                 branch2=BranchNet((rdim, 500), device=device),
-                branch3=BranchNet((rdim, 500), device=device),
-                branch4=BranchNet((rdim, 1000), device=device),
+                branch3=BranchNet((rdim, 1000), device=device),
+                branch4=BranchNet((rdim, 784), device=device),
             )
             self.decnet0 = decnet0
             self.decnet1 = decnet1
@@ -245,8 +245,8 @@ class Generator(Chain):
                 branch0=BranchNet((rdim, 100), device=device),
                 branch1=BranchNet((rdim, 250), device=device),
                 branch2=BranchNet((rdim, 500), device=device),
-                branch3=BranchNet((rdim, 500), device=device),
-                branch4=BranchNet((rdim, 1000), device=device),
+                branch3=BranchNet((rdim, 1000), device=device),
+                branch4=BranchNet((rdim, 784), device=device),
                 decnet0=decnet0,
                 decnet1=decnet1,
                 decnet2=decnet2,
@@ -256,29 +256,22 @@ class Generator(Chain):
 
     def __call__(self, bs, y):
         h_v = self.top(bs)
-        h_v = F.concat((h_v, y))
         h_l = self.branch0(bs)
-        h_l = F.concat((h_l, y))
-        h_v = self.decnet0(h_l, h_v)
+        h_v = self.decnet0(h_l, h_v, y)
 
         h_l = self.branch1(bs)
-        h_l = F.concat((h_l, y))
-        h_v = self.decnet1(h_l, h_v)
+        h_v = self.decnet1(h_l, h_v, y)
 
         h_l = self.branch2(bs)
-        h_l = F.concat((h_l, y))
-        h_v = self.decnet2(h_l, h_v)
+        h_v = self.decnet2(h_l, h_v, y)
 
-        print(h_v.shape)
         h_l = self.branch3(bs)
         print(h_l.shape)
-        h_l = F.concat((h_l, y))
-        print(h_l.shape)
-        h_v = self.decnet3(h_l, h_v)
+        print(h_v.shape)
+        h_v = self.decnet3(h_l, h_v, y)
 
         h_l = self.branch4(bs)
-        h_l = F.concat((h_l, y))
-        h_v = self.decnet4(h_l, h_v)
+        h_v = self.decnet4(h_l, h_v, y)
 
         return h_v
 
@@ -316,10 +309,12 @@ class GanLoss(Chain):
         pass
 
     def __call__(self, d_gen, d=None):
-        if x:
-            return F.log(d) + F.log(1 - d_gen)
+        bs_gen = d_gen[0]
+        if d:
+            bs = d[0]
+            return F.sum(F.log(d)) / bs + F.sum(F.log(1 - d_gen)) / bs_gen
         else:
-            return F.log(1 - d_gen)
+            return F.sum(F.log(1 - d_gen)) / bs_gen
 
     
         

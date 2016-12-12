@@ -29,7 +29,49 @@ def test_decoder():
     x_rec = decoder(h, encoder.hiddens, y)
     
 def test_generator():
-    pass
+    bs = 8
+    dim = 784
+    n_cls = 10
+    fix = True
+     
+    # Encoder
+    encoder = Encoder()
+    x = np.random.rand(bs, dim).astype(np.float32)
+    h = encoder(x)
+     
+    # Decoder
+    decoder = Decoder()
+    y_ = np.random.choice(n_cls, bs)
+    y = to_onehot(y_, n_cls)
+    x_rec = decoder(h, encoder.hiddens, y)
+     
+    # Generator
+    generator = Generator(decoder, fix=fix)
+    generator(bs, y)
 
+    
 def test_discriminator():
-    pass
+    bs = 8
+    dim = 784
+    n_cls = 10
+    fix = True
+
+    # Encoder
+    encoder = Encoder()
+    x = np.random.rand(bs, dim).astype(np.float32)
+    h = encoder(x)
+     
+    # Decoder
+    decoder = Decoder()
+    y_ = np.random.choice(n_cls, bs)
+    y = to_onehot(y_, n_cls)
+    x_rec = decoder(h, encoder.hiddens, y)
+     
+    # Generator
+    generator = Generator(decoder, fix=fix)
+    x_gen = generator(bs, y)
+
+    # Discriminator
+    discriminator = Discriminator()
+    discriminator(x_gen)
+    
