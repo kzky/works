@@ -24,7 +24,8 @@ class EncNet(Chain):
         d_inp, d_out = dim
         super(EncNet, self).__init__(
             linear=L.Linear(d_inp, d_out),
-            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
+            bn=L.BatchNormalization(d_out, decay=0.9,
+                                    use_gamma=False, use_beta=False),
             sb=L.Scale(W_shape=d_out, bias_term=True)
         )
         self.sigma = 0.3
@@ -61,101 +62,111 @@ class Encoder(Chain):
         
     def __call__(self, x, noise=False, test=False, ):
         self.hiddens = []
-
+        h = x
         if noise:
-            x = x + self.encnet0.generate_norm_noise(x)
+            h = x + self.encnet0.generate_norm_noise(x)
         self.hiddens.append(h)
-        h = encnet0(x, noise, test)
+        h = self.encnet0(x, noise, test)
         self.hiddens.append(h)
-        h = encnet1(h, noise, test)
+        h = self.encnet1(h, noise, test)
         self.hiddens.append(h)
-        h = encnet2(h, noise, test)
+        h = self.encnet2(h, noise, test)
         self.hiddens.append(h)
-        h = encnet3(h, noise, test)
+        h = self.encnet3(h, noise, test)
         self.hiddens.append(h)
 
         return h
 
-class Denoise(Chain):
-    def __init__(self, dim, device=None):
-        #TODO: Initialization
-        super(Denoise, self).__init__(
-            a0=L.Scale(W_shape=(dim, )),
-            a1=L.Scale(W_shape=(dim, )),
-            a2=L.Scale(W_shape=(dim, )),
-            a3=L.Bias(shape=(dim, )),
-            a4=L.Scale(shape=(dim, )),
-            b0=L.Scale(W_shape=(dim, )),
-            b1=L.Scale(W_shape=(dim, )),
-            b2=L.Scale(W_shape=(dim, )),
-            b3=L.Bias(shape=(dim, )),
+class Combinator(Chain):
+    """Two AMLP
+    """
+    def __init__(self, dim, act=F.relu, device=None):
+        super(Combinator, self).__init__(
+            linear0=L.Linear(3*dim, 2*dim),
+            linear1=L.Linear(2*dim, dim),
             )
-
-    def __call__(self, x, y):
+        self.act = act
+        
+    def __call__(self, h_l, h_v):
         """
-        x: Varialbe
+        h_l: Varialbe
             Varialbe of lateral
-        y: Varialbe
+        h_v: Varialbe
             Varialbe of vertial
         """
-        xy = x * y
-        a = self.a3(self.a0(x) + self.a1(y) + self.a2(xy))
-        b = self.b3(self.b0(x) + self.b1(y) + self.b2(xy))
-        
-        return b + self.a4(F.sigmoid(a))
+        h = F.concat((h_l, h_v, h_l*h_v))
+        h = self.act(self.linear0(h))
+        h = self.act(self.linear1(h))
+        return h
         
 class DecNet(Chain):
     """Decoder Component
     """
-    def __init__(self, dim, device=None):
-        d_inp, d_out = dim
-        super(DecNet, self).__init__(
-            linear=L.Linear(d_inp, d_out),
-            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
-            denoise=Denoise(d_out),
-        )
+    def __init__(self, dim, act=F.relu, device=None):
+        if len(dim) == 1:
+            d_inp, = dim
+            self.top = True
+            super(DecNet, self).__init__(
+                bn=L.BatchNormalization(d_inp, decay=0.9,
+                                        use_gamma=False, use_beta=False),
+                combinator=Combinator(d_inp, act, device),
+            )
+        else:
+            self.top = False
+            d_inp, d_out = dim
+            super(DecNet, self).__init__(
+                linear=L.Linear(d_inp, d_out),
+                bn=L.BatchNormalization(d_out, decay=0.9,
+                                        use_gamma=False, use_beta=False),
+                combinator=Combinator(d_out, act, device),
+            )
 
-    def __call__(self, z, h, test=False):
-        h = self.linear(h)
-        h = self.bn(h)
-        h = self.denoise(z, h)
-        return h
+    def __call__(self, h_l, h_v, test=False):
+        """
+        h_l: Varialbe
+            Varialbe of lateral
+        h_v: Varialbe
+            Varialbe of vertial
+        """
+        if not self.top:
+            h_v = self.linear(h_v)
+        h_v = self.bn(h_v)
+        h_v = self.combinator(h_l, h_v)
+        return h_v
         
 class Decoder(Chain):
-    def __init__(self, device=None):
+    def __init__(self, n_cls=10, act=F.relu, device=None):
         super(Decoder, self).__init__(
-            bn=L.Batchnorm(d_out, decay=0.9, use_gamm=False, use_beta=False),
-            decnet0=DecNet((100, 100)),
-            decnet1=DecNet((100, 250)),
-            decnet2=DecNet((250, 500)),
-            decnet3=DecNet((500, 1000)),
-            decnet4=DecNet((1000, 784)),
+            decnet0=DecNet((100+n_cls, )),
+            decnet1=DecNet((100+n_cls, 250+n_cls)),
+            decnet2=DecNet((250+n_cls, 500+n_cls)),
+            decnet3=DecNet((500+n_cls, 1000+n_cls)),
+            decnet4=DecNet((1000+n_cls, 784+n_cls)),
         )
         self.hiddens = []
         
-    def __call__(self, h, y, enc_hiddens, test=False):
+    def __call__(self, h_v, enc_hiddens, y, test=False):
         self.hiddens = []
         L = len(enc_hiddens)
-        
-        h = self.bn(h, test)
-        h_l = F.concat(enc_hiddens[L-1], y)
-        h = decnet0(h_l, h)
-        self.hiddens.apppend(h)
-        h_l = F.concat(enc_hiddens[L-2], y)
-        h = decnet1(h_l, h)
-        self.hiddens.apppend(h)
-        h_l = F.concat(enc_hiddens[L-3], y)
-        h = decnet2(h_l, h)
-        self.hiddens.apppend(h)
-        h_l = F.concat(enc_hiddens[L-4], y)
-        h = decnet3(h_l, h)
-        self.hiddens.apppend(h)
-        h_l = F.concat(enc_hiddens[L-5], y)
-        h = decnet4(h_l, h)
-        h = F.tanh(h)  # align input
-        self.hiddens.apppend(h)
+        h_v = F.concat((h_v, y))
+        h_l = F.concat((enc_hiddens[L-1], y))
+        h_v = self.decnet0(h_l, h_v)
+        self.hiddens.append(h_v)
+        h_l = F.concat((enc_hiddens[L-2], y))
+        h_v = self.decnet1(h_l, h_v)
+        self.hiddens.append(h_v)
+        h_l = F.concat((enc_hiddens[L-3], y))
+        h_v = self.decnet2(h_l, h_v)
+        self.hiddens.append(h_v)
+        h_l = F.concat((enc_hiddens[L-4], y))
+        h_v = self.decnet3(h_l, h_v)
+        self.hiddens.append(h_v)
+        h_l = F.concat((enc_hiddens[L-5], y))
+        h_v = self.decnet4(h_l, h_v)
+        h_v = F.tanh(h_v)  # align input
+        self.hiddens.append(h_v)
 
-        return h
+        return h_v
 
 class EncDecModel(Chain):
     #TODO: necessary?
@@ -168,18 +179,18 @@ class EncDecModel(Chain):
     def __call__(self, x, y, noise=False, test=False):
         pass
 
-class MLPBranch(Chain):
+class BranchNet(Chain):
     """MLP Branch
     Enlarge random seeds to the two times as many dimensions as dimensions.
     """
     def __init__(self, dim, device=None):
         d_inp, d_out = dim
-        super(MLPBranch, self).__init__(
+        super(BranchNet, self).__init__(
             linear0=L.Linear(d_inp, d_out),
             linear1=L.Linear(d_out, d_out),
-            bn0=L.Batchnorm(d_out),
+            bn0=L.BatchNormalization(d_out),
             # Align domain of denoising function's input
-            bn1=L.Batchnorm(d_out, use_gamma=False, use_beta=False),
+            bn1=L.BatchNormalization(d_out, use_gamma=False, use_beta=False),
         )
         self.dim = d_inp
         
@@ -210,11 +221,11 @@ class Generator(Chain):
         rdim = 100
         if fix:
             super(Generator, self).__init__(
-                top=MLPBranch((rdim, 100)),
-                branch0=MLPBranch((rdim, 250)),
-                branch1=MLPBranch((rdim, 500)),
-                branch2=MLPBranch((rdim, 500)),
-                branch3=MLPBranch((rdim, 1000)),
+                top=BranchNet((rdim, 100)),
+                branch0=BranchNet((rdim, 250)),
+                branch1=BranchNet((rdim, 500)),
+                branch2=BranchNet((rdim, 500)),
+                branch3=BranchNet((rdim, 1000)),
             )
             self.decnet0 = decnet0
             self.decnet1 = decnet1
@@ -223,12 +234,12 @@ class Generator(Chain):
             self.decnet4 = decnet4
         else:
             super(Generator, self).__init__(
-                top=MLPBranch((rdim, 100)),
-                branch0=MLPBranch((rdim, 100)),
-                branch1=MLPBranch((rdim, 250)),
-                branch2=MLPBranch((rdim, 500)),
-                branch3=MLPBranch((rdim, 500)),
-                branch4=MLPBranch((rdim, 1000)),
+                top=BranchNet((rdim, 100)),
+                branch0=BranchNet((rdim, 100)),
+                branch1=BranchNet((rdim, 250)),
+                branch2=BranchNet((rdim, 500)),
+                branch3=BranchNet((rdim, 500)),
+                branch4=BranchNet((rdim, 1000)),
                 decnet0=decnet0,
                 decnet1=decnet1,
                 decnet2=decnet2,
@@ -239,19 +250,19 @@ class Generator(Chain):
     def __call__(self, bs, y):
         h_v = self.top(bs)
         h_l = self.branch0(bs)
-        h_l = F.concat(h_l, y)
-        h_v = self.decnet0(h_l, h_t)
+        h_l = F.concat((h_l, y))
+        h_v = self.decnet0(h_l, h_v)
         h_l = self.branch1(bs)
-        h_l = F.concat(h_l, y)
+        h_l = F.concat((h_l, y))
         h_v = self.decnet1(h_l, h_v)
         h_l = self.branch2(bs)
-        h_l = F.concat(h_l, y)
+        h_l = F.concat((h_l, y))
         h_v = self.decnet2(h_l, h_v)
         h_l = self.branch3(bs)
-        h_l = F.concat(h_l, y)
+        h_l = F.concat((h_l, y))
         h_v = self.decnet3(h_l, h_v)
         h_l = self.branch4(bs)
-        h_l = F.concat(h_l, y)
+        h_l = F.concat((h_l, y))
         h_v = self.decnet4(h_l, h_v)
 
         return h_v
