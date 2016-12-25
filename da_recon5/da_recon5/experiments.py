@@ -1,7 +1,7 @@
 from da_recon5.models import MLPEncDecModel
 from chainer import optimizers, Variable
 import chainer.functions as F
-from utils improt grad_norm_hook
+from utils import grad_norm_hook
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
