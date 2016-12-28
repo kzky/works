@@ -13,6 +13,7 @@ from collections import OrderedDict
 import logging
 import time
 from utils import to_device
+from chainer_fix import BatchNormalization
 
 class MLPEnc(Chain):
 
@@ -27,6 +28,7 @@ class MLPEnc(Chain):
         # Setup layers
         layers = {}
         linears = OrderedDict()
+        scales = OrderedDict()
         batch_norms = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
@@ -36,19 +38,27 @@ class MLPEnc(Chain):
             l_name = "linear-enc-{:03}".format(l)
             linears[l_name] = linear
 
-            # Normalization and BatchCorrection
-            batch_norm = L.BatchNormalization(d_out, decay=0.9)
+            # Normalization
+            batch_norm = BatchNormalization(d_out, decay=0.9,
+                                            use_gamma=False, use_beta=False, device=device)
             bn_name = "bn-enc-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 
+            # Scales
+            scale = L.Scale(W_shape=d_out, bias_term=True)
+            bn_name = "sb-enc-{:03d}".format(l)
+            scales[bn_name] = scale
+            
         layers.update(linears)
         layers.update(batch_norms)
+        layers.update(scales)
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
+        self.scales = scales
         self.act = act
         self.noise = noise
         self.rc = rc
@@ -58,24 +68,27 @@ class MLPEnc(Chain):
 
     def __call__(self, x, test):
         h = x
+
+        # Add noise
+        h = self._add_noise(h, test)
+        
         self.hiddens = []
         for i, layers in enumerate(zip(
-            self.linears.values(), self.batch_norms.values())):
+            self.linears.values(), self.scales.values(), self.batch_norms.values())):
 
-            linear, batch_norm = layers
-
-            # Add noise
-            if self.noise and not test:
-                if np.random.randint(0, 2):
-                    n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
-                    n_ = Variable(to_device(n, self.device))
-                    h = h + n_
+            linear, scale, batch_norm = layers
 
             # Linear
             h = linear(h)
 
             # Batchnorm
             h = batch_norm(h, test)
+
+            # Add noise
+            h = self._add_noise(h, test)
+
+            # Scale
+            h = scale(h)
 
             # Activation
             h = self.act(h)
@@ -85,6 +98,15 @@ class MLPEnc(Chain):
                 self.hiddens.append(h)
 
         return h
+
+    def _add_noise(self, h, test):
+        if self.noise and not test:
+            if np.random.randint(0, 2):
+                n = np.random.normal(0, 0.03, h.data.shape).astype(np.float32)
+                n_ = Variable(to_device(n, self.device))
+                h = h + n_
+        return h
+        
 
 class Denoise(Chain):
     def __init__(self, dim):
@@ -130,7 +152,8 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            batch_norm = L.BatchNormalization(d_out, decay=0.9)
+            batch_norm = BatchNormalization(d_out, decay=0.9,
+                                            use_gamma=False, use_beta=False, device=device)
             bn_name = "bn-dec-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 

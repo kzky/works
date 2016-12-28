@@ -15,7 +15,7 @@ def test_model():
     # Model
     model = MLPEncDecModel(
         dims=dims, act=act,
-        noise=noise, lateral=lateral, test=test)
+        noise=noise, lateral=lateral)
     mlp_enc = model.mlp_enc
     mlp_dec = model.mlp_dec
     supervised_loss = model.supervised_loss
@@ -26,9 +26,9 @@ def test_model():
     y = Variable((np.random.rand(batch_size) * 10).astype(np.int32))
 
     # Forward Enc/Dec
-    y_pred = mlp_enc(x)
+    y_pred = mlp_enc(x, test)
     supervised_loss = model.supervised_loss(y_pred, y)
-    x_recon = model.mlp_dec(y_pred)
+    x_recon = model.mlp_dec(y_pred, test)
     recon_loss = model.recon_loss(x_recon, x, mlp_enc.hiddens, mlp_dec.hiddens)
     loss = supervised_loss + recon_loss
         
