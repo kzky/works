@@ -59,7 +59,7 @@ class Experiment(object):
                                            self.mlp_dec.hiddens)
 
         # Negative Entropy for y_l
-        neg_ent_l = NegativeEntropyLoss(y)
+        neg_ent_l = self.neg_ent_loss(y)
             
         # Reconstruction for (x_u, _)
         if x_u is None:
