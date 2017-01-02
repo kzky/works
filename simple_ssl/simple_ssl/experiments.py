@@ -63,7 +63,7 @@ class Experiment(object):
             
         # Reconstruction for (x_u, _)
         if x_u is None:
-            continue
+            return supervised_loss, recon_loss_l, neg_ent_l
 
         y = self.mlp_enc(x_u, test)
         x_u_recon = self.mlp_dec(y, test)
