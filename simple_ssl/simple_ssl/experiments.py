@@ -72,7 +72,7 @@ class Experiment(object):
                                            self.mlp_dec.hiddens)
 
         # Negative Entropy for y_u
-        neg_ent_u = NegativeEntropyLoss(y)
+        neg_ent_u = self.neg_ent_loss(y)
 
         return supervised_loss, recon_loss_l, recon_loss_u, neg_ent_l, neg_ent_u
 
