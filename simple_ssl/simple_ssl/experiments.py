@@ -13,10 +13,17 @@ class Experiment(object):
                  act=F.relu,
                  noise=False,
                  rc=False,
+                 lds=False,
+                 scale_rc=False,
+                 scale_lds=False,
                  ):
 
         # Settting
         self.device = device
+        self.rc = rc
+        self.lds = lds
+        self.scale_rc = scale_rc
+        self.scale_lds = scale_lds
         
         # Model
         self.model = MLPEncDecModel(
@@ -59,12 +66,16 @@ class Experiment(object):
                                            self.mlp_dec.hiddens)
 
         # Negative Entropy for y_l
-        neg_ent_l = self.neg_ent_loss(y)
-            
-        # Reconstruction for (x_u, _)
+        if self.lds:
+            #TODO: add mlp_dec.hiddens?
+            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens) 
+        else:
+            neg_ent_l = self.neg_ent_loss(y)
+
         if x_u is None:
             return supervised_loss, recon_loss_l, neg_ent_l
-
+            
+        # Reconstruction for (x_u, _)
         y = self.mlp_enc(x_u, test)
         x_u_recon = self.mlp_dec(y, test)
         recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
@@ -72,7 +83,11 @@ class Experiment(object):
                                            self.mlp_dec.hiddens)
 
         # Negative Entropy for y_u
-        neg_ent_u = self.neg_ent_loss(y)
+        if self.lds:
+            #TODO: add mlp_dec.hiddens?
+            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens) 
+        else:
+            neg_ent_l = self.neg_ent_loss(y)
 
         return supervised_loss, recon_loss_l, recon_loss_u, neg_ent_l, neg_ent_u
 
