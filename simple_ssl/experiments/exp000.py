@@ -18,13 +18,16 @@ def main():
     n_l_train_data = 100
     n_train_data = 60000
 
-    dims = [inp_dim, 250, 100, out_dim]
+    dims = [inp_dim, 500, 250, 100, out_dim]
     learning_rate = 1. * 1e-3
     n_epoch = 20
     decay = 0.5
     act = F.relu
     noise = False
     rc = False
+    lds = False
+    scale_rc = False
+    scale_lds = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
