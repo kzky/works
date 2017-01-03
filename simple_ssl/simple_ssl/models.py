@@ -22,7 +22,6 @@ class MLPEnc(Chain):
                      act=F.relu,
                      noise=False,
                      rc=False,
-                     lateral=False,
                      device=None):
 
         # Setup layers
@@ -53,7 +52,6 @@ class MLPEnc(Chain):
         self.act = act
         self.noise = noise
         self.rc = rc
-        self.lateral = lateral
         self.device = device
         self.hiddens = []
 
@@ -87,32 +85,10 @@ class MLPEnc(Chain):
 
         return h
 
-class Denoise(Chain):
-    def __init__(self, dim):
-        super(Denoise, self).__init__(
-            a0=L.Scale(W_shape=(dim, )),
-            a1=L.Scale(W_shape=(dim, )),
-            a2=L.Scale(W_shape=(dim, )),
-            a3=L.Bias(shape=(dim, )),
-            a4=L.Scale(W_shape=(dim, )),
-            b0=L.Scale(W_shape=(dim, )),
-            b1=L.Scale(W_shape=(dim, )),
-            b2=L.Scale(W_shape=(dim, )),
-            b3=L.Bias(shape=(dim, )),
-            )
-
-    def __call__(self, x, y):
-        xy = x * y
-        a = self.a3(self.a0(x) + self.a1(y) + self.a2(xy))
-        b = self.b3(self.b0(x) + self.b1(y) + self.b2(xy))
-        
-        return b + self.a4(F.sigmoid(a))
-
 class MLPDec(Chain):
 
     def __init__(self, dims, act=F.relu,
                      rc=False,
-                     lateral=False,
                      mlp_enc=None,
                      device=None):
         # Setup layers
@@ -136,14 +112,8 @@ class MLPDec(Chain):
             bn_name = "bn-dec-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 
-            # Denoise
-            if lateral and l != 0:
-                dn_name = "dn-dec-{:03d}".format(l)
-                denoises[dn_name] = Denoise(d_in)
-                                
         layers.update(linears)
         layers.update(batch_norms)
-        layers.update(denoises) if lateral else None
         
         super(MLPDec, self).__init__(**layers)
         self.dims = dims
@@ -153,7 +123,6 @@ class MLPDec(Chain):
         self.denoises = denoises
         self.act = act
         self.rc = rc
-        self.lateral = lateral
         self.device = device
         self.hiddens = []
         self.mlp_enc = mlp_enc
@@ -172,14 +141,8 @@ class MLPDec(Chain):
             h = batch_norm(h, test)
 
             # Activation, no need for non-linearity for RC of x
-            if not self.lateral != len(self.dims) - 2:
+            if i != len(self.dims) - 2:
                 h = self.act(h)
-
-            # Denoise
-            if self.lateral and i != len(self.dims) - 2:
-                denoise = self.denoises.values()[i]
-                h_enc = self.mlp_enc.hiddens[::-1][i]
-                h = denoise(h_enc, h)
 
             # RC after non-linearity
             if self.rc and i != len(self.dims) - 2:
@@ -202,12 +165,11 @@ class ReconstructionLoss(Chain):
     def __init__(self,
                      noise=False,
                      rc=False,
-                     lateral=False):
+                     ):
 
         super(ReconstructionLoss, self).__init__()
         self.noise = noise
         self.rc = rc
-        self.lateral = lateral
         self.loss = None
         
     def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
@@ -287,7 +249,6 @@ class MLPEncDecModel(Chain):
                      act=F.relu,
                      noise=False,
                      rc=False,
-                     lateral=False,
                      device=None):
         # Constrcut models
         mlp_enc = MLPEnc(
@@ -295,17 +256,15 @@ class MLPEncDecModel(Chain):
             act=act,
             noise=noise,
             rc=rc,
-            lateral=lateral,
             device=device)
         mlp_dec = MLPDec(
             dims=dims,
             act=act,
             rc=rc,
-            lateral=lateral,
             mlp_enc=mlp_enc,
             device=device)
         self.supervised_loss = SupervizedLoss()
-        self.recon_loss = ReconstructionLoss(noise, rc, lateral)
+        self.recon_loss = ReconstructionLoss(noise, rc)
         self.pseudo_supervised_loss = PseudoSupervisedLoss()
         self.kl_loss = KLLoss()
         self.neg_ent_loss = NegativeEntropyLoss()

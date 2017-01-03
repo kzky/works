@@ -25,7 +25,6 @@ def main():
     act = F.relu
     noise = False
     rc = False
-    lateral = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -50,7 +49,7 @@ def main():
         act,
         noise,
         rc,
-        lateral)
+        )
 
     # Training loop
     print("# Training loop")

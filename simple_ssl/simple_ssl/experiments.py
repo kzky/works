@@ -13,7 +13,7 @@ class Experiment(object):
                  act=F.relu,
                  noise=False,
                  rc=False,
-                 lateral=False):
+                 ):
 
         # Settting
         self.device = device
@@ -21,7 +21,7 @@ class Experiment(object):
         # Model
         self.model = MLPEncDecModel(
             dims=dims, act=act,
-            noise=noise, rc=rc, lateral=lateral,
+            noise=noise, rc=rc,
             device=device)
         self.model.to_gpu(self.device) if self.device else None
         self.mlp_enc = self.model.mlp_enc
