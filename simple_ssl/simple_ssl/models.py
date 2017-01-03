@@ -197,7 +197,7 @@ class ReconstructionLoss(Chain):
             l = F.mean_squared_error(x_recon, x)
             if scale:
                 d = np.prod(x.data.shape[1:])
-                l = l/ d
+                l = l / d
             recon_loss +=  l
 
         self.loss = recon_loss
