@@ -20,7 +20,7 @@ def main():
 
     dims = [inp_dim, 250, 100, out_dim]
     learning_rate = 1. * 1e-3
-    n_epoch = 100
+    n_epoch = 20
     decay = 0.5
     act = F.relu
     noise = False
