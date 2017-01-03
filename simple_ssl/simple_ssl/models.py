@@ -76,7 +76,7 @@ class MLPEnc(Chain):
             # Batchnorm
             h = batch_norm(h, test)
 
-            # Activation
+            # Activation  #TODO: have to add in the last layer?
             h = self.act(h)
 
             # RC after non-linearity
