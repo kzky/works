@@ -181,7 +181,7 @@ class MLPDec(Chain):
             h = batch_norm(h, test)
 
             # Activation, no need for non-linearity for RC of x
-            if not self.lateral != len(self.dims) - 2:
+            if not self.lateral and i != len(self.dims) - 2:
                 h = self.act(h)
 
             # Denoise
