@@ -172,7 +172,7 @@ class ReconstructionLoss(Chain):
         self.rc = rc
         self.loss = None
         
-    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
+    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens, scale=True):
         """
         Parameters
         -----------------
@@ -181,21 +181,26 @@ class ReconstructionLoss(Chain):
         enc_hiddens: list of Variable
         dec_hiddens: list of Varialbe
         """
-
-        # Lateral Recon Loss
         recon_loss = 0
+        
+        # Lateral Recon Loss
         if self.rc and enc_hiddens is not None:
             for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
-                d = np.prod(h0.data.shape[1:])
-                recon_loss += F.mean_squared_error(h0, h1) / d
-
+                l += F.mean_squared_error(h0, h1)
+                if scale:
+                    d = np.prod(h0.data.shape[1:])
+                    l = l / d
+                recon_loss += l
+                
         # Reconstruction Loss
         if x_recon is not None:
-            d = np.prod(x.data.shape[1:])
-            recon_loss += F.mean_squared_error(x_recon, x) / d
+            l = F.mean_squared_error(x_recon, x)
+            if scale:
+                d = np.prod(x.data.shape[1:])
+                l = l/ d
+            recon_loss +=  l
 
         self.loss = recon_loss
-        
         return self.loss
 
 class PseudoSupervisedLoss(Chain):
@@ -236,12 +241,31 @@ class NegativeEntropyLoss(Chain):
         self.test = test
 
 
-    def __call__(self, y):
+    def __call__(self, y, hiddens=None, scale=True):
+        ne_loss = 0
+        
+        # NE for hiddens
+        if not hiddens:
+            for h in hiddens:
+                h_normalized = F.softmax(h)
+                h_log_softmax = F.log_softmax(h)
+                n = h.data.shape[0]
+                l = - F.sum(h_normalized * h_log_softmax) / n 
+                if scale:
+                    d = np.prod(h.data.shape[1:])
+                    l = l / d
+                ne_loss += l
+                
+        # NE for output
         y_normalized = F.softmax(y)
         y_log_softmax = F.log_softmax(y)
         n = y.data.shape[0]
-        d = np.prod(y.data.shape[1:])
-        return - F.sum(y_normalized * y_log_softmax) / n / d
+        l = - F.sum(y_normalized * y_log_softmax) / n 
+        if scale:
+            d = np.prod(y.data.shape[1:])
+            l = l / d
+        ne_loss += l
+        return ne_loss
 
 class MLPEncDecModel(Chain):
     def __init__(self,
