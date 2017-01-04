@@ -259,8 +259,6 @@ class MLPEncDecModel(Chain):
             device=device)
         self.supervised_loss = SupervizedLoss()
         self.recon_loss = ReconstructionLoss(noise, rc)
-        self.pseudo_supervised_loss = PseudoSupervisedLoss()
-        self.kl_loss = KLLoss()
         self.neg_ent_loss = NegativeEntropyLoss()
 
         super(MLPEncDecModel, self).__init__(
