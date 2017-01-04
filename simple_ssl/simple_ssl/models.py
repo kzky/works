@@ -215,7 +215,7 @@ class NegativeEntropyLoss(Chain):
         ne_loss = 0
         
         # NE for hiddens
-        if not hiddens:
+        if hiddens is not None:
             for h in hiddens:
                 h_normalized = F.softmax(h)
                 h_log_softmax = F.log_softmax(h)
