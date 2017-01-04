@@ -140,8 +140,7 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            batch_norm = BatchNormalization(d_out, decay=0.9,
-                                            use_gamma=False, use_beta=False, device=device)
+            batch_norm = L.BatchNormalization(d_out, decay=0.9)
             bn_name = "bn-dec-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 
