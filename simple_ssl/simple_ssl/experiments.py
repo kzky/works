@@ -62,15 +62,16 @@ class Experiment(object):
         # Reconstruction for (x_l, )
         x_l_recon = self.mlp_dec(y, test)
         recon_loss_l = self.recon_loss(x_l_recon, x_l,  # Use self, x_l
-                                           self.mlp_enc.hiddens,
-                                           self.mlp_dec.hiddens)
+                                       self.mlp_enc.hiddens,
+                                       self.mlp_dec.hiddens, 
+                                       self.scale_rc)
 
         # Negative Entropy for y_l
         if self.lds:
             #TODO: add mlp_dec.hiddens?
-            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens) 
+            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
         else:
-            neg_ent_l = self.neg_ent_loss(y)
+            neg_ent_l = self.neg_ent_loss(y, scale=self.scale_lds)
 
         if x_u is None:
             return supervised_loss, recon_loss_l, neg_ent_l
@@ -79,15 +80,16 @@ class Experiment(object):
         y = self.mlp_enc(x_u, test)
         x_u_recon = self.mlp_dec(y, test)
         recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
-                                           self.mlp_enc.hiddens, 
-                                           self.mlp_dec.hiddens)
+                                       self.mlp_enc.hiddens, 
+                                       self.mlp_dec.hiddens, 
+                                       self.scale_rc)
 
         # Negative Entropy for y_u
         if self.lds:
             #TODO: add mlp_dec.hiddens?
-            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens) 
+            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
         else:
-            neg_ent_l = self.neg_ent_loss(y)
+            neg_ent_l = self.neg_ent_loss(y, scale=self.scale_lds)
 
         return supervised_loss, recon_loss_l, recon_loss_u, neg_ent_l, neg_ent_u
 

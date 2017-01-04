@@ -52,6 +52,9 @@ def main():
         act,
         noise,
         rc,
+        lds,
+        scale_rc,
+        scale_lds,
         )
 
     # Training loop
