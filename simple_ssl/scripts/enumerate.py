@@ -5,12 +5,13 @@ def main():
     a = ["MLP", "CNN"]
     b = ["RC on X", "RC on all"]
     c = ["LDS on Y", "LDS on all"]
-    d = ["Scale for RC", "Scale for LDS"]
-    e = ["Clean", "Noise"]
-    f = ["GN for W", "None"]
-    g = ["One Opt", "Two Opts"]
+    d = ["Scale for RC", "None"]
+    e = ["Scale for LDS", "None"]
+    f = ["Clean", "Noise"]
+    g = ["GN for W", "None"]
+    h = ["One Opt", "Two Opts"]
     
-    categories = [a, b, c, d]
+    categories = [a, b, c, d, e, f, g, h]
     fname = "./experiment_list.csv"
     with open(fname, "w") as fpout:
         writer = csv.writer(fpout)
