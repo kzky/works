@@ -87,9 +87,9 @@ class Experiment(object):
         # Negative Entropy for y_u
         if self.lds:
             #TODO: add mlp_dec.hiddens?
-            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
+            neg_ent_u = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
         else:
-            neg_ent_l = self.neg_ent_loss(y, scale=self.scale_lds)
+            neg_ent_u = self.neg_ent_loss(y, scale=self.scale_lds)
 
         return supervised_loss, recon_loss_l, recon_loss_u, neg_ent_l, neg_ent_u
 
