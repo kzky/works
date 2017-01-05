@@ -273,6 +273,39 @@ class KLLoss(Chain):
 
         return F.sum((t_normalized * t_log_softmax) \
                          - (t_normalized * y_log_softmax)) / n
+class NegativeEntropyLoss(Chain):
+    """Compute cross entropy between y_t and y_{t+1}.
+    """
+
+    def __init__(self, test=False):
+        self.test = test
+
+
+    def __call__(self, y, hiddens=None, scale=True):
+        ne_loss = 0
+        
+        # NE for hiddens
+        if hiddens is not None:
+            for h in hiddens:
+                h_normalized = F.softmax(h)
+                h_log_softmax = F.log_softmax(h)
+                n = h.data.shape[0]
+                l = - F.sum(h_normalized * h_log_softmax) / n 
+                if scale:
+                    d = np.prod(h.data.shape[1:])
+                    l = l / d
+                ne_loss += l
+                
+        # NE for output
+        y_normalized = F.softmax(y)
+        y_log_softmax = F.log_softmax(y)
+        n = y.data.shape[0]
+        l = - F.sum(y_normalized * y_log_softmax) / n 
+        if scale:
+            d = np.prod(y.data.shape[1:])
+            l = l / d
+        ne_loss += l
+        return ne_loss
 
 class MLPEncDecModel(Chain):
     def __init__(self,
@@ -301,6 +334,7 @@ class MLPEncDecModel(Chain):
         self.recon_loss = ReconstructionLoss(noise, rc, lateral)
         self.pseudo_supervised_loss = PseudoSupervisedLoss()
         self.kl_loss = KLLoss()
+        self.neg_ent_loss = NegativeEntropyLoss()
 
         super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,

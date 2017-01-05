@@ -31,6 +31,7 @@ class Experiment(object):
         self.mlp_dec = self.model.mlp_dec
         self.supervised_loss = self.model.supervised_loss
         self.recon_loss = self.model.recon_loss
+        self.neg_ent_loss = self.model.neg_ent_loss
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
