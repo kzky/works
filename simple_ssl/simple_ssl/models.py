@@ -236,6 +236,34 @@ class NegativeEntropyLoss(Chain):
         ne_loss += l
         return ne_loss
 
+class GraphLoss(Chain):
+    def __call__(self, hiddens, y):
+        # Feature Similarity
+        sim_feats = 0
+        for h in hiddens:
+            d = np.prod(h.shape[1:])
+            distmat = self._calc_distmat(h)
+            sim_feats += F.exp(- distmat / d)
+
+        # Label Similarity
+        d = np.prod(y.shape[1:])
+        sim_label = self._calc_distmat(y) / d
+
+        # Graph Loss
+        bs = y.shape[0]
+        loss = F.sum(sim_feats * sim_label) / bs
+        return loss
+
+    def _calc_distmat(self, h):
+        bs = h.shape[0]
+        
+        h_l2_2 = F.sum(h**2, axis=1)
+        H = F.broadcast_to(h_l2_2, (bs, bs))
+        H_t = F.transpose(H)
+        XX = F.linear(h, h)
+
+        return (H_t - 2*XX + H)
+
 class MLPEncDecModel(Chain):
     def __init__(self,
                      dims,
