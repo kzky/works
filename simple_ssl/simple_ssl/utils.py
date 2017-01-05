@@ -16,6 +16,6 @@ def add_normal_noise(h, sigma=0.03):
         if device.id ==  -1:
             n_ = Variable(n)
         else:
-            n_ = Variable(cuda.(n, device.id))
+            n_ = Variable(cuda.to_gpu(n, device.id))
         h = h + n_
     return h
