@@ -120,7 +120,7 @@ class MNISTDataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
-        imgs_ = np.zeros(imgs)
+        imgs_ = np.zeros_like(imgs)
         for i, img in enumerate(imgs):
             # Rotation
             n = np.random.choice(np.arange(-15, 15))
