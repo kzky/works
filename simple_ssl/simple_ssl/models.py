@@ -241,14 +241,14 @@ class GraphLoss(Chain):
         # Input Similarity
         d = np.prod(x.shape[1:])
         distmat = self._calc_distmat(x)
-        sim_input = F.exp(- distmat / d)
+        sim_input = F.exp(- distmat) / d
         
         # Feature Similarity
         sim_feats = 0
         for h in hiddens:
             d = np.prod(h.shape[1:])
             distmat = self._calc_distmat(h)
-            sim_feats += F.exp(- distmat / d)
+            sim_feats += F.exp(- distmat) / d
 
         # Label Similarity
         d = np.prod(y.shape[1:])
@@ -256,7 +256,7 @@ class GraphLoss(Chain):
 
         # Graph Loss
         bs_2 = y.shape[0] ** 2
-        loss = F.sum(sim_feats * sim_label) / bs_2
+        loss = F.sum((sim_input + sim_feats) * sim_label) / bs_2
         return loss
 
     def _calc_distmat(self, h):
