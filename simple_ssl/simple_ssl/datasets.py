@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from chainer import cuda
+import cv2
 
 class MNISTDataReader(object):
     """DataReader
@@ -12,7 +13,8 @@ class MNISTDataReader(object):
             "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/u_train.npz", 
         test_path="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/test.npz",
         batch_size=32,
-        n_cls=10):
+        n_cls=10,
+        da=False):
             
         self.l_train_data = dict(np.load(l_train_path))
         self.u_train_data = dict(np.load(u_train_path))
@@ -26,6 +28,7 @@ class MNISTDataReader(object):
         self._n_u_train_data = len(self.u_train_data["x"])
         self._n_test_data = len(self.test_data["x"])
         self._n_cls = n_cls
+        self._da = da
 
         print("Num. of labeled samples {}".format(self._n_l_train_data))
         print("Num. of unlabeled samples {}".format(self._n_u_train_data))
@@ -81,6 +84,8 @@ class MNISTDataReader(object):
         batch_data_x_ = self.u_train_data["x"][beg:end, :]
         batch_data_y_ = self.u_train_data["y"][beg:end]
         batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        if self._da:
+            batch_data_x = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
@@ -113,6 +118,15 @@ class MNISTDataReader(object):
         batch_data_y = batch_data_y_.astype(np.int32)
 
         return batch_data_x , batch_data_y
+
+    def _transform(self, imgs):
+        imgs_ = np.zeros(imgs)
+        for i, img in enumerate(imgs):
+            # Rotation
+            n = np.random.choice(np.arange(-15, 15))
+            M = cv2.getRotationMatrix2D((28/2, 28/2), n, 1)
+            imgs_[i] = cv2.warpAffine(img.reshape(28, 28), M, (28, 28)).reshape(784)
+        return imgs_
 
 class Separator(object):
     """Seprate the original samples to labeled samples and unlabeled samples.
