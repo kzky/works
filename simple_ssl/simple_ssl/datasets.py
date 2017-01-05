@@ -126,13 +126,7 @@ class MNISTDataReader(object):
             n = np.random.choice(np.arange(-15, 15))
             M = cv2.getRotationMatrix2D((28/2, 28/2), n, 1)
             dst = cv2.warpAffine(img.reshape(28, 28), M, (28, 28))
-
-            # Shift
-            x = np.random.choice(np.arange(-10, 10))
-            y = np.random.choice(np.arange(-10, 10))
-            M = np.float32([[1,0,x],[0,1,y]])
-            dst = cv2.warpAffine(dst, M, (28, 28)).reshape(784)
-            imgs_[i] = dsto
+            imgs_[i] = dst.reshape(784)
         return imgs_
 
 class Separator(object):
