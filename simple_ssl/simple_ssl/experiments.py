@@ -36,6 +36,7 @@ class Experiment(object):
         self.supervised_loss = self.model.supervised_loss
         self.recon_loss = self.model.recon_loss
         self.neg_ent_loss = self.model.neg_ent_loss
+        self.graph_loss = self.model.graph_loss
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
@@ -93,10 +94,9 @@ class Experiment(object):
     def test(self, x_l, y_l):
         y = self.mlp_enc(x_l, test=True)
         acc = F.accuracy(y, y_l)
-        losses = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
-        supervised_loss = losses[0]
-        recon_loss = losses[1]
-        return acc, supervised_loss, recon_loss
+        loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
+        supervised_loss = losse
+        return acc, supervised_loss
         
 # Alias
 Experiment000 = Experiment
