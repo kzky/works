@@ -132,7 +132,7 @@ class MNISTDataReader(object):
             y = np.random.choice(np.arange(-10, 10))
             M = np.float32([[1,0,x],[0,1,y]])
             dst = cv2.warpAffine(dst, M, (28, 28)).reshape(784)
-             imgs_[i] = dst
+            imgs_[i] = dsto
         return imgs_
 
 class Separator(object):
