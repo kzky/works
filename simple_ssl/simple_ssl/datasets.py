@@ -52,6 +52,8 @@ class MNISTDataReader(object):
         batch_data_x_ = self.l_train_data["x"][beg:end, :]
         batch_data_y_ = self.l_train_data["y"][beg:end]
         batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        if self._da:
+            batch_data_x = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
