@@ -77,7 +77,7 @@ class Experiment(object):
         else:
             neg_ent_u = self.neg_ent_loss(y, scale=self.scale_lds)
 
-        return supervised_loss, recon_loss_l, recon_loss_u, neg_ent_l, neg_ent_u
+        return supervised_loss, recon_loss_u, neg_ent_u
 
     def forward(self, x_l, y_l, x_u, test=False):
         losses = self.forward_for_losses(x_l, y_l, x_u)
