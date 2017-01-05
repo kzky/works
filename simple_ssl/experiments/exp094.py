@@ -77,8 +77,8 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            acc, sloss, rloss = exp.test(x_l, y_l)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{},ReconstructionLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data, rloss.data)
+            acc, sloss = exp.test(x_l, y_l)
+            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data)
             print(msg)
             
             st = time.time()
