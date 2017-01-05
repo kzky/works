@@ -110,7 +110,7 @@ class Experiment(object):
         y = self.mlp_enc(x_l, test=True)
         acc = F.accuracy(y, y_l)
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
-        supervised_loss = losse
+        supervised_loss = loss
         return acc, supervised_loss
         
 # Alias
