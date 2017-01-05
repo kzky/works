@@ -250,7 +250,7 @@ class GraphLoss(Chain):
         sim_label = self._calc_distmat(y) / d
 
         # Graph Loss
-        bs = y.shape[0]
+        bs_2 = y.shape[0] ** 2
         loss = F.sum(sim_feats * sim_label) / bs
         return loss
 
