@@ -263,10 +263,7 @@ class CrossCovarianceLoss(Chain):
             for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
                 n = h0.shape[0]
                 d = np.prod(h0.shape[1:])
-                p = F.softmax(h0)
-                log_p = F.log_softmax(h0)
-                log_q = F.log_softmax(h1)
-                l = F.sum(p * (log_p - log_q)) / n / d
+                l = F.cross_covariance(h0, h1) / n / d
                 cc_loss += l
 
         self.loss = cc_loss
