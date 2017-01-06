@@ -202,6 +202,40 @@ class ReconstructionLoss(Chain):
         self.loss = recon_loss
         return self.loss
 
+class KLReconstructionLoss(Chain):
+
+    def __init__(self,
+                     rc=False,
+                     ):
+
+        super(KLReconstructionLoss, self).__init__()
+        self.rc = rc
+        self.loss = None
+        
+    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens, scale=True):
+        """
+        Parameters
+        -----------------
+        x_recon: Variable to be reconstructed as label
+        x: Variable to be reconstructed as label
+        enc_hiddens: list of Variable
+        dec_hiddens: list of Varialbe
+        """
+        kl_recon_loss = 0
+        
+        # Lateral Recon Loss
+        if self.rc and enc_hiddens is not None:
+            for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
+                d = np.prod(h0.shape[1:])
+                p = F.softmax(h0)
+                log_p = F.log_softmax(h0)
+                log_q = F.log_softmax(h1)
+                l = p * (log_p - log_q) / d
+                kl_recon_loss += l
+
+        self.loss = kl_recon_loss
+        return self.loss
+    
 class NegativeEntropyLoss(Chain):
     """Compute cross entropy between y_t and y_{t+1}.
     """
@@ -293,6 +327,7 @@ class MLPEncDecModel(Chain):
         self.recon_loss = ReconstructionLoss(noise, rc)
         self.neg_ent_loss = NegativeEntropyLoss()
         self.graph_loss = GraphLoss()
+        self.kl_recon_loss = KLReconstructionLoss(rc)
 
         super(MLPEncDecModel, self).__init__(
             mlp_enc=mlp_enc,

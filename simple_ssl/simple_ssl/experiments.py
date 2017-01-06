@@ -38,6 +38,7 @@ class Experiment(object):
         self.recon_loss = self.model.recon_loss
         self.neg_ent_loss = self.model.neg_ent_loss
         self.graph_loss = self.model.graph_loss
+        self.kl_recon_loss = self.model.kl_recon_loss
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
