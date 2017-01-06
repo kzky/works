@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from chainer import cuda, Variable
+import chainer.functions as F
 
 def to_device(x, device=None):
     if device:
