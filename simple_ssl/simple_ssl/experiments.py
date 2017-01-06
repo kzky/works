@@ -1,6 +1,7 @@
 from simple_ssl.models import MLPEncDecModel, NegativeEntropyLoss
 from chainer import optimizers, Variable
 import chainer.functions as F
+from utils import grad_norm_hook
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -42,10 +43,12 @@ class Experiment(object):
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
+        self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
         
     def train(self, x_l, y_l, x_u):
         loss = self.forward(x_l, y_l, x_u)
         self.backward(loss)
+        #self.optimizer.call_hooks()
         self.update()
 
     def forward_for_losses(self, x_l, y_l, x_u, test=False):
