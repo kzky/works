@@ -226,11 +226,12 @@ class KLReconstructionLoss(Chain):
         # Lateral Recon Loss
         if self.rc and enc_hiddens is not None:
             for h0, h1 in zip(enc_hiddens[::-1], dec_hiddens):
+                n = h0.shape[0]
                 d = np.prod(h0.shape[1:])
                 p = F.softmax(h0)
                 log_p = F.log_softmax(h0)
                 log_q = F.log_softmax(h1)
-                l = p * (log_p - log_q) / d
+                l = F.sum(p * (log_p - log_q)) / n / d
                 kl_recon_loss += l
 
         self.loss = kl_recon_loss
