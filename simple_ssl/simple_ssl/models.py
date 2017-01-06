@@ -212,7 +212,7 @@ class KLReconstructionLoss(Chain):
         self.rc = rc
         self.loss = None
         
-    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens, scale=True):
+    def __call__(self, x_recon, x, enc_hiddens, dec_hiddens):
         """
         Parameters
         -----------------
