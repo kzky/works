@@ -128,7 +128,7 @@ class Experiment(object):
 
         # Wrong samples
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
-        print(idx.tolist())
+        #print(idx.tolist())
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
