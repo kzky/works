@@ -67,7 +67,7 @@ class MLPEnc(Chain):
         h = x
         self.hiddens = []
         for i, layers in enumerate(zip(
-                self.linears.values(), self.batch_norms.values(), self.scale_biases())):
+                self.linears.values(), self.batch_norms.values(), self.scale_biases.values())):
 
             linear, batch_norm, scale_bias = layers
 
@@ -147,7 +147,7 @@ class MLPDec(Chain):
         h = x
         self.hiddens = []
         for i, layers in enumerate(zip(
-                self.linears.values(), self.batch_norms.values(), self.scale_biases())):
+                self.linears.values(), self.batch_norms.values(), self.scale_biases.values())):
             linear, batch_norm, scale_bias = layers
 
             # Linear
