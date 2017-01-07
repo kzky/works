@@ -140,7 +140,7 @@ class Experiment(object):
 
     def save_generate_images(self, y_rec):
         for i, img in enumerate(y_rec.data):
-            fpath = "./test_gen/{:05d}".format(i)
+            fpath = "./test_gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28))
 
 class Experiment1000(Experiment):
