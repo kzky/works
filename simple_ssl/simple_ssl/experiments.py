@@ -4,6 +4,8 @@ import chainer.functions as F
 from utils import grad_norm_hook
 from sklearn.metrics import confusion_matrix
 from chainer import cuda
+import numpy as np
+
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
