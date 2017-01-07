@@ -106,7 +106,7 @@ class MLPDec(Chain):
         layers = {}
         linears = OrderedDict()
         batch_norms = OrderedDict()
-        denoises = OrderedDict()
+        scale_biases = OrderedDict()
         
         dims_reverse = dims[::-1]
         for l, d in enumerate(zip(dims_reverse[0:-1], dims_reverse[1:])):
@@ -137,7 +137,6 @@ class MLPDec(Chain):
         self.linears = linears
         self.batch_norms = batch_norms
         self.scale_biases = scale_bias
-        self.denoises = denoises
         self.act = act
         self.rc = rc
         self.device = device
