@@ -28,6 +28,7 @@ class MLPEnc(Chain):
         layers = {}
         linears = OrderedDict()
         batch_norms = OrderedDict()
+        scale_biases = OrderedDict()
         for l, d in enumerate(zip(dims[0:-1], dims[1:])):
             d_in, d_out = d[0], d[1]
 
@@ -37,18 +38,25 @@ class MLPEnc(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            batch_norm = L.BatchNormalization(d_out, decay=0.9)
+            batch_norm = BatchNormalization(d_out, decay=0.9, 
+                                            use_gamma=False, use_beta=False)
             bn_name = "bn-enc-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 
+            scale_bias = L.Scale(W_shape=d_out, bias_term=True)
+            sb_name = "sb-enc-{:03d}".format(l)
+            scale_biases[sb_name] = scale_bias
+
         layers.update(linears)
         layers.update(batch_norms)
+        layers.update(scale_biases)
         
         super(MLPEnc, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
+        self.scale_biases = scale_bias
         self.act = act
         self.noise = noise
         self.rc = rc
@@ -59,9 +67,9 @@ class MLPEnc(Chain):
         h = x
         self.hiddens = []
         for i, layers in enumerate(zip(
-            self.linears.values(), self.batch_norms.values())):
+                self.linears.values(), self.batch_norms.values(), self.scale_biases)):
 
-            linear, batch_norm = layers
+            linear, batch_norm, scale_bias = layers
 
             # Add noise
             if self.noise and not test:
@@ -75,6 +83,9 @@ class MLPEnc(Chain):
 
             # Batchnorm
             h = batch_norm(h, test)
+
+            # Scale bias
+            h = scale_bias(h)            
 
             # Activation  #TODO: have to add in the last layer?
             h = self.act(h)
@@ -107,18 +118,25 @@ class MLPDec(Chain):
             linears[l_name] = linear
 
             # Normalization and BatchCorrection
-            batch_norm = L.BatchNormalization(d_out, decay=0.9)
+            batch_norm = BatchNormalization(d_out, decay=0.9, 
+                                            use_gamma=False, use_beta=False)
             bn_name = "bn-dec-{:03d}".format(l)
             batch_norms[bn_name] = batch_norm
 
+            scale_bias = L.Scale(W_shape=d_out, bias_term=True)
+            sb_name = "sb-enc-{:03d}".format(l)
+            scale_biases[sb_name] = scale_bias
+
         layers.update(linears)
         layers.update(batch_norms)
+        layers.update(scale_biases)
         
         super(MLPDec, self).__init__(**layers)
         self.dims = dims
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
+        self.scale_biases = scale_bias
         self.denoises = denoises
         self.act = act
         self.rc = rc
@@ -130,14 +148,17 @@ class MLPDec(Chain):
         h = x
         self.hiddens = []
         for i, layers in enumerate(zip(
-            self.linears.values(), self.batch_norms.values())):
-            linear, batch_norm = layers
+                self.linears.values(), self.batch_norms.values(), self.scale_biases))):
+            linear, batch_norm, scale_bias = layers
 
             # Linear
             h = linear(h)
 
             # Batchnorm
             h = batch_norm(h, test)
+
+            # Scale bias
+            h = scale_bias(h)            
 
             # Activation, no need for non-linearity for RC of x
             if i != len(self.dims) - 2:
