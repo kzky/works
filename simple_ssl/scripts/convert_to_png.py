@@ -15,7 +15,7 @@ def convert_mnist(fpath="~/datasets/mnist/test.npz"):
 
 def main():
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "/datasets/mnist/test.npz")
+    fpath = os.path.join(home, "datasets/mnist/test.npz")
     convert_mnist(fpath)
 
 if __name__ == '__main__':
