@@ -131,14 +131,19 @@ class Experiment(object):
         #print(idx.tolist())
 
         # Generate and Save
-        y_rec = self.mlp_dec(y, test=True)
-        self.save_generate_images(y_rec)
+        x_rec = self.mlp_dec(y, test=True)
+        self.save_generate_images(y_rec, idx)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
         return acc, supervised_loss
 
-    def save_generate_images(self, y_rec):
+    def save_generate_images(self, x_rec, idx=None):
+        if idx is not None:
+            x_rec = x_rec[idx, :]
+        else:
+            x_rec = x_rec.data
+            
         for i, img in enumerate(y_rec.data):
             fpath = "./test_gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
