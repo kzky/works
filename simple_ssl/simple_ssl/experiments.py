@@ -139,7 +139,7 @@ class Experiment(object):
         return acc, supervised_loss
 
     def save_generate_images(self, y_rec):
-        for i, img in y_rec:
+        for i, img in enumerate(y_rec):
             fpath = "./test_gen/{:05d}".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28))
 
