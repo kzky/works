@@ -190,7 +190,7 @@ class Experiment1000(Experiment):
         # Supervision for (x_l, y_l)
         y = self.mlp_enc(x_l, test)
         supervised_loss = self.supervised_loss(y, y_l)
-        self.optimizer_ce.cleargrads()
+        self.model.cleargrads()
         supervised_loss.backward()
         self.optimizer_ce.update()
 
@@ -201,7 +201,7 @@ class Experiment1000(Experiment):
                                        self.mlp_enc.hiddens, 
                                        self.mlp_dec.hiddens, 
                                        self.scale_rc)
-        self.optimizer_rc.cleargrads()
+        self.model.cleargrads()
         recon_loss_u.backward()
         self.optimizer_rc.update()
 
@@ -210,7 +210,7 @@ class Experiment1000(Experiment):
             neg_ent_u = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
         else:
             neg_ent_u = self.neg_ent_loss(y, scale=self.scale_lds)
-        self.optimizer_ne.cleargrads()
+        self.model.cleargrads()
         neg_ent_u.backward()
         self.optimizer_ne.update()
 
