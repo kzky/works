@@ -132,7 +132,7 @@ class Experiment(object):
 
         # Generate and Save
         x_rec = self.mlp_dec(y, test=True)
-        self.save_generate_images(y_rec, idx)
+        self.save_generate_images(x_rec, idx)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
@@ -144,7 +144,7 @@ class Experiment(object):
         else:
             x_rec = x_rec.data
             
-        for i, img in enumerate(y_rec.data):
+        for i, img in enumerate(x_rec.data):
             fpath = "./test_gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
 
