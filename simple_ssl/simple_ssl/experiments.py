@@ -5,7 +5,7 @@ from utils import grad_norm_hook
 from sklearn.metrics import confusion_matrix
 from chainer import cuda
 import numpy as np
-
+import cv2
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -130,10 +130,18 @@ class Experiment(object):
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
         #print(idx.tolist())
 
+        # Generate and Save
+        y_rec = self.mlp_dec(y, test=True)
+        self.save_generate_images(y_rec)
+
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
         return acc, supervised_loss
 
+    def save_generate_images(self, y_rec):
+        for i, img in y_rec:
+            fpath = "./test_gen/{:05d}".format(i)
+            cv2.imwrite(fpath, img.reshape(28, 28)
 
 class Experiment1000(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
