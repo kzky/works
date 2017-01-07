@@ -116,7 +116,7 @@ class Experiment(object):
         y = self.mlp_enc(x_l, test=True)
         y_argmax = F.argmax(y)
         acc = F.accuracy(y, y_l)
-        cm = confusion_matrix(y_l, y_argmax)
+        cm = confusion_matrix(y_l.data, y_argmax.data)
         print(cm)
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
