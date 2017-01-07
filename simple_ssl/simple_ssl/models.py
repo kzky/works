@@ -56,7 +56,7 @@ class MLPEnc(Chain):
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
-        self.scale_biases = scale_bias
+        self.scale_biases = scale_biases
         self.act = act
         self.noise = noise
         self.rc = rc
@@ -136,7 +136,7 @@ class MLPDec(Chain):
         self.layers = layers
         self.linears = linears
         self.batch_norms = batch_norms
-        self.scale_biases = scale_bias
+        self.scale_biases = scale_biases
         self.act = act
         self.rc = rc
         self.device = device
