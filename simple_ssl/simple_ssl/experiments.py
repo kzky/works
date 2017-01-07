@@ -3,6 +3,7 @@ from chainer import optimizers, Variable
 import chainer.functions as F
 from utils import grad_norm_hook
 from sklearn.metrics import confusion_matrix
+from chainer import cuda
 
 class Experiment(object):
     """Experiment takes responsibility for a batch not for train-loop.
@@ -116,7 +117,7 @@ class Experiment(object):
         y = self.mlp_enc(x_l, test=True)
         y_argmax = F.argmax(y)
         acc = F.accuracy(y, y_l)
-        cm = confusion_matrix(y_l.data, y_argmax.data)
+        cm = confusion_matrix(cuda.to_cpu(y_l.data), cuda.to_cpu(y_argmax.data))
         print(cm)
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
