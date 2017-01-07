@@ -140,11 +140,11 @@ class Experiment(object):
 
     def save_generate_images(self, x_rec, idx=None):
         if idx is not None:
-            x_rec = x_rec[idx, :]
+            x_rec = x_rec.data[idx, :]
         else:
             x_rec = x_rec.data
             
-        for i, img in enumerate(x_rec.data):
+        for i, img in enumerate(x_rec):
             fpath = "./test_gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
 
