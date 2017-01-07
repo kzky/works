@@ -141,7 +141,7 @@ class Experiment(object):
     def save_generate_images(self, y_rec):
         for i, img in y_rec:
             fpath = "./test_gen/{:05d}".format(i)
-            cv2.imwrite(fpath, img.reshape(28, 28)
+            cv2.imwrite(fpath, img.reshape(28, 28))
 
 class Experiment1000(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
