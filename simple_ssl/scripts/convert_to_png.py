@@ -1,10 +1,17 @@
 import cv2
 import numpy as np
 import os
+import shutil
 
-def convert_mnist(fpath="~/datasets/mnist/test.npz"):
+def convert_mnist_test(fpath="~/datasets/mnist/test.npz"):
     data = np.load(fpath)
-    dpath = os.path.dirname(fpath)
+    dpath = "{}/test".format(os.path.dirname(fpath))
+    if os.path.exists(dpath):
+        shutil.rmtree(dpath)
+        os.makedirs(dpath)
+    else:
+        os.makedirs(dpath)
+    
     imgs = data["x"]
 
     print("Writing as png")
@@ -16,7 +23,7 @@ def convert_mnist(fpath="~/datasets/mnist/test.npz"):
 def main():
     home = os.environ.get("HOME")
     fpath = os.path.join(home, "datasets/mnist/test.npz")
-    convert_mnist(fpath)
+    convert_mnist_test(fpath)
 
 if __name__ == '__main__':
     main()
