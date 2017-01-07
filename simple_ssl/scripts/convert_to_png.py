@@ -12,6 +12,12 @@ def convert_mnist(fpath="~/datasets/mnist/test.npz"):
         fpath_out = os.path.join(dpath, "test_{:05d}.png".format(i))
         print("Write to {}".format(fpath_out))
         cv2.imwrite(fpath_out, img.reshape(28, 28))
+
+def main():
+    home = os.environ.get("HOME")
+    fpath = os.path.join(home, "/datasets/mnist/test.npz")
+    convert_mnist(fpath)
+    
         
 
     
