@@ -117,8 +117,17 @@ class Experiment(object):
         y = self.mlp_enc(x_l, test=True)
         y_argmax = F.argmax(y, axis=1)
         acc = F.accuracy(y, y_l)
-        cm = confusion_matrix(cuda.to_cpu(y_l.data), cuda.to_cpu(y_argmax.data))
+        y_l_cpu = cuda.to_cpu(y_l.data)
+        y_argmax_cpu = cuda.to_cpu(y_argmax.data)
+
+        # Confuction Matrix
+        cm = confusion_matrix(y_l_cpu, y_argmax_cpu)
         print(cm)
+
+        # Wrong samples
+        idx = np.where(y_l_cpu != y_argmax_cpu)[0]
+        print(idx.tolist())
+
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
         return acc, supervised_loss
