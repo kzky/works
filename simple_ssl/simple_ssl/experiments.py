@@ -1,7 +1,7 @@
 from simple_ssl.models import MLPEncDecModel, NegativeEntropyLoss
 from chainer import optimizers, Variable
 import chainer.functions as F
-from utils import grad_norm_hook
+from utils import grad_norm_hook, grad_unbias_hook
 from sklearn.metrics import confusion_matrix
 from chainer import cuda
 import numpy as np
@@ -49,7 +49,7 @@ class Experiment(object):
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
-        self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
+        #self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
         
     def train(self, x_l, y_l, x_u):
         loss = self.forward(x_l, y_l, x_u)
