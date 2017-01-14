@@ -150,6 +150,8 @@ class Experiment(object):
 
 class Experiment1000(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
+
+    Separate optimizers
     """
 
     def __init__(self,
