@@ -52,6 +52,12 @@ def save_generate_images(x_rec, idx=None):
             x_rec = x_rec.data[idx, :]
         else:
             x_rec = x_rec.data
+
+        if os.path.exists("./test_gen"):
+            shutil.rmtree("./test_gen")
+            os.mkdir("./test_gen")
+        else:
+            os.mkdir("./test_gen")
             
         for i, img in enumerate(x_rec):
             fpath = "./test_gen/{:05d}.png".format(i)
