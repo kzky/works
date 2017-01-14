@@ -2,6 +2,7 @@ from da_recon6.models import MLPEncDecModel, NegativeEntropyLoss
 from chainer import optimizers, Variable
 import chainer.functions as F
 from utils import grad_norm_hook, grad_unbias_hook
+from utils import save_generate_images
 from sklearn.metrics import confusion_matrix
 from chainer import cuda
 import numpy as np
@@ -134,21 +135,11 @@ class Experiment(object):
 
         ## Generate and Save
         x_rec = self.mlp_dec(y, test=True)
-        self.save_generate_images(x_rec, idx)
+        save_generate_images(x_rec, idx)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
         return acc, supervised_loss
-
-    def save_generate_images(self, x_rec, idx=None):
-        if idx is not None:
-            x_rec = x_rec.data[idx, :]
-        else:
-            x_rec = x_rec.data
-            
-        for i, img in enumerate(x_rec):
-            fpath = "./test_gen/{:05d}.png".format(i)
-            cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
 
 class Experiment1000(Experiment):
     """Experiment takes responsibility for a batch not for train-loop.
