@@ -33,3 +33,11 @@ def grad_norm_hook(optimizer):
         grad_norm_reshape = F.reshape(grad_norm, shape)
 
         p.grad = grad_norm_reshape.data
+
+def grad_unbias_hook(optimizer):
+    for p in optimizer.target.params():
+        grad_data = p.grad
+        grad = Variable(grad_data)
+        grad_unbias = grad - F.sum(grad)
+        p.grad = grad_unbias.data
+        
