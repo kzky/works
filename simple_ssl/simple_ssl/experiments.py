@@ -130,9 +130,9 @@ class Experiment(object):
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
         #print(idx.tolist())
 
-        # Generate and Save
-        x_rec = self.mlp_dec(y, test=True)
-        self.save_generate_images(x_rec, idx)
+        ## Generate and Save
+        #x_rec = self.mlp_dec(y, test=True)
+        #self.save_generate_images(x_rec, idx)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
