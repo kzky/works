@@ -69,14 +69,18 @@ def save_incorrect_info(x_rec, x_l, y, y_l):
         cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
      
     # Images
-    for i, img in enumerate(x_rec):
+    for i, img in enumerate(x_l):
         fpath = "./test/{:05d}.png".format(i)
         cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
 
     # Label and Probability
     with open("./label_prediction.out", "w") as fpout:
+        header = ["idx", "true", "pred"]
+        header += ["prob_{}".format(i) for i in range(len(y[0]))]
         writer = csv.writer(fpout, delimiter=",")
-        for y_l, y_ in zip(y_l_, y_):
-            row = [y_l] + y_.tolist()
+        writer.writerow(header)
+        for i, elm in enumerate(zip(y, y_l)):
+            y_, y_l_ = elm
+            row = [i] + [y_l_] + [np.argmax(y_)] + map(lambda x: "{:05f}".format(x) , y_.tolist())
             writer.writerow(row)
             
