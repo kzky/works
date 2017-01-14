@@ -3,6 +3,7 @@ import os
 from chainer import cuda, Variable
 import chainer.functions as F
 import cv2
+import shutil
 
 def to_device(x, device=None):
     if device:
