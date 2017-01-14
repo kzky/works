@@ -139,7 +139,7 @@ class Experiment(object):
         save_generate_images(x_rec, idx)
 
         # Save model
-        serializers.save_hdf5("./model/mlp_encdec", self.model)
+        serializers.save_hdf5("./model/mlp_encdec.h5py", self.model)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
