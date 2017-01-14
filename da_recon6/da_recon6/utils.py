@@ -4,13 +4,13 @@ from chainer import cuda, Variable
 import chainer.functions as F
 import cv2
 import shutil
+import csv
 
 def to_device(x, device=None):
     if device:
         return cuda.to_gpu(x, device)
     else:
         return cuda.to_cpu(x)
-
 
 def add_normal_noise(h, sigma=0.03):
     if np.random.randint(0, 2):
@@ -48,18 +48,35 @@ def grad_unbias_hook(optimizer):
 
         p.grad = grad_unbias.data
         
-def save_generate_images(x_rec, idx=None):
-        if idx is not None:
-            x_rec = x_rec.data[idx, :]
-        else:
-            x_rec = x_rec.data
+def save_incorrect_info(x_rec, x_l, y, y_l):
+    # Generated Images
+    if os.path.exists("./test_gen"):
+        shutil.rmtree("./test_gen")
+        os.mkdir("./test_gen")
+    else:
+        os.mkdir("./test_gen")
 
-        if os.path.exists("./test_gen"):
-            shutil.rmtree("./test_gen")
-            os.mkdir("./test_gen")
-        else:
-            os.mkdir("./test_gen")
+    # Images
+    if os.path.exists("./test"):
+        shutil.rmtree("./test")
+        os.mkdir("./test")
+    else:
+        os.mkdir("./test")
+     
+    # Generated Images
+    for i, img in enumerate(x_rec):
+        fpath = "./test_gen/{:05d}.png".format(i)
+        cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
+     
+    # Images
+    for i, img in enumerate(x_rec):
+        fpath = "./test/{:05d}.png".format(i)
+        cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
+
+    # Label and Probability
+    with open("./label_prediction.out", "w") as fpout:
+        writer = csv.writer(fpout, delimiter=",")
+        for y_l, y_ in zip(y_l_, y_):
+            row = [y_l] + y_.tolist()
+            writer.writerow(row)
             
-        for i, img in enumerate(x_rec):
-            fpath = "./test_gen/{:05d}.png".format(i)
-            cv2.imwrite(fpath, img.reshape(28, 28) * 255.)
