@@ -38,8 +38,11 @@ def grad_unbias_hook(optimizer):
     for p in optimizer.target.params():
         grad_data = p.grad
         bs = grad_data.shape[0]
+        shape = grad_data.shape
         
         grad = Variable(grad_data)
-        grad_unbias = grad - F.sum(grad) / bs
+        mean_grad = F.broadcast_to(F.sum(grad) / bs, shape)
+        grad_unbias = grad - mean_grad
+
         p.grad = grad_unbias.data
         
