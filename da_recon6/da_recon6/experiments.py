@@ -1,5 +1,6 @@
 from da_recon6.models import MLPEncDecModel, NegativeEntropyLoss
 from chainer import optimizers, Variable
+from chainer import serializers
 import chainer.functions as F
 from utils import grad_norm_hook, grad_unbias_hook
 from utils import save_generate_images
@@ -133,9 +134,12 @@ class Experiment(object):
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
         #print(idx.tolist())
 
-        ## Generate and Save
+        # Generate and Save
         x_rec = self.mlp_dec(y, test=True)
         save_generate_images(x_rec, idx)
+
+        # Save model
+        serializers.save_hdf5("./model/mlp_encdec", self.model)
 
         loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
         supervised_loss = loss
