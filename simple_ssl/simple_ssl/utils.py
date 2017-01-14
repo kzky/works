@@ -37,7 +37,9 @@ def grad_norm_hook(optimizer):
 def grad_unbias_hook(optimizer):
     for p in optimizer.target.params():
         grad_data = p.grad
+        bs = grad_data.shape[0]
+        
         grad = Variable(grad_data)
-        grad_unbias = grad - F.sum(grad)
+        grad_unbias = grad - F.sum(grad) / bs
         p.grad = grad_unbias.data
         
