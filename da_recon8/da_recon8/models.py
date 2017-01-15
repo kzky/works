@@ -48,29 +48,26 @@ class MLPDecoder(Chain):
 
     def __init__(self, device, act=F.relu):
         super(MLPDecoder, self).__init__(
-            linear0=L.Linear(10, 500),
-            linear1=L.Linear(100, 500),
-            linear2=L.Linear(1000, 1000),
-            linear3=L.Linear(1000, 784),
+            linear0=L.Linear(100, 500),
+            linear1=L.Linear(510, 1000),
+            linear2=L.Linear(1000, 784),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(1000, decay=0.9),
-            bn2=L.BatchNormalization(1000, decay=0.9),
         )
         self.device = device
         self.act = act
 
     def __call__(self, y, z, test=False):
-        y = self.linear0(y)
-        y = self.bs0(y)
-        
-        z = self.linear1(z)
-        z = self.bn1(z)
-
+        h = self.linear0(z)
+        h = self.bn0(h)
+        h = self.act(h)
         h = F.concat((y, z))
-        h = self.linear2(h)
-        h = self.bn2(h)
 
-        h = self.linear3(h)
+        h = self.linear1(h)
+        h = self.bn1(h)
+        h = self.act(h)
+        
+        h = self.linear2(h)
         return h
         
 class MLPAE(Chain):
