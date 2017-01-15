@@ -323,5 +323,11 @@ class Experiment2001(Experiment):
         )
         self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
 
+    def train(self, x_l, y_l, x_u):
+        loss = self.forward(x_l, y_l, x_u)
+        self.backward(loss)
+        self.optimizer.call_hooks()
+        self.update()
+
 # Alias
 Experiment000 = Experiment
