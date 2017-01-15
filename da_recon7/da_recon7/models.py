@@ -102,7 +102,6 @@ class MLPDecoder(Chain):
         
         return h_norm
         
-        
 class MLPAE(Chain):
 
     def __init__(self, device, act=F.relu):
