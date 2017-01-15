@@ -310,7 +310,7 @@ class Experiment2001(Experiment):
                  scale_lds=False,
                  ):
 
-        super(Experiment2000, self).__init__(
+        super(Experiment2001, self).__init__(
                  device=None,
                  learning_rate=1. * 1e-2,
                  dims=[784, 250, 100, 10],
