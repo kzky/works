@@ -229,5 +229,99 @@ class Experiment1000(Experiment):
         neg_ent_u.backward()
         self.optimizer_ne.update()
 
+
+class Experiment2000(Experiment):
+    """Experiment takes responsibility for a batch not for train-loop.
+    
+    2000 uses CE and NE only, not using RC
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 rc=False,
+                 lds=False,
+                 scale_rc=False,
+                 scale_lds=False,
+                 ):
+
+        super(Experiment2000, self).__init__(
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 rc=False,
+                 lds=False,
+                 scale_rc=False,
+                 scale_lds=False,
+        )
+        #self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
+        
+    def forward_for_losses(self, x_l, y_l, x_u, test=False):
+        """
+        Returns
+        -----------
+        tuple:
+            tuple of Variables for separate loss
+        """
+
+        # Supervision for (x_l, y_l)
+        y = self.mlp_enc(x_l, test)
+        supervised_loss = self.supervised_loss(y, y_l)
+
+        # Negative Entropy for y_l
+        if self.lds:
+            #TODO: add mlp_dec.hiddens?
+            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
+        else:
+            neg_ent_l = self.neg_ent_loss(y, scale=self.scale_lds)
+        
+        if x_u is None:
+            return supervised_loss
+            
+        # Negative Entropy for y_u
+        if self.lds:
+            #TODO: add mlp_dec.hiddens?
+            neg_ent_u = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
+        else:
+            neg_ent_u = self.neg_ent_loss(y, scale=self.scale_lds)
+
+        return supervised_loss, neg_ent_u
+
+class Experiment2001(Experiment):
+    """Experiment takes responsibility for a batch not for train-loop.
+    
+    2001 uses CE and NE only, not using RC but with Gradient Normalization
+    """
+
+    def __init__(self,
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 rc=False,
+                 lds=False,
+                 scale_rc=False,
+                 scale_lds=False,
+                 ):
+
+        super(Experiment2000, self).__init__(
+                 device=None,
+                 learning_rate=1. * 1e-2,
+                 dims=[784, 250, 100, 10],
+                 act=F.relu,
+                 noise=False,
+                 rc=False,
+                 lds=False,
+                 scale_rc=False,
+                 scale_lds=False,
+        )
+        self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
+
 # Alias
 Experiment000 = Experiment
