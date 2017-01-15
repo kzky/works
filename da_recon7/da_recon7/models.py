@@ -98,7 +98,7 @@ class MLPDecoder(Chain):
         """
         h_max = F.max(h, axis=1, keepdims=True)
         h_min = F.min(h, axis=1, keepdims=True)
-        h_norm = (h - h_min) / (h_max - h_min)
+        h_norm = (h - h_min) / (h_max - h_min + 1e-10)
         
         return h_norm
         

@@ -1,4 +1,5 @@
-from da_recon7.models import MLPEncDecModel, NegativeEntropyLoss
+from da_recon7.models import MLPAE
+from da_recon7.losses import ReconstructionLoss, NegativeEntropyLoss
 from chainer import optimizers, Variable
 from chainer import serializers
 import chainer.functions as F
@@ -14,113 +15,63 @@ class Experiment(object):
     """
 
     def __init__(self,
-                 device=None,
-                 learning_rate=1. * 1e-2,
-                 dims=[784, 250, 100, 10],
+                 device=None,                 
                  act=F.relu,
-                 noise=False,
-                 rc=False,
-                 lds=False,
-                 scale_rc=False,
-                 scale_lds=False,
+                 learning_rate=1. * 1e-2,
                  ):
 
         # Settting
         self.device = device
-        self.rc = rc
-        self.lds = lds
-        self.scale_rc = scale_rc
-        self.scale_lds = scale_lds
-        
+        self.act = act
+        self.learning_rate = learning_rate
+
         # Model
-        self.model = MLPEncDecModel(
-            dims=dims, act=act,
-            noise=noise, rc=rc,
-            device=device)
-        self.model.to_gpu(self.device) if self.device else None
-        self.mlp_enc = self.model.mlp_enc
-        self.mlp_dec = self.model.mlp_dec
-        self.supervised_loss = self.model.supervised_loss
-        self.recon_loss = self.model.recon_loss
-        self.neg_ent_loss = self.model.neg_ent_loss
-        self.graph_loss = self.model.graph_loss
-        self.kl_recon_loss = self.model.kl_recon_loss
-        self.cc_loss = self.model.cc_loss
+        self.mlp_ae = MLPAE(device, act)
+
+        # Loss
+        self.rc_loss = ReconstructionLoss()
+        self.ne_loss = NegativeEntropyLoss()
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
-        self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
-        #self.optimizer.add_hook(grad_norm_hook, "grad_norm_hook")
-        
+        self.optimizer.setup(mlp_ae)
+
     def train(self, x_l, y_l, x_u):
         loss = self.forward(x_l, y_l, x_u)
-        self.backward(loss)
-        #self.optimizer.call_hooks()
-        self.update()
-
-    def forward_for_losses(self, x_l, y_l, x_u, test=False):
-        """
-        Returns
-        -----------
-        tuple:
-            tuple of Variables for separate loss
-        """
-
-        # Supervision for (x_l, y_l)
-        y = self.mlp_enc(x_l, test)
-        supervised_loss = self.supervised_loss(y, y_l)
-
-        # Reconstruction for (x_l, _)
-        y = self.mlp_enc(x_l, test)
-        y_prob = F.softmax(y)
-        x_l_recon = self.mlp_dec(y_prob, test)
-        recon_loss_l = self.recon_loss(x_l_recon, x_l,  # Use self, x_l
-                                       self.mlp_enc.hiddens, 
-                                       self.mlp_dec.hiddens, 
-                                       self.scale_rc)
-
-        # Negative Entropy for y_l
-        if self.lds:
-            #TODO: add mlp_dec.hiddens?
-            neg_ent_l = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
-        else:
-            neg_ent_l = self.neg_ent_loss(y, scale=self.scale_lds)
-        
-        if x_u is None:
-            return supervised_loss
-            
-        # Reconstruction for (x_u, _)
-        y = self.mlp_enc(x_u, test)
-        y_prob = F.softmax(y)
-        x_u_recon = self.mlp_dec(y_prob, test)
-        recon_loss_u = self.recon_loss(x_u_recon, x_u,  # Use self, x_u
-                                       self.mlp_enc.hiddens, 
-                                       self.mlp_dec.hiddens, 
-                                       self.scale_rc)
-
-        # Negative Entropy for y_u
-        if self.lds:
-            #TODO: add mlp_dec.hiddens?
-            neg_ent_u = self.neg_ent_loss(y, self.mlp_enc.hiddens, scale=self.scale_lds) 
-        else:
-            neg_ent_u = self.neg_ent_loss(y, scale=self.scale_lds)
-
-        return supervised_loss, recon_loss_u, neg_ent_u
-
-    def forward(self, x_l, y_l, x_u, test=False):
-        losses = self.forward_for_losses(x_l, y_l, x_u)
-        return reduce(lambda x, y: x + y, losses)
-
-    def backward(self, loss):
-        self.model.cleargrads()
+        self.mlp_ae.cleargrads()        
         loss.backward()
-
-    def update(self, ):
         self.optimizer.update()
 
+    def forward(self,  x_l, y_l, x_u):
+        # Labeled data
+        ## Cross Entropy
+        y = self.mlp_ae.mlp_encoder(x_l)
+        loss_ce_l = F.softmax_cross_entropy(y, y_l)
+
+        ## Negative Entropy
+        loss_ne_l = self.ne_loss(y)
+
+        ## Reconstruction
+        x_recon = self.mlp_ae.mlp_decocer(y, self.mlp_encoder.hiddens)
+        loss_rc_l = self.rc_loss(x_recon, x)
+
+        # Unlabeled data
+        ## Cross Entropy
+        y = self.mlp_ae.mlp_encoder(x_u)
+
+        ## Negative Entropy
+        loss_ne_u = self.ne_loss(y)
+
+        ## Reconstruction
+        x_recon = self.mlp_ae.mlp_decocer(y, self.mlp_encoder.hiddens)
+        loss_rc_u = self.rc_loss(x_recon, x)
+
+        loss = loss_ce_l + loss_ne_l + loss_rc_l + loss_ne_u + loss_rc_u
+        return loss
+        
     def test(self, x_l, y_l):
-        y = F.softmax(self.mlp_enc(x_l, test=True))
+        y = F.softmax(self.mlp_ae.mlp_encoder(x_l, test=True))
         y_argmax = F.argmax(y, axis=1)
         acc = F.accuracy(y, y_l)
         y_l_cpu = cuda.to_cpu(y_l.data)
@@ -132,17 +83,14 @@ class Experiment(object):
 
         # Wrong samples
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
-        #print(idx.tolist())
 
         # Generate and Save
-        x_rec = self.mlp_dec(y, test=True)
+        x_rec = self.mlp_ae.mlp_decoder(y, self.mlp_encoder.hiddens, test=True)
         save_incorrect_info(x_rec.data[idx, ], x_l.data[idx, ],
                             y.data[idx, ], y_l.data[idx, ])
 
         # Save model
-        serializers.save_hdf5("./model/mlp_encdec.h5py", self.model)
+        serializers.save_hdf5("./model/mlp_encdec.h5py", self.mlp_ae)
 
-        loss = self.forward_for_losses(x_l, y_l, None, test=True)  # only measure x_l
-        supervised_loss = loss
-        return acc, supervised_loss
+        return acc
 
