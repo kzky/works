@@ -84,13 +84,5 @@ class Experiment(object):
         # Wrong samples
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
 
-        # Generate and Save
-        x_rec = self.mlp_ae.mlp_decoder(y, self.mlp_encoder.hiddens, test=True)
-        save_incorrect_info(x_rec.data[idx, ], x_l.data[idx, ],
-                            y.data[idx, ], y_l.data[idx, ])
-
-        # Save model
-        serializers.save_hdf5("./model/mlp_encdec.h5py", self.mlp_ae)
-
         return acc
 

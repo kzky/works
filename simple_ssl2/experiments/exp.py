@@ -1,4 +1,4 @@
-from simple_ssl2.experiments import Experiment000
+from simple_ssl2.experiments import Experiment
 from simple_ssl2.utils import to_device
 from simple_ssl2.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -18,16 +18,10 @@ def main():
     n_l_train_data = 100
     n_train_data = 60000
 
-    dims = [inp_dim, 500, 250, 100, out_dim]
     learning_rate = 1. * 1e-3
     n_epoch = 20
     decay = 0.5
     act = F.relu
-    noise = False
-    rc = False
-    lds = False
-    scale_rc = False
-    scale_lds = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -45,16 +39,10 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment000(
+    exp = Experiment(
         device,
-        learning_rate,
-        dims,
         act,
-        noise,
-        rc,
-        lds,
-        scale_rc,
-        scale_lds,
+        learning_rate,
         )
 
     # Training loop
@@ -77,8 +65,11 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            acc, sloss = exp.test(x_l, y_l)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data)
+            acc = exp.test(x_l, y_l)
+            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{}".format(
+                epoch, 
+                time.time() - st, 
+                acc.data)
             print(msg)
             
             st = time.time()
