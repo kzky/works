@@ -70,7 +70,7 @@ class Experiment(object):
         return loss
         
     def test(self, x_l, y_l):
-        y = F.softmax(self.mlp_ae.mlp_encoder(x_l, test=True))
+        y = self.mlp_ae.mlp_encoder(x_l, test=True)
         y_argmax = F.argmax(y, axis=1)
         acc = F.accuracy(y, y_l)
         y_l_cpu = cuda.to_cpu(y_l.data)
