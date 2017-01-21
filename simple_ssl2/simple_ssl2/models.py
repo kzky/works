@@ -47,9 +47,8 @@ class MLPDecoder(Chain):
     def __init__(self, device, act=F.relu):
         super(MLPDecoder, self).__init__(
             linear0=L.Linear(250, 500),
-            linear1=L.Linear(500, 750),
+            linear1=L.Linear(500, 784),
             bn0=L.BatchNormalization(500, decay=0.9),
-            bn1=L.BatchNormalization(750, decay=0.9),
         )
         self.device = device
         self.act = act
