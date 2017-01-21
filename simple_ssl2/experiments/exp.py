@@ -66,7 +66,7 @@ def main():
                             for x in data_reader.get_test_batch()]
 
             acc = exp.test(x_l, y_l)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{}".format(
+            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch, 
                 time.time() - st, 
                 acc.data)
