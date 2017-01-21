@@ -34,7 +34,7 @@ class Experiment(object):
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.use_cleargrads()
-        self.optimizer.setup(mlp_ae)
+        self.optimizer.setup(self.mlp_ae)
 
     def train(self, x_l, y_l, x_u):
         loss = self.forward(x_l, y_l, x_u)
