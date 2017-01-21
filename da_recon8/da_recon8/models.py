@@ -66,7 +66,7 @@ class MLPDecoder(Chain):
 
     def __call__(self, y, z, test=False):
         #TODO: Variable y should be copyed for not backpropping
-        h = F.concat((y, z))  # z is normalized by whitening (BatchNorm)
+        h = F.concat((y, z))  # z was normalized by whitening (BatchNorm)
         h = self.sc(h)
 
         h = self.linear0(h)

@@ -74,7 +74,8 @@ class Experiment(object):
         return loss
         
     def test(self, x_l, y_l):
-        y = F.softmax(self.mlp_ae.mlp_encoder(x_l, test=True))
+        y_, z = self.mlp_ae.mlp_encoder(x_l, test=True)
+        y = F.softmax(y_)
         y_argmax = F.argmax(y, axis=1)
         acc = F.accuracy(y, y_l)
         y_l_cpu = cuda.to_cpu(y_l.data)
@@ -88,7 +89,7 @@ class Experiment(object):
         idx = np.where(y_l_cpu != y_argmax_cpu)[0]
 
         # Generate and Save
-        x_rec = self.mlp_ae.mlp_decoder(y, self.mlp_encoder.hiddens, test=True)
+        x_rec = self.mlp_ae.mlp_decoder(y, z, test=True)
         save_incorrect_info(x_rec.data[idx, ], x_l.data[idx, ],
                             y.data[idx, ], y_l.data[idx, ])
 
