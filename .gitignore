@@ -179,3 +179,4 @@ ENV/
 ### Other
 *.csv
 *.tsv
+.~*
