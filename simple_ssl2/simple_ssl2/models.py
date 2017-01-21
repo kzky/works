@@ -60,10 +60,7 @@ class MLPDecoder(Chain):
         h = self.act(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
-        h = self.act(h)
-        
-        h = self.linear2(h)
+
         return h
         
 class MLPAE(Chain):
