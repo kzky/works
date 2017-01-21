@@ -44,9 +44,11 @@ class Experiment(object):
         self.optimizer.update()
 
     def forward(self,  x_l, y_l, x_u):
+        #TODO: normalize z over dimensions
+        #TODO: normalize y also over dimensions
+                
         # Labeled data
         ## Cross Entropy
-        #TODO: normalize z over dimension
         y, z = self.mlp_ae.mlp_encoder(x_l)
         loss_ce_l = F.softmax_cross_entropy(y, y_l)
 
