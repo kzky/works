@@ -21,15 +21,16 @@ class MLPEncoder(Chain):
         super(MLPEncoder, self).__init__(
             linear0=L.Linear(784, 1000),
             linear1=L.Linear(1000, 500),
-            linear2=L.Linear(500, 100),
-            classifier=L.Linear(500, 10),
+            linear2=L.Linear(500, 200),
+            classifier=L.Linear(200, 10),
             bn0=L.BatchNormalization(1000, decay=0.9),
             bn1=L.BatchNormalization(500, decay=0.9),
-            #bn2=L.BatchNormalization(100, decay=0.9),
+            bn2=BatchNormalization(200, decay=0.9, 
+                                   use_gamma=False, use_beta=False),
+            sc2=Scale(200, bias_term=True)
         )
         self.device = device
         self.act = act
-
 
     def __call__(self, x, test=False):
         h = self.linear0(x)
@@ -40,17 +41,23 @@ class MLPEncoder(Chain):
         h = self.bn1(h)
         h = self.act(h)
 
+        h = self.linear2(h)
+        h = self.bn2(h)
+        z = h
+
+        h = self.sc2(h)
         y = self.classifier(h)
-        z = self.linear2(h)
+        
         return y, z
         
 class MLPDecoder(Chain):
 
     def __init__(self, device, act=F.relu):
         super(MLPDecoder, self).__init__(
-            linear0=L.Linear(100, 500),
-            linear1=L.Linear(510, 1000),
+            linear0=L.Linear(210, 500),
+            linear1=L.Linear(500, 1000),
             linear2=L.Linear(1000, 784),
+            sc=Scale(210, bias_term=True),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(1000, decay=0.9),
         )
@@ -58,16 +65,20 @@ class MLPDecoder(Chain):
         self.act = act
 
     def __call__(self, y, z, test=False):
-        h = self.linear0(z)
+        #TODO: Variable y should be copyed for not backpropping
+        h = F.concat((y, z))  # z is normalized by whitening (BatchNorm)
+        h = self.sc(h)
+
+        h = self.linear0(h)
         h = self.bn0(h)
         h = self.act(h)
-        h = F.concat((y, z))
 
         h = self.linear1(h)
         h = self.bn1(h)
         h = self.act(h)
-        
+
         h = self.linear2(h)
+                
         return h
         
 class MLPAE(Chain):
