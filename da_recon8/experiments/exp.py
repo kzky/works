@@ -23,11 +23,6 @@ def main():
     n_epoch = 10
     decay = 0.5
     act = F.relu
-    noise = False
-    rc = False
-    lds = False
-    scale_rc = False
-    scale_lds = False
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
@@ -47,14 +42,8 @@ def main():
                                   n_cls=n_cls)
     exp = Experiment000(
         device,
-        learning_rate,
-        dims,
         act,
-        noise,
-        rc,
-        lds,
-        scale_rc,
-        scale_lds,
+        learning_rate,
         )
 
     # Training loop
@@ -78,7 +67,10 @@ def main():
                             for x in data_reader.get_test_batch()]
 
             acc, sloss = exp.test(x_l, y_l)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{},SupervisedLoss:{}".format(epoch, time.time() - st, acc.data, sloss.data)
+            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
+                epoch, 
+                time.time() - st, 
+                acc.data)
             print(msg)
             
             st = time.time()
