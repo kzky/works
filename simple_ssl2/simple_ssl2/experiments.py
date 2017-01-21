@@ -4,7 +4,6 @@ from chainer import optimizers, Variable
 from chainer import serializers
 import chainer.functions as F
 from utils import grad_norm_hook, grad_unbias_hook
-from utils import save_incorrect_info
 from sklearn.metrics import confusion_matrix
 from chainer import cuda
 import numpy as np
