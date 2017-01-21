@@ -19,16 +19,14 @@ class MLPEncoder(Chain):
 
     def __init__(self, device, act=F.relu):
         super(MLPEncoder, self).__init__(
-            linear0=L.Linear(784, 1000),
-            linear1=L.Linear(1000, 500),
-            linear2=L.Linear(500, 100),
-            classifier=L.Linear(500, 10),
-            bn0=L.BatchNormalization(1000, decay=0.9),
-            bn1=L.BatchNormalization(500, decay=0.9),
+            linear0=L.Linear(784, 500),
+            linear1=L.Linear(500, 250),
+            classifier=L.Linear(250, 10),
+            bn0=L.BatchNormalization(500, decay=0.9),
+            bn1=L.BatchNormalization(250, decay=0.9),
         )
         self.device = device
         self.act = act
-
 
     def __call__(self, x, test=False):
         h = self.linear0(x)
@@ -39,8 +37,9 @@ class MLPEncoder(Chain):
         h = self.bn1(h)
         h = self.act(h)
 
+        z = h
         y = self.classifier(h)
-        z = self.linear2(h)
+        
         return y, z
         
 class MLPDecoder(Chain):
