@@ -46,14 +46,15 @@ class Experiment(object):
     def forward(self,  x_l, y_l, x_u):
         # Labeled data
         ## Cross Entropy
-        y = self.mlp_ae.mlp_encoder(x_l)
+        #TODO: normalize z over dimension
+        y, z = self.mlp_ae.mlp_encoder(x_l)
         loss_ce_l = F.softmax_cross_entropy(y, y_l)
 
         ## Negative Entropy
         loss_ne_l = self.ne_loss(y)
 
         ## Reconstruction
-        x_recon = self.mlp_ae.mlp_decocer(y, self.mlp_encoder.hiddens)
+        x_recon = self.mlp_ae.mlp_decocer(y, z)
         loss_rc_l = self.rc_loss(x_recon, x)
 
         # Unlabeled data
