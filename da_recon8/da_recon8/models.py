@@ -27,7 +27,7 @@ class MLPEncoder(Chain):
             bn1=L.BatchNormalization(500, decay=0.9),
             bn2=BatchNormalization(200, decay=0.9, 
                                    use_gamma=False, use_beta=False),
-            sc2=Scale(200, bias_term=True)
+            sc2=L.Scale(W_shape=(200, ), bias_term=True)
         )
         self.device = device
         self.act = act
@@ -57,7 +57,7 @@ class MLPDecoder(Chain):
             linear0=L.Linear(210, 500),
             linear1=L.Linear(500, 1000),
             linear2=L.Linear(1000, 784),
-            sc=Scale(210, bias_term=True),
+            sc=L.Scale(W_shape=(210, ), bias_term=True),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(1000, decay=0.9),
         )
@@ -85,9 +85,9 @@ class MLPAE(Chain):
 
     def __init__(self, device, act=F.relu):
         mlp_encoder = MLPEncoder(device, act)
-        mlp_decocer = MLPDecoder(device, act)
+        mlp_decoder = MLPDecoder(device, act)
 
         super(MLPAE, self).__init__(
             mlp_encoder=mlp_encoder,
-            mlp_decocer=mlp_decocer,
+            mlp_decoder=mlp_decoder,
         )
