@@ -95,9 +95,9 @@ class Decoder(Chain):
         
 class Generator(Chain):
 
-    def __init__(self, act=F.relu):
+    def __init__(self, act=F.relu, dim_rand=30):
         super(Generator, self).__init__(
-            linear0=L.Linear(784+100, 500, ),
+            linear0=L.Linear(784+dim_rand, 500, ),
             linear1=L.Linear(500, 250, ),
             linear2=L.Linear(250, 500, ),
             linear3=L.Linear(500, 784, ),
