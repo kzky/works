@@ -54,8 +54,8 @@ class AEExperiment(object):
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
         loss_recon_l = self.reconstruction(x_recon, x_l, 
-                                           self.ae.encoder.hiddens_enc, 
-                                           self.ae.decoder.hiddens_dec)
+                                           self.ae.encoder.hiddens, 
+                                           self.ae.decoder.hiddens)
         
         # unlabeled loss
         y = self.ae.encoder(x_u)
@@ -64,8 +64,8 @@ class AEExperiment(object):
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
         loss_recon_u = self.reconstruction(x_recon, x_u, 
-                                           self.ae.encoder.hiddens_enc, 
-                                           self.ae.decoder.hiddens_dec)
+                                           self.ae.encoder.hiddens, 
+                                           self.ae.decoder.hiddens)
 
         # sum losses
         loss = loss_ce + loss_ne_l + loss_recon_l + loss_ne_u + loss_recon_u
