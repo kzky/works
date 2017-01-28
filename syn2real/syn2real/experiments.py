@@ -221,7 +221,7 @@ class GANExperiment(object):
         else:
             os.makedirs(dpath)
         for i, img in enumerate(x_gen.data):
-            fpath = "./gen/{}/{:05d}.png".format(poech, i)
+            fpath = "./gen/{}/{:05d}.png".format(epoch, i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
     def generate_random_onehot(self, bs):
