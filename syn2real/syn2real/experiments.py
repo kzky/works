@@ -17,8 +17,8 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from mlp_model import AutoEncoder
-from losses import ReconstructionLoss, NegativeEntropyLoss
+from mlp_model import AutoEncoder, Generator, Discriminator
+from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss
 from sklearn.metrics import confusion_matrix
 
 class AEExperiment(object):
@@ -45,12 +45,10 @@ class AEExperiment(object):
         
     def train(self, x_l, y_l, x_u):
         # Forward
-
         # labeled loss
         y = self.ae.encoder(x_l)
         loss_ce = F.softmax_cross_entropy(y, y_l)
         loss_ne_l = self.ne_loss(y)
-        # TODO: add hiddens
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
         loss_recon_l = self.reconstruction(x_recon, x_l, 
@@ -60,7 +58,6 @@ class AEExperiment(object):
         # unlabeled loss
         y = self.ae.encoder(x_u)
         loss_ne_u = self.ne_loss(y)
-        # TODO: add hiddens
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
         loss_recon_u = self.reconstruction(x_recon, x_u, 
@@ -151,6 +148,5 @@ class AEExperiment(object):
         if not os.path.exists(dpath):
             os.makedirs(dpath)
             
-        fpath = "./model/auto_encoder_{:05d}.h5py".format(epoch)
-        serializers.save_hdf5(fpath, self.ae)
-
+        fpath = "./model/decoder_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.ae.decoder)
