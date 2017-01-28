@@ -48,7 +48,7 @@ class Experiment(object):
 
         # labeled loss
         y = self.ae.encoder(x_l)
-        loss_ce = F.softmax_cross_entropy(x_l, y_l)
+        loss_ce = F.softmax_cross_entropy(y, y_l)
         loss_ne_l = self.ne_loss(y)
         # TODO: add hiddens
         y_prob = F.softmax(y)
@@ -71,8 +71,6 @@ class Experiment(object):
         loss.backward()
         self.optimizer.update()
         
-        return loss
-
     def test(self, epoch, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
         self.generate_and_save_wrong_samples(x_l, y_l, y)
