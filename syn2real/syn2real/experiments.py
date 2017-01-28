@@ -150,3 +150,90 @@ class AEExperiment(object):
             
         fpath = "./model/decoder_{:05d}.h5py".format(epoch)
         serializers.save_hdf5(fpath, self.ae.decoder)
+
+class GANExperiment(object):
+
+    def __init__(self, decoder, device=None, 
+                 dim_rand=30, n_cls=10, learning_rate=1e-3, act=F.relu):
+
+        # Settings
+        self.device = device
+        self.dim_rand = dim_rand
+        self.n_cls = n_cls
+        self.act = act
+        self.learning_rate = 1e-5
+
+        # Model
+        self.generator = Generator(act=act)
+        self.generator.to_gpu(device) if self.device else None
+        self.discrimitor = Discriminator(act)
+        self.discriminator.to_gpu(device) if self.device else None
+        self.decoder = decoder
+
+        # Optimizer
+        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen.setup(self.generator)
+        self.optimizer_gen.use_cleargrads()
+
+        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis.setup(self.discriminator)
+        self.optimizer_dis.use_cleargrads()
+
+        # Losses
+        self.gan_loss = GANLoss()
+        
+    def train(self, x_real, ):
+        bs = x_real.shape[0]
+                          
+        # Train discriminator
+        x_recon = self.generate_x_recon(bs)
+        z = self.generate_random(bs, self.dim_rand)
+        d_x = self.discrimitor(x_recon)
+        x_gen = self.generator(x_recon, z)
+        d_x_gen = self.discrimitor(x_gen)
+        loss = self.gan_loss(d_x_gen, d_x)
+        self.discrimitor.cleargrads()
+        loss.backward()
+        self.optimizer_dis.update()
+
+        # Train generator
+        x_recon = self.generate_x_recon(bs)
+        z = self.generate_random(bs, self.dim_rand)
+        x_gen = self.generator(x_recon, z)
+        d_x_gen = self.discrimitor(x_gen)
+        loss = self.gan_loss(d_x_gen)
+        self.generator.cleargrads()
+        loss.backward()
+        self.optimizer_gen.update()
+
+    def test(self, epoch, bs):
+        z = self.generate_random(bs)
+        x_recon = self.
+        x_gen = self.generator(x_recon, z)
+     
+        # Generated Images
+        for i, img in enumerate(x_gen):
+            fpath = "./gen/{:05d}.png".format(i)
+            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+
+    def generate_random_onehot(self, bs):
+        y = np.zeros((bs, self.n_cls))
+        cls = np.random.choice(self.n_cls, size=bs)
+        y[np.arange(bs), cls] = 1.0
+        y = y.astype(np.float32)
+        return y
+
+    def generate_random_prob(self, bs):
+        pass
+            
+    def generate_x_recon(self, bs):
+        #TODO: consider diversity, now only r \in {0, 1}
+        y = self.generate_random_onehot(bs)
+        y = to_device(y, self.device)
+        x_recon = self.decoder(y)
+        return x_recon
+
+    def generate_random(self, bs, dim=30):
+        r = np.random.rand(-1, 1, 30).astype(np.float32)
+        r = to_device(r)
+        return r
