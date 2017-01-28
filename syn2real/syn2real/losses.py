@@ -55,7 +55,7 @@ class GANLoss(Chain):
         if d_x is not None:
             bs_d_x = d_x.shape[0]
             loss = F.sum(F.log(d_x)) / bs_d_x \
-                   + F.sum(F.log(1 - d_x_gen))) / bs_d_x_gen
+                   + F.sum(F.log(1 - d_x_gen)) / bs_d_x_gen
             return - loss  # to minimize
             
         else:
