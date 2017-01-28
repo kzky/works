@@ -75,7 +75,7 @@ class AEExperiment(object):
         loss.backward()
         self.optimizer.update()
 
-    def reconstruction(x_recon, x, hiddens_enc, hiddens_dec):
+    def reconstruction(self, x_recon, x, hiddens_enc, hiddens_dec):
         loss_recon = self.recon_loss(x_recon, x)
         for h_enc, h_dec in zip(hiddens_enc, hiddens_dec[::-1]):
             loss_recon += self.recon_loss(h_enc, h_dec)
