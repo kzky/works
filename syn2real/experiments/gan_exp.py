@@ -6,6 +6,7 @@ import os
 import numpy as np
 import sys
 import time
+import glob
 import chainer.functions as F
 from chainer import Variable
 from chainer import serializers
