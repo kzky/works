@@ -42,3 +42,22 @@ class NegativeEntropyLoss(Chain):
         self.loss = - F.sum(y_normalized * y_log_softmax) / bs / d
 
         return self.loss
+
+class GANLoss(Chain):
+
+    def __init__(self, ):
+        super(GANLoss, self).__init__(
+        )
+        
+    def __call__(self, d_x_gen, d_x=None):
+        #TODO: reverse trick
+        bs_d_x_gen = d_x_gen.shape[0]
+        if d_x is not None:
+            bs_d_x = d_x.shape[0]
+            loss = F.sum(F.log(d_x)) / bs_d_x \
+                   + F.sum(F.log(1 - d_x_gen))) / bs_d_x_gen
+            return - loss  # to minimize
+            
+        else:
+            loss = F.sum(F.log(1 - d_x_gen))) / bs_d_x_gen
+            return loss
