@@ -139,6 +139,10 @@ class Experiment(object):
         dpath  = "./model"
         if not os.path.exists(dpath):
             os.makedirs(dpath)
+        else:
+            shutil.rmtree(dpath)
+            os.makedirs(dpath)
+            
         fpath = "./model/auto_encoder_{:05d}.h5py".format(epoch)
         serializers.save_hdf5(fpath, self.ae)
 
