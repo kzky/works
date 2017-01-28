@@ -37,10 +37,11 @@ def main():
                                   n_cls=n_cls)
 
     # Decoder
+    decoder = Decoder(act=act)
     fpaths = glob.glob("./model/decoder*")
     fpaths.sort()
     fpath = fpaths[-1]
-    decoder = serializers.load_hdf5(fpath)
+    decoder = serializers.load_hdf5(fpath, decoder)
 
     # Experiment
     exp = GANExperiment(
