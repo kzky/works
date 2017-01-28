@@ -164,7 +164,7 @@ class GANExperiment(object):
         self.learning_rate = 1e-5
 
         # Model
-        self.generator = Generator(act=act, dim_rand)
+        self.generator = Generator(act=act, dim_rand=dim_rand)
         self.generator.to_gpu(device) if self.device else None
         self.discrimitor = Discriminator(act)
         self.discriminator.to_gpu(device) if self.device else None
