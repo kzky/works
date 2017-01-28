@@ -166,7 +166,7 @@ class GANExperiment(object):
         # Model
         self.generator = Generator(act=act, dim_rand=dim_rand)
         self.generator.to_gpu(device) if self.device else None
-        self.discrimitor = Discriminator(act)
+        self.discriminator = Discriminator(act=act)
         self.discriminator.to_gpu(device) if self.device else None
         self.decoder = decoder
 
@@ -188,11 +188,12 @@ class GANExperiment(object):
         # Train discriminator
         x_recon = self.generate_x_recon(bs)
         z = self.generate_random(bs, self.dim_rand)
-        d_x = self.discrimitor(x_recon)
+        d_x = self.discriminator(x_recon)
         x_gen = self.generator(x_recon, z)
-        d_x_gen = self.discrimitor(x_gen)
+        d_x_gen = self.discriminator(x_gen)
         loss = self.gan_loss(d_x_gen, d_x)
-        self.discrimitor.cleargrads()
+        self.discriminator.cleargrads()
+        self.generator.cleargrads()
         loss.backward()
         self.optimizer_dis.update()
 
@@ -200,14 +201,15 @@ class GANExperiment(object):
         x_recon = self.generate_x_recon(bs)
         z = self.generate_random(bs, self.dim_rand)
         x_gen = self.generator(x_recon, z)
-        d_x_gen = self.discrimitor(x_gen)
+        d_x_gen = self.discriminator(x_gen)
         loss = self.gan_loss(d_x_gen)
+        self.discriminator.cleargrads()
         self.generator.cleargrads()
         loss.backward()
         self.optimizer_gen.update()
 
     def test(self, epoch, bs):
-        z = self.generate_random(bs)
+        z = self.generate_random(bs, self.dim_rand)
         x_recon = self.generate_x_recon(bs)
         x_gen = self.generator(x_recon, z)
      
@@ -218,7 +220,7 @@ class GANExperiment(object):
 
     def generate_random_onehot(self, bs):
         y = np.zeros((bs, self.n_cls))
-        cls = np.random.choice(self.n_cls, size=bs)
+        cls = np.random.choice(self.n_cls, bs)
         y[np.arange(bs), cls] = 1.0
         y = y.astype(np.float32)
         return y
@@ -234,6 +236,6 @@ class GANExperiment(object):
         return x_recon
 
     def generate_random(self, bs, dim=30):
-        r = np.random.rand(-1, 1, 30).astype(np.float32)
+        r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
         r = to_device(r)
         return r

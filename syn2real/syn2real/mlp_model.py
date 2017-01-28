@@ -103,13 +103,13 @@ class Generator(Chain):
             linear3=L.Linear(500, 784, ),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
-            bn2=L.BatchNormalization(100, decay=0.9),
+            bn2=L.BatchNormalization(500, decay=0.9),
         )
         
         self.act = act
 
     def __call__(self, x, z, test=False):
-        h = F.Concat((x, z))
+        h = F.concat((x, z))
 
         h = self.linear0(h)
         h = self.bn0(h, test=test)
