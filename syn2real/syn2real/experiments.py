@@ -21,7 +21,7 @@ from mlp_model import AutoEncoder
 from losses import ReconstructionLoss, NegativeEntropyLoss
 from sklearn.metrics import confusion_matrix
 
-class Experiment(object):
+class AEExperiment(object):
 
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
 
@@ -53,7 +53,9 @@ class Experiment(object):
         # TODO: add hiddens
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
-        loss_recon_l = self.recon_loss(x_recon, x_l)
+        loss_recon_l = self.reconstruction(x_recon, x_l, 
+                                           self.ae.encoder.hiddens_enc, 
+                                           self.ae.decoder.hiddens_dec)
         
         # unlabeled loss
         y = self.ae.encoder(x_u)
@@ -61,7 +63,9 @@ class Experiment(object):
         # TODO: add hiddens
         y_prob = F.softmax(y)
         x_recon = self.ae.decoder(y_prob)
-        loss_recon_u = self.recon_loss(x_recon, x_u)
+        loss_recon_u = self.reconstruction(x_recon, x_u, 
+                                           self.ae.encoder.hiddens_enc, 
+                                           self.ae.decoder.hiddens_dec)
 
         # sum losses
         loss = loss_ce + loss_ne_l + loss_recon_l + loss_ne_u + loss_recon_u
@@ -70,6 +74,12 @@ class Experiment(object):
         self.ae.cleargrads()
         loss.backward()
         self.optimizer.update()
+
+    def reconstruction(x_recon, x, hiddens_enc, hiddens_dec):
+        loss_recon = self.recon_loss(x_recon, x)
+        for h_enc, h_dec in zip(hiddens_enc, hiddens_dec[::-1]):
+            loss_recon += self.recon_loss(h_enc, h_dec)
+        return loss_recon
         
     def test(self, epoch, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
