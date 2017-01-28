@@ -19,10 +19,10 @@ class Encoder(Chain):
 
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            linear0=L.Linear(784, 500, wscale=1/np.sqrt(2)),
-            linear1=L.Linear(500, 250, wscale=1/np.sqrt(2)),
-            linear2=L.Linear(250, 100, wscale=1/np.sqrt(2)),
-            linear3=L.Linear(100, 10, wscale=1/np.sqrt(2)),
+            linear0=L.Linear(784, 500, ),
+            linear1=L.Linear(500, 250, ),
+            linear2=L.Linear(250, 100, ),
+            linear3=L.Linear(100, 10, ),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
             bn2=L.BatchNormalization(100, decay=0.9),
@@ -58,10 +58,10 @@ class Decoder(Chain):
     def __init__(self, act=F.relu):
 
         super(Decoder, self).__init__(
-            linear0=L.Linear(10, 100, wscale=1/np.sqrt(2)),
-            linear1=L.Linear(100, 250, wscale=1/np.sqrt(2)),
-            linear2=L.Linear(250, 500, wscale=1/np.sqrt(2)),
-            linear3=L.Linear(500, 784, wscale=1/np.sqrt(2)),
+            linear0=L.Linear(10, 100, ),
+            linear1=L.Linear(100, 250, ),
+            linear2=L.Linear(250, 500, ),
+            linear3=L.Linear(500, 784, ),
             bn0=L.BatchNormalization(100, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
             bn2=L.BatchNormalization(500, decay=0.9),
@@ -97,10 +97,10 @@ class Generator(Chain):
 
     def __init__(self, act=F.relu):
         super(Generator, self).__init__(
-            linear0=L.Linear(784+100, 500, wscale=1/np.sqrt(2)),
-            linear1=L.Linear(500, 250, wscale=1/np.sqrt(2)),
-            linear2=L.Linear(250, 500, wscale=1/np.sqrt(2)),
-            linear3=L.Linear(500, 784, wscale=1/np.sqrt(2)),
+            linear0=L.Linear(784+100, 500, ),
+            linear1=L.Linear(500, 250, ),
+            linear2=L.Linear(250, 500, ),
+            linear3=L.Linear(500, 784, ),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
             bn2=L.BatchNormalization(100, decay=0.9),
@@ -132,10 +132,10 @@ class Discriminator(Chain):
 
     def __init__(self, act=F.relu):
         super(Discriminator, self).__init__(
-            linear0=L.Linear(784, 500, wscale=1/np.sqrt(2)),
-            linear1=L.Linear(500, 250, wscale=1/np.sqrt(2)),
-            linear2=L.Linear(250, 100, wscale=1/np.sqrt(2)),
-            linear3=L.Linear(100, 1, wscale=1/np.sqrt(2)),
+            linear0=L.Linear(784, 500, ),
+            linear1=L.Linear(500, 250, ),
+            linear2=L.Linear(250, 100, ),
+            linear3=L.Linear(100, 1, ),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
             bn2=L.BatchNormalization(100, decay=0.9),
