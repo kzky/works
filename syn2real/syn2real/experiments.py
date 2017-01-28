@@ -212,10 +212,16 @@ class GANExperiment(object):
         z = self.generate_random(bs, self.dim_rand)
         x_recon = self.generate_x_recon(bs)
         x_gen = self.generator(x_recon, z)
-     
+
         # Generated Images
+        dpath = "./gen/{}".format(epoch)
+        if os.path.exists(dpath):
+            shutil.rmtree(dpath)
+            os.makedirs(dapth)
+        else:
+            os.makedirs(dapth)
         for i, img in enumerate(x_gen.data):
-            fpath = "./gen/{:05d}.png".format(i)
+            fpath = "./gen/{}/{:05d}.png".format(poech, i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
     def generate_random_onehot(self, bs):
