@@ -1,4 +1,4 @@
-from syn2real.experiments import Experiment
+from syn2real.experiments import AEExperiment
 from syn2real.utils import to_device
 from syn2real.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -37,7 +37,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment(
+    exp = AEExperiment(
         device,
         learning_rate,
         act,
