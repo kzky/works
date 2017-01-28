@@ -89,6 +89,7 @@ class AEExperiment(object):
         return acc
 
     def generate_and_save_wrong_samples(self, x_l, y_l, y):
+        y = F.softmax(y)
         y_argmax = F.argmax(y, axis=1)
         y_l_cpu = cuda.to_cpu(y_l.data)
         y_argmax_cpu = cuda.to_cpu(y_argmax.data)
