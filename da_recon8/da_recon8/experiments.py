@@ -56,8 +56,8 @@ class Experiment(object):
         loss_ne_l = self.ne_loss(y)
 
         ## Reconstruction
-        x_recon = self.mlp_ae.mlp_decocer(y, z)
-        loss_rc_l = self.rc_loss(x_recon, x)
+        x_recon = self.mlp_ae.mlp_decoder(y, z)
+        loss_rc_l = self.rc_loss(x_recon, x_l)
 
         # Unlabeled data
         ## Cross Entropy
@@ -67,8 +67,8 @@ class Experiment(object):
         loss_ne_u = self.ne_loss(y)
 
         ## Reconstruction
-        x_recon = self.mlp_ae.mlp_decocer(y, z)
-        loss_rc_u = self.rc_loss(x_recon, x)
+        x_recon = self.mlp_ae.mlp_decoder(y, z)
+        loss_rc_u = self.rc_loss(x_recon, x_u)
 
         loss = loss_ce_l + loss_ne_l + loss_rc_l + loss_ne_u + loss_rc_u
         return loss

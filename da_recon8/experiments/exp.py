@@ -1,4 +1,4 @@
-from da_recon8.experiments import Experiment000
+from da_recon8.experiments import Experiment
 from da_recon8.utils import to_device
 from da_recon8.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -18,7 +18,6 @@ def main():
     n_l_train_data = 100
     n_train_data = 60000
 
-    dims = [inp_dim, 500, 250, 100, out_dim]
     learning_rate = 1. * 1e-3
     n_epoch = 10
     decay = 0.5
@@ -40,7 +39,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls)
-    exp = Experiment000(
+    exp = Experiment(
         device,
         act,
         learning_rate,
@@ -66,7 +65,7 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            acc, sloss = exp.test(x_l, y_l)
+            acc = exp.test(x_l, y_l)
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch, 
                 time.time() - st, 
