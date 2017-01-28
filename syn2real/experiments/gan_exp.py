@@ -37,7 +37,7 @@ def main():
                                   n_cls=n_cls)
 
     # Decoder
-    fpaths = glob.glob("./model/ae_decoder*")
+    fpaths = glob.glob("./model/decoder*")
     fpaths.sort()
     fpath = fpaths[-1]
     decoder = serializers.load_hdf5(fpath)
