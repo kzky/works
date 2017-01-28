@@ -33,7 +33,7 @@ class MLPEnc(Chain):
             d_in, d_out = d[0], d[1]
 
             # Linear
-            linear = L.Linear(d_in, d_out, wscale=1/np.sqrt(d_in))
+            linear = L.Linear(d_in, d_out, wscale=1/np.sqrt(2))
             l_name = "linear-enc-{:03}".format(l)
             linears[l_name] = linear
 
@@ -113,7 +113,7 @@ class MLPDec(Chain):
             d_in, d_out = d[0], d[1]
 
             # Linear
-            linear = L.Linear(d_in, d_out, wscale=1/np.sqrt(d_in))
+            linear = L.Linear(d_in, d_out, wscale=1/np.sqrt(2))
             l_name = "linear-dec-{:03}".format(l)
             linears[l_name] = linear
 
