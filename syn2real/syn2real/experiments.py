@@ -224,6 +224,9 @@ class GANExperiment(object):
             fpath = "./gen/{:05d}/{:05d}.png".format(epoch, i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
+        # Save model
+        self.save_model(epoch)
+
     def generate_random_onehot(self, bs):
         y = np.zeros((bs, self.n_cls))
         cls = np.random.choice(self.n_cls, bs)
@@ -245,3 +248,13 @@ class GANExperiment(object):
         r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
         r = to_device(r)
         return r
+
+    def save_model(self, epoch):
+        dpath  = "./model"
+        if not os.path.exists(dpath):
+            os.makedirs(dpath)
+            
+        fpath = "./model/generator_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator)
+
+    
