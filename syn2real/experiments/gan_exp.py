@@ -72,8 +72,8 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            exp.test(epoch, x_l, y_l)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(epoch, time.time() - st)
+            exp.test(epoch, batch_size)
+            msg = "Epoch:{},ElapsedTime:{}".format(epoch, time.time() - st)
             print(msg)
             
             st = time.time()

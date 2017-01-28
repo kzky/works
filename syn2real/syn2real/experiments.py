@@ -214,7 +214,7 @@ class GANExperiment(object):
         x_gen = self.generator(x_recon, z)
      
         # Generated Images
-        for i, img in enumerate(x_gen):
+        for i, img in enumerate(x_gen.data):
             fpath = "./gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
