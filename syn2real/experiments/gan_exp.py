@@ -1,6 +1,7 @@
 from syn2real.experiments import GANExperiment
 from syn2real.utils import to_device
 from syn2real.datasets import MNISTDataReader, Separator
+from syn2real.mlp_model import Decoder
 import numpy as np
 import os
 import numpy as np
