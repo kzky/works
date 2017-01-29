@@ -213,7 +213,7 @@ class GANExperiment(object):
         x_recon = self.generate_x_recon(bs)
         d_x = self.discriminator(x_real)
         z = self.generate_random(bs, self.dim_rand)
-        x_gen = self.generator(x_recon, z)
+        x_gen = self.generator(x_recon, z, test=False)
         d_x_gen = self.discriminator(x_gen)
         loss = self.gan_loss(d_x_gen, d_x)
         self.discriminator.cleargrads()
@@ -224,7 +224,7 @@ class GANExperiment(object):
         # Train generator
         x_recon = self.generate_x_recon(bs)
         z = self.generate_random(bs, self.dim_rand)
-        x_gen = self.generator(x_recon, z)
+        x_gen = self.generator(x_recon, z, test=False)
         d_x_gen = self.discriminator(x_gen)
         loss = self.gan_loss(d_x_gen)
         self.discriminator.cleargrads()
@@ -235,7 +235,7 @@ class GANExperiment(object):
     def test(self, epoch, bs):
         z = self.generate_random(bs, self.dim_rand)
         x_recon = self.generate_x_recon(bs)
-        x_gen = self.generator(x_recon, z)
+        x_gen = self.generator(x_recon, z, test=False)
 
         # Generated Images
         dpath = "./gen/{:05d}".format(epoch)
