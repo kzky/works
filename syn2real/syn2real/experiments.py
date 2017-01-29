@@ -187,8 +187,8 @@ class GANExperiment(object):
                           
         # Train discriminator
         x_recon = self.generate_x_recon(bs)
+        d_x = self.discriminator(x_real)
         z = self.generate_random(bs, self.dim_rand)
-        d_x = self.discriminator(x_recon)
         x_gen = self.generator(x_recon, z)
         d_x_gen = self.discriminator(x_gen)
         loss = self.gan_loss(d_x_gen, d_x)
