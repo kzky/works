@@ -4,7 +4,7 @@ import numpy as np
 def test_cnn():
     # Encoder
     encoder = Encoder()
-    x = np.random.rand(8, 3, 28, 28).astype(np.float32)
+    x = np.random.rand(8, 1, 28, 28).astype(np.float32)
     encoder(x)
         
     # Decoder
