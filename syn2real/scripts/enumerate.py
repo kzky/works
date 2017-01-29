@@ -2,16 +2,11 @@ import itertools
 import csv
 
 def main():
-    a = ["MLP", "CNN"]
-    b = ["RC on X", "RC on all"]
-    c = ["LDS on Y", "LDS on all"]
-    d = ["Scale for RC", "None"]
-    e = ["Scale for LDS", "None"]
-    f = ["Clean", "Noise"]
-    g = ["GN for W", "None"]
-    h = ["One Opt", "Two Opts"]
+    a = ["MLP", "CNN", "STN"]
+    b = ["None", "Residual", "Residual+Skip"]
+    c = ["None", "Conditioned"]
     
-    categories = [a, b, c, d, e, f, g, h]
+    categories = [a, b, c]
     fname = "./experiment_list.csv"
     with open(fname, "w") as fpout:
         writer = csv.writer(fpout)
