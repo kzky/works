@@ -129,7 +129,7 @@ class Generator(Chain):
         h = self.bn3(h, test=test)
         h3 = self.act(h) + h0
 
-        h4 = self.linear4(h3)
+        h4 = self.linear4(h3) + x
 
         h = F.tanh(h4)
         return h
