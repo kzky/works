@@ -17,13 +17,22 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from mlp_model import AutoEncoder, Generator, Discriminator
 from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss
 from sklearn.metrics import confusion_matrix
 
+def create_ae_experiment(model, act=F.relu):
+    if model == "mlp":
+        from mlp_model import AutoEncoder
+        return AutoEncoder(act)
+
+def create_gan_experiment(model, act=F.dim_rand=30):
+    if model == "mlp":
+        from mlp_model import Generator, Discriminator
+        return Generator(act, dim_rand), Discriminator(act)
+        
 class AEExperiment(object):
 
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, model=None, learning_rate=1e-3, act=F.relu):
 
         # Settings
         self.device = device
@@ -31,7 +40,7 @@ class AEExperiment(object):
         self.learning_rate = 1e-3
 
         # Model
-        self.ae = AutoEncoder(act)
+        self.ae = create_ae_experiment(model, act)
         self.ae.to_gpu(device) if self.device else None
 
         # Optimizer
@@ -153,7 +162,7 @@ class AEExperiment(object):
 
 class GANExperiment(object):
 
-    def __init__(self, decoder, device=None, 
+    def __init__(self, decoder, device=None, model=None,
                  dim_rand=30, n_cls=10, learning_rate=1e-3, act=F.relu):
 
         # Settings
@@ -164,9 +173,11 @@ class GANExperiment(object):
         self.learning_rate = 1e-5
 
         # Model
-        self.generator = Generator(act=act, dim_rand=dim_rand)
+        generator, discriminator = create_gan_experiment(
+            model, act=act, dim_rand=dim_rand)
+        self.generator = generator
         self.generator.to_gpu(device) if self.device else None
-        self.discriminator = Discriminator(act=act)
+        self.discriminator = discriminator
         self.discriminator.to_gpu(device) if self.device else None
         self.decoder = decoder
 

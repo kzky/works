@@ -15,6 +15,7 @@ from chainer import serializers
 def main():
     # Settings
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
+    model = "mlp"
     batch_size = 64
     n_l_train_data = 100
     n_train_data = 60000
@@ -48,6 +49,7 @@ def main():
     exp = GANExperiment(
         decoder,
         device,
+        model,
         dim_rand,
         n_cls,
         learning_rate,

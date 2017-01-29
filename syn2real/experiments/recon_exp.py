@@ -12,6 +12,7 @@ from chainer import Variable
 def main():
     # Settings
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
+    model = "mlp"
     batch_size = 128
     n_l_train_data = 100
     n_train_data = 60000
@@ -39,6 +40,7 @@ def main():
                                   n_cls=n_cls)
     exp = AEExperiment(
         device,
+        model,
         learning_rate,
         act,
         )
