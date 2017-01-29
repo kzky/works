@@ -131,12 +131,18 @@ class AEExperiment(object):
         # Generated Images
         for i, img in enumerate(x_rec):
             fpath = "./test_gen/{:05d}.png".format(i)
-            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            if len(img.shape) == 2:
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            else:
+                cv2.imwrite(fpath, img * 127.5 + 127.5)
             
         # Images
         for i, img in enumerate(x_l):
             fpath = "./test/{:05d}.png".format(i)
-            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            if len(img.shape) == 2:
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            else:
+                cv2.imwrite(fpath, img * 127.5 + 127.5)
      
         # Label and Probability
         with open("./label_prediction.out", "w") as fpout:
@@ -234,7 +240,10 @@ class GANExperiment(object):
             
         for i, img in enumerate(x_gen.data):
             fpath = "./gen/{:05d}/{:05d}.png".format(epoch, i)
-            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            if len(img.shape) == 2:
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+            else:
+                cv2.imwrite(fpath, img * 127.5 + 127.5)
 
         # Save model
         self.save_model(epoch)
