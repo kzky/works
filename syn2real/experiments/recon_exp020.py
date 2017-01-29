@@ -17,6 +17,7 @@ def main():
     n_l_train_data = 100
     n_train_data = 60000
     n_cls = 10
+    shape = True
 
     learning_rate = 1. * 1e-3
     n_epoch = 10
@@ -37,7 +38,9 @@ def main():
     # DataReader, Model, Optimizer, Losses
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
-                                  n_cls=n_cls)
+                                  n_cls=n_cls, 
+                                  shape=shape)
+
     exp = AEExperiment(
         device,
         model,
