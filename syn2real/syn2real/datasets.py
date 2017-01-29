@@ -40,7 +40,8 @@ class MNISTDataReader(object):
 
     def reshape(self, x):
         if self._shape:
-            return x.reshape(1, 28, 28)
+            bs = x.shape[0]
+            return x.reshape(bs, 1, 28, 28)
         return x
     
     def get_l_train_batch(self,):
