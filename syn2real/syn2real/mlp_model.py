@@ -115,23 +115,23 @@ class Generator(Chain):
 
         h = self.linear0(h)
         h = self.bn0(h, test=test)
-        h = self.act(h)
+        h0 = self.act(h)
 
-        h = self.linear1(h)
+        h = self.linear1(h0)
         h = self.bn1(h, test=test)
-        h = self.act(h)
+        h1 = self.act(h)
         
-        h = self.linear2(h)
+        h = self.linear2(h1)
         h = self.bn2(h, test=test)
-        h = self.act(h)
+        h2 = self.act(h) + h1
 
-        h = self.linear3(h)
+        h = self.linear3(h2)
         h = self.bn3(h, test=test)
-        h = self.act(h)
+        h3 = self.act(h) + h0
 
-        h = self.linear4(h)
-        h = F.tanh(h)
+        h4 = self.linear4(h3) + x
 
+        h = F.tanh(h4)
         return h
 
 class Discriminator(Chain):
