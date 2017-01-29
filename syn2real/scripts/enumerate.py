@@ -5,8 +5,9 @@ def main():
     a = ["MLP", "CNN", "STN"]
     b = ["None", "Residual", "Residual+Skip"]
     c = ["None", "Conditioned"]
+    d = ["None", "Patch"]
     
-    categories = [a, b, c]
+    categories = [a, b, c, d]
     fname = "./experiment_list.csv"
     with open(fname, "w") as fpout:
         writer = csv.writer(fpout)
