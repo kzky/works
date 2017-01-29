@@ -214,12 +214,13 @@ class GANExperiment(object):
         x_gen = self.generator(x_recon, z)
 
         # Generated Images
-        dpath = "./gen/{}".format(epoch)
+        dpath = "./gen/{:05d}".format(epoch)
         if os.path.exists(dpath):
             shutil.rmtree(dpath)
             os.makedirs(dpath)
         else:
             os.makedirs(dpath)
+            
         for i, img in enumerate(x_gen.data):
             fpath = "./gen/{:05d}/{:05d}.png".format(epoch, i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
