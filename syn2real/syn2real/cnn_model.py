@@ -19,7 +19,7 @@ class Encoder(Chain):
 
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            conv0=L.Convolution2D(3, 32, 4, stride=2, pad=1),
+            conv0=L.Convolution2D(1, 32, 4, stride=2, pad=1),
             conv1=L.Convolution2D(32, 64, 4, stride=2, pad=1),
             linear0=L.Linear(64 * 7 * 7, 64),
             linear1=L.Linear(64, 10),
@@ -61,7 +61,7 @@ class Decoder(Chain):
             linear0=L.Linear(10, 64),
             linear1=L.Linear(64, 64 * 7 * 7),
             deconv0=L.Convolution2D(64, 32, 4, stride=2, pad=1),
-            deconv1=L.Convolution2D(32, 3, 4, stride=2, pad=1),
+            deconv1=L.Convolution2D(32, 1, 4, stride=2, pad=1),
             bn0=L.BatchNormalization(64, decay=0.9),
             bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9),
             bn2=L.BatchNormalization(32, decay=0.9),
