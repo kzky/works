@@ -99,11 +99,13 @@ class Generator(Chain):
         super(Generator, self).__init__(
             linear0=L.Linear(784+dim_rand, 500, ),
             linear1=L.Linear(500, 250, ),
-            linear2=L.Linear(250, 500, ),
-            linear3=L.Linear(500, 784, ),
+            linear2=L.Linear(250, 250, ),
+            linear3=L.Linear(250, 500, ),
+            linear4=L.Linear(500, 784, ),
             bn0=L.BatchNormalization(500, decay=0.9),
             bn1=L.BatchNormalization(250, decay=0.9),
-            bn2=L.BatchNormalization(500, decay=0.9),
+            bn2=L.BatchNormalization(250, decay=0.9),
+            bn3=L.BatchNormalization(500, decay=0.9),
         )
         
         self.act = act
@@ -124,6 +126,10 @@ class Generator(Chain):
         h = self.act(h)
 
         h = self.linear3(h)
+        h = self.bn3(h, test=test)
+        h = self.act(h)
+
+        h = self.linear4(h)
         h = F.tanh(h)
 
         return h
