@@ -114,8 +114,10 @@ class AEExperiment(object):
         # Generate and Save
         x_rec = self.ae.decoder(y[idx, ], test=True)
         x_rec_cpu = cuda.to_cpu(x_rec.data)
-        self.save_incorrect_info(x_rec_cpu, x_l.data[idx, ],
-                                 y.data[idx, ], y_l.data[idx, ])
+        x_l_cpu = cuda.to_cpu(x_l.data)
+        y_cpu = cuda.to_cpu(y.data)
+        self.save_incorrect_info(x_rec_cpu, x_l_cpu[idx, ],
+                                 y_cpu[idx, ], y_l_cpu[idx, ])
 
     def save_incorrect_info(self, x_rec, x_l, y, y_l):
         # Generated Images
@@ -135,18 +137,19 @@ class AEExperiment(object):
         # Generated Images
         for i, img in enumerate(x_rec):
             fpath = "./test_gen/{:05d}.png".format(i)
-            if len(img.shape) == 2:
+            if len(img.shape) == 1:
                 cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             else:
-                cv2.imwrite(fpath, img * 127.5 + 127.5)
+                                
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             
         # Images
         for i, img in enumerate(x_l):
             fpath = "./test/{:05d}.png".format(i)
-            if len(img.shape) == 2:
+            if len(img.shape) == 1:
                 cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             else:
-                cv2.imwrite(fpath, img * 127.5 + 127.5)
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
      
         # Label and Probability
         with open("./label_prediction.out", "w") as fpout:
@@ -244,10 +247,10 @@ class GANExperiment(object):
             
         for i, img in enumerate(x_gen.data):
             fpath = "./gen/{:05d}/{:05d}.png".format(epoch, i)
-            if len(img.shape) == 2:
+            if len(img.shape) == 1:
                 cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             else:
-                cv2.imwrite(fpath, img * 127.5 + 127.5)
+                cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # Save model
         self.save_model(epoch)
