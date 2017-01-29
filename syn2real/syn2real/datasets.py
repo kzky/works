@@ -31,6 +31,7 @@ class MNISTDataReader(object):
         self._n_test_data = len(self.test_data["x"])
         self._n_cls = n_cls
         self._da = da
+        self._shape = shape
 
         print("Num. of labeled samples {}".format(self._n_l_train_data))
         print("Num. of unlabeled samples {}".format(self._n_u_train_data))
@@ -38,7 +39,7 @@ class MNISTDataReader(object):
         print("Num. of classes {}".format(self._n_cls))
 
     def reshape(self, x):
-        if self.shape:
+        if self._shape:
             return x.reshape(1, 28, 28)
         return x
     
