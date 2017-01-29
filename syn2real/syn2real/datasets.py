@@ -7,14 +7,16 @@ class MNISTDataReader(object):
     """DataReader
     """
     def __init__(self,
-        l_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/l_train.npz",
-        u_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/u_train.npz", 
-        test_path="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/test.npz",
-        batch_size=64,
-        n_cls=10,
-        da=False):
+                 l_train_path=\
+                 "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/l_train.npz",
+                 u_train_path=\
+                 "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/u_train.npz", 
+                 test_path="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/test.npz",
+                 batch_size=64,
+                 n_cls=10,
+                 da=False,
+                 shape=False,
+    ):
             
         self.l_train_data = dict(np.load(l_train_path))
         self.u_train_data = dict(np.load(u_train_path))
@@ -34,7 +36,12 @@ class MNISTDataReader(object):
         print("Num. of unlabeled samples {}".format(self._n_u_train_data))
         print("Num. of test samples {}".format(self._n_test_data))
         print("Num. of classes {}".format(self._n_cls))
-        
+
+    def reshape(self, x):
+        if self.shape:
+            return x.reshape(1, 28, 28)
+        return x
+    
     def get_l_train_batch(self,):
         """Return next batch data.
 
@@ -67,7 +74,7 @@ class MNISTDataReader(object):
             self.l_train_data["x"] = self.l_train_data["x"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
 
-        
+        batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_u_train_batch(self,):
@@ -100,7 +107,8 @@ class MNISTDataReader(object):
             np.random.shuffle(idx)
             self.u_train_data["x"] = self.u_train_data["x"][idx]
             self.u_train_data["y"] = self.u_train_data["y"][idx]
-        
+
+        batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_test_batch(self,):
@@ -119,6 +127,7 @@ class MNISTDataReader(object):
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
+        batch_data_x = self.reshape(batch_data_x)
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
