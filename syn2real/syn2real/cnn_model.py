@@ -60,8 +60,8 @@ class Decoder(Chain):
         super(Decoder, self).__init__(
             linear0=L.Linear(10, 64),
             linear1=L.Linear(64, 64 * 7 * 7),
-            deconv0=L.Convolution2D(64, 32, 4, stride=2, pad=1),
-            deconv1=L.Convolution2D(32, 1, 4, stride=2, pad=1),
+            deconv0=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
+            deconv1=L.Deconvolution2D(32, 1, 4, stride=2, pad=1),
             bn0=L.BatchNormalization(64, decay=0.9),
             bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9),
             bn2=L.BatchNormalization(32, decay=0.9),
