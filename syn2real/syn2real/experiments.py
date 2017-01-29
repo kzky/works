@@ -25,6 +25,10 @@ def create_ae_experiment(model, act=F.relu):
         from mlp_model import AutoEncoder
         return AutoEncoder(act)
 
+    if model == "cnn":
+        from cnn_model import AutoEncoder
+        return AutoEncoder(act)
+
 def create_gan_experiment(model, act=F.relu, dim_rand=30):
     if model == "mlp":
         from mlp_model import Generator, Discriminator
