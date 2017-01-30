@@ -37,7 +37,7 @@ class ReconstructionLoss1(Chain):
     def __call__(self, x_recon, x):
         bs = x.shape[0]
         d = np.prod(x.shape[1:])
-        self.loss = F.mean_abolute_error(x_recon, x) / d
+        self.loss = F.mean_absolute_error(x_recon, x) / d
 
         return self.loss
 
