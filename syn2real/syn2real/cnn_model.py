@@ -71,13 +71,17 @@ class Decoder(Chain):
         self.hiddens = []
 
     def __call__(self, y, test=False):
+        self.hiddens = []
+
         h = self.linear0(y)
         h = self.bn0(h)
         h = self.act(h)
+        self.hiddens.append(h)
 
         h = self.linear1(h)
         h = self.bn1(h)
         h = self.act(h)
+        self.hiddens.append(h)
 
         bs = h.shape[0]
         h = F.reshape(h, (bs, 64, 7, 7))
@@ -85,6 +89,7 @@ class Decoder(Chain):
         h = self.deconv0(h)
         h = self.bn2(h)
         h = self.act(h)
+        self.hiddens.append(h)
         
         h = self.deconv1(h)
         x = F.tanh(h)
