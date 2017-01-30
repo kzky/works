@@ -31,7 +31,7 @@ class ReconstructionLoss1(Chain):
 
     def __init__(self,
                      ):
-        super(ReconstructionLoss, self).__init__()
+        super(ReconstructionLoss1, self).__init__()
         self.loss = None
         
     def __call__(self, x_recon, x):
