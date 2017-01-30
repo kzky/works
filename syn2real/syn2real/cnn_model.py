@@ -81,10 +81,10 @@ class Decoder(Chain):
         h = self.linear1(h)
         h = self.bn1(h)
         h = self.act(h)
-        self.hiddens.append(h)
 
         bs = h.shape[0]
         h = F.reshape(h, (bs, 64, 7, 7))
+        self.hiddens.append(h)
         
         h = self.deconv0(h)
         h = self.bn2(h)
