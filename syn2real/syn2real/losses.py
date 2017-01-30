@@ -27,6 +27,20 @@ class ReconstructionLoss(Chain):
 
         return self.loss
 
+class ReconstructionLoss1(Chain):
+
+    def __init__(self,
+                     ):
+        super(ReconstructionLoss, self).__init__()
+        self.loss = None
+        
+    def __call__(self, x_recon, x):
+        bs = x.shape[0]
+        d = np.prod(x.shape[1:])
+        self.loss = F.mean_abolute_error(x_recon, x) / d
+
+        return self.loss
+
 class NegativeEntropyLoss(Chain):
 
     def __init__(self, test=False):
