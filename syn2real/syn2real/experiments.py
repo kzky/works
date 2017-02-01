@@ -277,7 +277,7 @@ class GANExperiment(object):
 
     def generate_random(self, bs, dim=30):
         r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
-        r = to_device(r)
+        r = to_device(r, self.device)
         return r
 
     def save_model(self, epoch):
