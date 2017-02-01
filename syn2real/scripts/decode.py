@@ -18,16 +18,13 @@ def main():
     # Generate random vector(s)
     bs = 1
     y = np.random.rand(bs, 10).astype(np.float32)
-    y = np.array([[0., 0, 0, 0, 0, 0, 0, 1, 0, 0]], dtype=np.float32)
+    y = np.array([[1000.0, .0, 0.0, 0.0, 0.0, 100, 0.0, 0.0, 0.0, 100.0]], dtype=np.float32)
     y = y / np.sum(y)
     y = y[np.newaxis]
-
     # Generate sample(s)
     x = decoder(y, test=True)
-    x = x.data * 127.5 + 127.5
-    
-    for i in range(bs):
-        cv2.imwrite("./dec_mnist_{:05d}.png".format(i), x[i, :].reshape(28, 28))
+    x = x.data 
+    cv2.imwrite("./dec_mnist.png", x.reshape(28, 28) * 127.5 + 127.5)
 
 if __name__ == '__main__':
     main()
