@@ -33,6 +33,10 @@ def create_gan_experiment(model, act=F.relu, dim_rand=30):
     if model == "mlp":
         from mlp_model import Generator, Discriminator
         return Generator(act, dim_rand), Discriminator(act)
+
+    if model == "cnn":
+        from mlp_model import Generator, Discriminator
+        return Generator(act, dim_rand), Discriminator(act)
         
 class AEExperiment(object):
 
@@ -140,7 +144,6 @@ class AEExperiment(object):
             if len(img.shape) == 1:
                 cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             else:
-                                
                 cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
             
         # Images
@@ -184,10 +187,10 @@ class GANExperiment(object):
         self.n_cls = n_cls
         self.act = act
         self.learning_rate = 1e-5
-
+        
         # Model
         generator, discriminator = create_gan_experiment(
-            model, act=act, dim_rand=dim_rand)
+            model=model, act=act, dim_rand=dim_rand)
         self.generator = generator
         self.generator.to_gpu(device) if self.device else None
         self.discriminator = discriminator
