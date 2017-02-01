@@ -248,8 +248,8 @@ class GANExperiment(object):
         else:
             os.makedirs(dpath)
 
-        x_gen = cuda.to_cpu(x_gen)
-        for i, img in enumerate(x_gen.data):
+        x_gen_data = cuda.to_cpu(x_gen.data)
+        for i, img in enumerate(x_gen_data):
             fpath = "./gen/{:05d}/{:05d}.png".format(epoch, i)
             if len(img.shape) == 1:
                 
