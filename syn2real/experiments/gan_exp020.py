@@ -40,7 +40,7 @@ def main():
 
     # Decoder
     decoder = Decoder(act=act)
-    decoder.to_gpu(device) if self.device else None
+    decoder.to_gpu(device) if device else None
     fpaths = glob.glob("./model/decoder*")
     fpaths.sort()
     fpath = fpaths[-1]
