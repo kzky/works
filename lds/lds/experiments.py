@@ -264,7 +264,7 @@ class Experiment002(Experiment001):
         # loss for unlabeled samples
         loss_u = l_ne_u + l_rec_u + l_lrec_u
 
-g        loss = loss_l + loss_u
+        loss = loss_l + loss_u
 
         # Backward and Update
         self.ae.cleargrads()
