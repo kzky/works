@@ -88,7 +88,12 @@ class Experiment(object):
         # loss for unlabeled samples
         loss_u = l_ne_u + l_rec_u
 
-        return loss_l + loss_u
+        loss = loss_l + loss_u
+
+        # Backward and Update
+        self.ae.cleargrads()
+        loss.backward()
+        self.optimizer.update()
 
     def test(self, x_l, y_l):
         y = self.ae.encoder(x_l)
