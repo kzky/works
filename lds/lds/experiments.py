@@ -365,7 +365,7 @@ class Experiment003(Experiment002):
                               self.ae.decoder.classifiers[::-1])])
         
         # loss for unlabeled samples
-        loss_u = l_ne_u + l_rec_u + l_ljd_u
+        loss_u = l_ne_u + l_rec_u + l_ljsd_u
 
         loss = loss_l + loss_u
 
