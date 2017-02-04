@@ -75,7 +75,7 @@ class JensenShannonDivergenceLoss(Chain):
         kl0 = F.sum(y0_softmax * (y0_log_softmax - y1_log_softmax)) / bs / d
         kl1 = F.sum(y1_softmax * (y1_log_softmax - y0_log_softmax)) / bs / d
 
-        return kl0 + kl1
+        return (kl0 + kl1) / 2
 
 class GANLoss(Chain):
 
