@@ -23,7 +23,7 @@ class ReconstructionLoss(Chain):
     def __call__(self, x_recon, x):
         bs = x.shape[0]
         d = np.prod(x.shape[1:])
-        self.loss = F.mean_squared_error(x_recon, x)# / d
+        self.loss = F.mean_squared_error(x_recon, x) / d
 
         return self.loss
 
@@ -37,7 +37,7 @@ class ReconstructionLoss1(Chain):
     def __call__(self, x_recon, x):
         bs = x.shape[0]
         d = np.prod(x.shape[1:])
-        self.loss = F.mean_absolute_error(x_recon, x)# / d
+        self.loss = F.mean_absolute_error(x_recon, x) / d
 
         return self.loss
 
@@ -53,7 +53,7 @@ class NegativeEntropyLoss(Chain):
 
         y_normalized = F.softmax(y)
         y_log_softmax = F.log_softmax(y)
-        self.loss = - F.sum(y_normalized * y_log_softmax) / bs# / d
+        self.loss = - F.sum(y_normalized * y_log_softmax) / bs / d
 
         return self.loss
 
