@@ -57,6 +57,26 @@ class NegativeEntropyLoss(Chain):
 
         return self.loss
 
+class JensenShannonDivergenceLoss(Chain):
+
+    def __init__(self, test=False):
+        super(JensenShannonDivergenceLoss, self).__init__()
+
+    def __call__(y0, y1):
+        bs = y0.data.shape[0]
+        d = np.prod(y0.data.shape[1:])
+
+        y0_softmax = F.softmax(y0)
+        y1_softmax = F.softmax(y1)
+
+        y0_log_softmax = F.log_softmax(y0)
+        y1_log_softmax = F.log_softmax(y1)
+
+        kl0 = F.sum(y0_softmax * (y0_log_softmax - y1_log_softmax)) / bs / d
+        kl1 = F.sum(y1_softmax * (y1_log_softmax - y0_log_softmax)) / bs / d
+
+        return kl0 + kl1
+
 class GANLoss(Chain):
 
     def __init__(self, ):
