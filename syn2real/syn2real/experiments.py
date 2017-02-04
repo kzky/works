@@ -35,7 +35,7 @@ def create_gan_experiment(model, act=F.relu, dim_rand=30):
         return Generator(act, dim_rand), Discriminator(act)
 
     if model == "cnn":
-        from mlp_model import Generator, Discriminator
+        from cnn_model import Generator, Discriminator
         return Generator(act, dim_rand), Discriminator(act)
         
 class AEExperiment(object):
