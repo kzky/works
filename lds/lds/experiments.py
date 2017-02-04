@@ -188,6 +188,20 @@ class Experiment001(Experiment):
         self.ae.cleargrads()
         loss.backward()
         self.optimizer.update()
+
+    def test(self, x_l, y_l):
+        y = self.ae.encoder(x_l)
+        x = self.ae.decoder(y)
+        
+        acc = F.accuracy(y, y_l)
+        
+        accs = [F.accuracy(y_, y_l) \
+                for y_ in self.ae.encoder.classifiers] \
+                    + [F.accuracy(y_, y_l)\
+                       for y_ in self.ae.decoder.classifiers] \
+                           + [acc] 
+        
+        return accs
     
 class Experiment002(Experiment001):
     """Decoder predict label.
