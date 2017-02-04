@@ -111,7 +111,7 @@ class Experiment001(object):
     """
 
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
-        super(Experiment000, self).__init__(
+        super(Experiment001, self).__init__(
             device=device, learning_rate=learning_rate, act=act
         )
         
