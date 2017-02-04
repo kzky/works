@@ -18,7 +18,7 @@ def main():
     n_cls = 10
 
     learning_rate = 1. * 1e-3
-    n_epoch = 10
+    n_epoch = 50
     act = F.relu
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
@@ -36,7 +36,8 @@ def main():
     # DataReader, Model, Optimizer, Losses
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
-                                  n_cls=n_cls, 
+                                  n_cls=n_cls,
+                                  da=True,
                                   shape=True)
     exp = Experiment(
         device,
@@ -64,11 +65,11 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            acc = exp.test(x_l, y_l)
+            accs = [acc.data for acc in exp.test(x_l, y_l)]
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                acc.data)
+                accs)
             print(msg)
             
             st = time.time()
