@@ -102,13 +102,13 @@ class Generator(Chain):
         super(Generator, self).__init__(
             conv0=L.Convolution2D(1, 32, ksize=4, stride=2, pad=1),
             conv1=L.Convolution2D(32, 64, ksize=4, stride=2, pad=1),
-            deconv0=L.Deconvolution2D(64, 32, ksize=4, stride=2, pad=1),
-            deconv1=L.Deconvolution2D(32, 1, ksize=4, stride=2, pad=1),
+            deconv0=L.Deconvolution2D(128, 64, ksize=4, stride=2, pad=1),
+            deconv1=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1),
             bn0=L.BatchNormalization(32, decay=0.9),
             bn1=L.BatchNormalization(64, decay=0.9),
             bn2=L.BatchNormalization(64, decay=0.9),
-            linear_z=L.Linear(dmi_rand, 64 * 7 * 7),
-            bn_z=L.Linear(dmi_rand, 64 * 7 * 7),
+            linear_z=L.Linear(dim_rand, 64 * 7 * 7),
+            bn_z=L.BatchNormalization(64 * 7 * 7, decay=0.9),
         )
         
         self.act = act
@@ -119,7 +119,7 @@ class Generator(Chain):
         h = self.bn0(h)
         h = self.act(h)
         
-        h = self.conv1(x)
+        h = self.conv1(h)
         h = self.bn1(h)
         bottleneck = self.act(h)
 
@@ -136,7 +136,7 @@ class Generator(Chain):
         h = self.bn2(h)
         h = self.act(h)
         
-        h = self.deconv0(h) + x  # residual
+        h = self.deconv1(h) + x  # residual
         x_gen = F.tanh(h)
 
         return x_gen
@@ -149,7 +149,7 @@ class Discriminator(Chain):
         super(Discriminator, self).__init__(
             conv0=L.Convolution2D(1, 32, ksize=4, stride=2, pad=1),
             conv1=L.Convolution2D(32, 64, ksize=4, stride=2, pad=1),
-            linear=L.Linear(128 * 7 * 7, 1),
+            linear=L.Linear(64 * 7 * 7, 1),
             bn0=L.BatchNormalization(32, decay=0.9),
             bn1=L.BatchNormalization(64, decay=0.9),
         )

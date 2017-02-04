@@ -213,7 +213,9 @@ class GANExperiment(object):
         bs = x_real.shape[0]
                           
         # Train discriminator
-        x_recon = self.generate_x_recon(bs)
+        x_recon_ = self.generate_x_recon(bs)  #TODO: change when using CNN reconstructor
+        bs = x_recon_.shape[0]
+        x_recon = F.reshape(x_recon_, (bs, 1, 28, 28))
         d_x = self.discriminator(x_real)
         z = self.generate_random(bs, self.dim_rand)
         x_gen = self.generator(x_recon, z, test=False)
@@ -225,7 +227,9 @@ class GANExperiment(object):
         self.optimizer_dis.update()
 
         # Train generator
-        x_recon = self.generate_x_recon(bs)
+        x_recon_ = self.generate_x_recon(bs)  #TODO: change when using CNN reconstructor
+        bs = x_recon_.shape[0]
+        x_recon = F.reshape(x_recon_, (bs, 1, 28, 28))
         z = self.generate_random(bs, self.dim_rand)
         x_gen = self.generator(x_recon, z, test=False)
         d_x_gen = self.discriminator(x_gen)
@@ -236,8 +240,10 @@ class GANExperiment(object):
         self.optimizer_gen.update()
 
     def test(self, epoch, bs):
+        x_recon_ = self.generate_x_recon(bs)  #TODO: change when using CNN reconstructor
+        bs = x_recon_.shape[0]
+        x_recon = F.reshape(x_recon_, (bs, 1, 28, 28))
         z = self.generate_random(bs, self.dim_rand)
-        x_recon = self.generate_x_recon(bs)
         x_gen = self.generator(x_recon, z, test=False)
 
         # Generated Images

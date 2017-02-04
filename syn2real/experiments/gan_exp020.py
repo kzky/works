@@ -36,7 +36,8 @@ def main():
     # DataReader, Model, Optimizer, Losses
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
-                                  n_cls=n_cls)
+                                  n_cls=n_cls,
+                                  shape=True)
 
     # Decoder
     decoder = Decoder(act=act)
