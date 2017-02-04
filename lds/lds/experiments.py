@@ -106,7 +106,7 @@ class Experiment(object):
         
         return accs
 
-class Experiment001(object):
+class Experiment001(Experiment):
     """Decoder predict label and use NE loss on these predictions.
     """
 
@@ -115,9 +115,17 @@ class Experiment001(object):
             device=device, learning_rate=learning_rate, act=act
         )
         
+        # Model
         from lds.cnn_model_001 import AutoEncoder
         self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
 
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+        
+        
     def train(self, x_l, y_l, x_u):
         # Labeled samples
         y = self.ae.encoder(x_l)
@@ -131,7 +139,7 @@ class Experiment001(object):
                             for y_ in self.ae.encoder.classifiers]) \
                                 + reduce(lambda x, y: x + y, 
                                          [F.softmax_cross_entropy(y_, y_l) \
-                                          for y_ in self.ae.decocer.classifiers])
+                                          for y_ in self.ae.decoder.classifiers])
 
         # negative entropy loss
         l_ne_l = 0
