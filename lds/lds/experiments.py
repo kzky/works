@@ -359,7 +359,7 @@ class Experiment003(Experiment002):
                                 self.ae.decoder.hiddens[::-1])])
 
         # unlabel jsd loss
-        l_ljsd_l = reduce(lambda x, y: x + y,
+        l_ljsd_u = reduce(lambda x, y: x + y,
                           [self.jsd_loss(x, y) for x, y in zip(
                               self.ae.encoder.classifiers,
                               self.ae.decoder.classifiers[::-1])])
