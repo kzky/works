@@ -62,7 +62,7 @@ class JensenShannonDivergenceLoss(Chain):
     def __init__(self, test=False):
         super(JensenShannonDivergenceLoss, self).__init__()
 
-    def __call__(y0, y1):
+    def __call__(self, y0, y1):
         bs = y0.data.shape[0]
         d = np.prod(y0.data.shape[1:])
 
