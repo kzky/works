@@ -19,6 +19,7 @@ from utils import to_device
 from chainer_fix import BatchNormalization
 from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss
 from sklearn.metrics import confusion_matrix
+from sslgen.cnn_model import Generator, Discriminator
         
 class Experiment(object):
 
@@ -32,9 +33,9 @@ class Experiment(object):
         self.learning_rate = 1e-3
 
         # Model
-        self.generator = Generator(act=act, n_cls=n_cls, dims=dims)
+        self.generator = Generator(device=device, act=act, n_cls=n_cls, dims=dims)
         self.generator.to_gpu(device) if self.device else None
-        self.discriminator = Discriminator(act)
+        self.discriminator = Discriminator(device=device, act=act)
         self.discriminator.to_gpu(device) if self.device else None
 
         # Optimizer
@@ -65,8 +66,8 @@ class Experiment(object):
         d_x_gen = self.discriminator(x_gen)
         d_x = self.discriminator(x_real)
         loss_dis = self.gan_loss(d_x_gen, d_x)
-        self.optimizer_dis.cleargrads()
-        self.optimizer_gen.cleargrads()
+        self.generator.cleargrads()
+        self.discriminator.cleargrads()
         loss_dis.backward()
         self.optimizer_dis.update()
         
@@ -74,14 +75,13 @@ class Experiment(object):
         z = self.generate_random(bs, self.dims)
         x_gen = self.generator(x_real, y, z)
         d_x_gen = self.discriminator(x_gen)
-        loss_gen = self.gan_loss(d_x_gen)
-        loss_recon = self.recon_loss(x_gen, x_real)
-        self.optimizer_dis.cleargrads()
-        self.optimizer_gen.cleargrads()
+        loss_gen = self.gan_loss(d_x_gen) + self.recon_loss(x_gen, x_real)
+        self.generator.cleargrads()
+        self.discriminator.cleargrads()
         loss_gen.backward()
         self.optimizer_gen.update()
         
-    def test(self, x):
+    def test(self, x, y):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dims)
@@ -95,13 +95,13 @@ class Experiment(object):
         else:
             os.mkdir("./test_gen")
 
-        x_gen_data = cuda.to_gpu(x_gen.data)
+        x_gen_data = cuda.to_cpu(x_gen.data)
         for i, img in enumerate(x_gen_data):
             fpath = "./test_gen/{:05d}.png".format(i)
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # D(x_gen) values
-        d_x_gen_data = [data for data in cuda.to_gpu(d_x_gen.data)]
+        d_x_gen_data = [float(data[0]) for data in cuda.to_gpu(d_x_gen.data)][0:100]
 
         return d_x_gen_data
         

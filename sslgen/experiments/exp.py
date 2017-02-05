@@ -38,7 +38,8 @@ def main():
     # DataReader, Model, Optimizer, Losses
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
-                                  n_cls=n_cls)
+                                  n_cls=n_cls,
+                                  shape=True)
     exp = Experiment(
         device,
         n_cls,
@@ -53,8 +54,11 @@ def main():
     st = time.time()
     for i in range(n_iter):
         # Get data
-        x_l, y_l = [Variable(to_device(x, device)) \
-                        for x in data_reader.get_l_train_batch()]
+        #x_l, y_l = [Variable(to_device(x, device)) \
+        #                for x in data_reader.get_l_train_batch()]
+        x_l, y_l = [x for x in data_reader.get_l_train_batch()]
+        x_l = Variable(to_device(x_l, device))
+
         x_u, _ = [Variable(to_device(x, device)) \
                       for x in data_reader.get_u_train_batch()]
 
@@ -64,14 +68,14 @@ def main():
         # Eval
         if (i+1) % iter_epoch == 0:
             # Get data
-            x_l, y_l = [Variable(to_device(x, device)) \
-                            for x in data_reader.get_test_batch()]
+            x_l, y_l = [x for x in data_reader.get_test_batch()]
+            x_l = Variable(to_device(x_l, device))
 
-            acc = exp.test(epoch, x_l, y_l)
+            d_x_gen = exp.test(x_l, y_l)
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch, 
                 time.time() - st, 
-                acc.data)
+                d_x_gen)
             print(msg)
             
             st = time.time()
