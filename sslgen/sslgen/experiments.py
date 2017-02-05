@@ -101,7 +101,7 @@ class Experiment(object):
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # D(x_gen) values
-        d_x_gen_data = [float(data[0]) for data in cuda.to_gpu(d_x_gen.data)][0:100]
+        d_x_gen_data = [float(data[0]) for data in cuda.to_cpu(d_x_gen.data)][0:100]
 
         return d_x_gen_data
         
