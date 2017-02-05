@@ -66,7 +66,7 @@ def main():
         exp.train(x_l, y_l, x_u)
         
         # Eval
-        if (i) % iter_epoch == 0:
+        if (i+1) % iter_epoch == 0:
             # Get data
             x_l, y_l = [x for x in data_reader.get_test_batch()]
             x_l = Variable(to_device(x_l, device))
