@@ -113,8 +113,8 @@ class Experiment(object):
         fpath = "./model/generator_{:05d}.h5py".format(epoch)
         serializers.save_hdf5(fpath, self.generator)
 
-    def generate_random(self, bs, dim=30):
-        r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
+    def generate_random(self, bs, dims=30):
+        r = np.random.uniform(-1, 1, (bs, dims)).astype(np.float32)
         r = to_device(r, self.device)
         return r
 
