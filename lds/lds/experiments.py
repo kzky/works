@@ -122,9 +122,7 @@ class Experiment000(Experiment):
 
         # cronss entropy loss
         l_ce_l = 0
-        l_ce_l += F.softmax_cross_entropy(y, y_l) \
-                  + reduce(lambda x, y: x + y, 
-                           [F.softmax_cross_entropy(y_, y_l) for y_ in self.ae.encoder.classifiers])
+        l_ce_l += F.softmax_cross_entropy(y, y_l)
 
         # negative entropy loss
         l_ne_l = 0
