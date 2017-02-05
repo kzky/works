@@ -110,8 +110,8 @@ class Experiment(object):
         if not os.path.exists(dpath):
             os.makedirs(dpath)
             
-        fpath = "./model/decoder_{:05d}.h5py".format(epoch)
-        serializers.save_hdf5(fpath, self.ae.decoder)
+        fpath = "./model/generator_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator)
 
     def generate_random(self, bs, dim=30):
         r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
