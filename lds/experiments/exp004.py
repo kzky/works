@@ -68,7 +68,8 @@ def main():
             bs = 100
             accs = []
             for i in xrange(len(x_l) / bs ):
-                accs.append(float(exp.test(x_l, y_l)))
+                s = slice(i*bs, (i+1)*bs)
+                accs.append(float(exp.test(x_l[s, ], y_l[s, ])))
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
