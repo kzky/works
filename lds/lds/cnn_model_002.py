@@ -24,14 +24,14 @@ class ResEnc(Chain):
                 conv1=L.Convolution2D(outmap, outmap, 3, stride=1, pad=1),
                 conv2=L.Convolution2D(inmap, outmap, 4, stride=2, pad=1),
                 bn0=L.BatchNormalization(outmap, decay=0.9),
-                bn1=L.BatchNormalization(outmap, decay=0.9)
+                bn1=L.BatchNormalization(outmap, decay=0.9),
                 bn2=L.BatchNormalization(outmap, decay=0.9)
             )
         else:
             super(ResEnc, self).__init__(
                 conv0=L.Convolution2D(inmap, outmap, 3, stride=1, pad=1),
-                conv1=L.Convolution2D(inmap, outmap, 4, stride=1, pad=1),
-                bn0=L.BatchNormalization(inmap, decay=0.9)
+                conv1=L.Convolution2D(inmap, outmap, 3, stride=1, pad=1),
+                bn0=L.BatchNormalization(inmap, decay=0.9),
                 bn1=L.BatchNormalization(inmap, decay=0.9)
             )
             
@@ -59,23 +59,24 @@ class ResDec(Chain):
     def __init__(self, inmap=32, outmap=64, act=F.relu, up=False):
         if up:
             super(ResDec, self).__init__(
-                decovn0=L.Decovnolution2D(inmap, outmap, 4, stride=2, pad=1),
-                decovn1=L.Decovnolution2D(outmap, outmap, 3, stride=1, pad=1),
-                decovn2=L.Decovnolution2D(inmap, outmap, 4, stride=2, pad=1),
+                decovn0=L.Deconvolution2D(inmap, outmap, 4, stride=2, pad=1),
+                decovn1=L.Deconvolution2D(outmap, outmap, 3, stride=1, pad=1),
+                decovn2=L.Deconvolution2D(inmap, outmap, 4, stride=2, pad=1),
                 bn0=L.BatchNormalization(outmap, decay=0.9),
-                bn1=L.BatchNormalization(outmap, decay=0.9)
+                bn1=L.BatchNormalization(outmap, decay=0.9),
                 bn2=L.BatchNormalization(outmap, decay=0.9)
             )
         else:
             super(ResDec, self).__init__(
-                decovn0=L.Decovnolution2D(inmap, outmap, 3, stride=1, pad=1),
-                decovn1=L.Decovnolution2D(inmap, outmap, 4, stride=1, pad=1),
-                bn0=L.BatchNormalization(inmap, decay=0.9)
+                decovn0=L.Deconvolution2D(inmap, outmap, 3, stride=1, pad=1),
+                decovn1=L.Deconvolution2D(inmap, outmap, 3, stride=1, pad=1),
+                bn0=L.BatchNormalization(inmap, decay=0.9),
                 bn1=L.BatchNormalization(inmap, decay=0.9)
             )
             
         self.act = act
         self.up = up
+        self.outmap = outmap
 
     def __call__(self, x):
         h = self.decovn0(x)
@@ -83,15 +84,14 @@ class ResDec(Chain):
         h = self.act(h)
         h = self.decovn1(h)
         h = self.bn1(h)
-
-        if self.act is not None:  # the last layer
+        if self.outmap != 1:
             h = self.act(h)
 
         h_s = x
         if self.up:
             h_s = self.decovn2(x)
             h_s = self.bn2(h_s)
-            if self.act is not None:  # the last layer
+            if self.outmap != 1:
                 h_s = self.act(h_s)
 
         return h + h_s
@@ -101,9 +101,9 @@ class Encoder(Chain):
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
             # Encoder
-            resenc0=ResEnc(1, 32, act, up=True),
+            resenc0=ResEnc(1, 32, act, dn=True),
             resenc1=ResEnc(32, 32, act),
-            resenc2=ResEnc(32, 64, act, up=True),
+            resenc2=ResEnc(32, 64, act, dn=True),
             resenc3=ResEnc(64, 64, act),
             linear0=L.Linear(64 * 7 * 7, 32),
             linear1=L.Linear(32, 10),
@@ -148,10 +148,10 @@ class Decoder(Chain):
             linear1=L.Linear(32, 64 * 7 * 7),
             bn0=L.BatchNormalization(32, decay=0.9),
             bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9),
-            resdec0=(64, 64, act),
-            resdec1=(64, 32, act, dn=True),
-            resdec2=(32, 32, act),
-            resdec3=(32, 1, act=None, dn=True),
+            resdec0=ResDec(64, 64, act),
+            resdec1=ResDec(64, 32, act, up=True),
+            resdec2=ResDec(32, 32, act),
+            resdec3=ResDec(32, 1, act, up=True),
             # BranchNet
             linear0_bn=L.Linear(32, 10),
             linear1_bn=L.Linear(64*7*7, 10),

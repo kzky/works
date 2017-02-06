@@ -444,7 +444,7 @@ class Experiment003(Experiment002):
 # Aliases
 class Experiment004(Experiment000):
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
-        super(Experiment001, self).__init__(
+        super(Experiment004, self).__init__(
             device=device, learning_rate=learning_rate, act=act
         )
         

@@ -15,22 +15,24 @@ import time
 from utils import to_device
 from chainer_fix import BatchNormalization
 
+f = 1
+        
 class Encoder(Chain):
 
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
             # Encoder
-            conv0=L.Convolution2D(1, 32, 4, stride=2, pad=1),
-            conv1=L.Convolution2D(32, 64, 4, stride=2, pad=1),
-            linear0=L.Linear(64 * 7 * 7, 32),
-            linear1=L.Linear(32, 10),
-            bn0=L.BatchNormalization(32, decay=0.9),
-            bn1=L.BatchNormalization(64, decay=0.9),
-            bn2=L.BatchNormalization(32, decay=0.9),
+            conv0=L.Convolution2D(1, 16, 4, stride=2, pad=1),
+            conv1=L.Convolution2D(16, 32, 4, stride=2, pad=1),
+            linear0=L.Linear(32 * 7 * 7, 16),
+            linear1=L.Linear(16, 10),
+            bn0=L.BatchNormalization(16, decay=0.9),
+            bn1=L.BatchNormalization(32, decay=0.9),
+            bn2=L.BatchNormalization(16, decay=0.9),
             # BranchNet
-            linear0_bn=L.Linear(32*14*14, 10),
-            linear1_bn=L.Linear(64*7*7, 10),
-            linear2_bn=L.Linear(32, 10),
+            linear0_bn=L.Linear(16*14*14, 10),
+            linear1_bn=L.Linear(32*7*7, 10),
+            linear2_bn=L.Linear(16, 10),
         )
 
         self.act = act
@@ -71,18 +73,18 @@ class Decoder(Chain):
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
             # Decoer
-            linear0=L.Linear(10, 32),
-            linear1=L.Linear(32, 64 * 7 * 7),
-            deconv0=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
-            deconv1=L.Deconvolution2D(32, 1, 4, stride=2, pad=1),
-            bn0=L.BatchNormalization(32, decay=0.9),
-            bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9),
-            bn2=L.BatchNormalization(32, decay=0.9),
+            linear0=L.Linear(10, 16),
+            linear1=L.Linear(16, 32 * 7 * 7),
+            deconv0=L.Deconvolution2D(32, 16, 4, stride=2, pad=1),
+            deconv1=L.Deconvolution2D(16, 1, 4, stride=2, pad=1),
+            bn0=L.BatchNormalization(16, decay=0.9),
+            bn1=L.BatchNormalization(32 * 7 * 7, decay=0.9),
+            bn2=L.BatchNormalization(16, decay=0.9),
 
             # BranchNet
-            linear0_bn=L.Linear(32, 10),
-            linear1_bn=L.Linear(64*7*7, 10),
-            linear2_bn=L.Linear(32*14*14, 10),
+            linear0_bn=L.Linear(16, 10),
+            linear1_bn=L.Linear(32*7*7, 10),
+            linear2_bn=L.Linear(16*14*14, 10),
         )
                 
         self.act = act
@@ -104,7 +106,7 @@ class Decoder(Chain):
         h = self.bn1(h)
         h = self.act(h)
         bs = h.shape[0]
-        h = F.reshape(h, (bs, 64, 7, 7))
+        h = F.reshape(h, (bs, 32, 7, 7))
         self.hiddens.append(h)
         cls = self.linear1_bn(h)
         self.classifiers.append(cls)
@@ -117,6 +119,7 @@ class Decoder(Chain):
         self.classifiers.append(cls)
 
         h = self.deconv1(h)
+        h = F.tanh(h)
         return h
 
 

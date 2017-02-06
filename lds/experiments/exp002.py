@@ -18,7 +18,7 @@ def main():
     n_cls = 10
 
     learning_rate = 1. * 1e-3
-    n_epoch = 50
+    n_epoch = 500
     act = F.relu
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
@@ -26,8 +26,8 @@ def main():
     # Separate dataset
     home = os.environ.get("HOME")
     fpath = os.path.join(home, "datasets/mnist/train.npz")
-    separator = Separator(n_l_train_data)
-    separator.separate_then_save(fpath)
+    #separator = Separator(n_l_train_data)
+    #separator.separate_then_save(fpath)
 
     l_train_path = os.path.join(home, "datasets/mnist/l_train.npz")
     u_train_path = os.path.join(home, "datasets/mnist/train.npz")
