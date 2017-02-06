@@ -65,11 +65,14 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            accs = [acc.data for acc in exp.test(x_l, y_l)]
+            bs = 100
+            accs = []
+            for i in xrange(len(x_l) / bs ):
+                accs.append(float(exp.test(x_l, y_l)))
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                accs)
+                np.means(accs))
             print(msg)
             
             st = time.time()
