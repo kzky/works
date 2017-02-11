@@ -474,7 +474,7 @@ class Experiment005(Experiment):
 
 class Experiment006(Experiment000):
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
-        super(Experiment005, self).__init__(
+        super(Experiment006, self).__init__(
             device=device, learning_rate=learning_rate, act=act
         )        
         # Model
@@ -489,7 +489,7 @@ class Experiment006(Experiment000):
 
 class Experiment007(Experiment001):
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
-        super(Experiment005, self).__init__(
+        super(Experiment007, self).__init__(
             device=device, learning_rate=learning_rate, act=act
         )        
         # Model
