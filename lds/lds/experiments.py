@@ -502,3 +502,18 @@ class Experiment007(Experiment001):
         self.optimizer.setup(self.ae)
         self.optimizer.use_cleargrads()
 
+class Experiment008(Experiment002):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+        super(Experiment008, self).__init__(
+            device=device, learning_rate=learning_rate, act=act
+        )        
+        # Model
+        from lds.cnn_model_003 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
