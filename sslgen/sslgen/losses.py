@@ -63,11 +63,11 @@ class GANLoss(Chain):
         super(GANLoss, self).__init__(
         )
         
-    def __call__(self, d_x_gen, d_x=None):
+    def __call__(self, d_x_gen, d_x_real=None):
         bs_d_x_gen = d_x_gen.shape[0]
-        if d_x is not None:
-            bs_d_x = d_x.shape[0]
-            loss = F.sum(F.log(d_x)) / bs_d_x \
+        if d_x_real is not None:
+            bs_d_x_real = d_x_real.shape[0]
+            loss = F.sum(F.log(d_x_real)) / bs_d_x_real \
                    + F.sum(F.log(1 - d_x_gen)) / bs_d_x_gen
             return - loss  # to minimize
             
