@@ -113,6 +113,7 @@ class Encoder(Chain):
             linear1_bn=L.Linear(32*14*14, 10),
             linear2_bn=L.Linear(64*7*7, 10),
             linear4_bn=L.Linear(64*7*7, 10),
+            linear4_bn=L.Linear(32, 10),
         )
 
         self.act = act
@@ -147,6 +148,8 @@ class Encoder(Chain):
         h = self.bn0(h)
         h = self.act(h)
         self.hiddens.append(h)
+        y = self.linear4_bn(h)
+        self.classifiers.append(y)
 
         h = self.linear1(h)
         return h
@@ -165,9 +168,10 @@ class Decoder(Chain):
             resdec2=ResDec(32, 32, act),
             resdec3=ResDec(32, 1, act, up=True),
             # BranchNet
-            linear0_bn=L.Linear(64*7*7, 10),
+            linear0_bn=L.Linear(32, 10),
             linear1_bn=L.Linear(64*7*7, 10),
-            linear2_bn=L.Linear(32*14*14, 10),
+            linear2_bn=L.Linear(64*7*7, 10),
+            linear3_bn=L.Linear(32*14*14, 10),
             linear4_bn=L.Linear(32*14*14, 10),
         )
                 
@@ -184,6 +188,8 @@ class Decoder(Chain):
         h = self.bn0(h)
         h = self.act(h)
         self.hiddens.append(h)
+        y = self.linear0_bn(h)
+        self.classifiers.append(y)
 
         h = self.linear1(h)
         h = self.bn1(h)
@@ -191,22 +197,22 @@ class Decoder(Chain):
 
         h = F.reshape(h, (bs, 64, 7, 7))
         self.hiddens.append(h)
-        y = self.linear0_bn(h)
+        y = self.linear1_bn(h)
         self.classifiers.append(y)
 
         h = self.resdec0(h)  #7x7
         self.hiddens.append(h)
-        y = self.linear1_bn(h)
+        y = self.linear2_bn(h)
         self.classifiers.append(y)
 
         h = self.resdec1(h)  #14x14
         self.hiddens.append(h)
-        y = self.linear2_bn(h)
+        y = self.linear3_bn(h)
         self.classifiers.append(y)
 
         h = self.resdec2(h)  #14x14
         self.hiddens.append(h)
-        y = self.linear3_bn(h)
+        y = self.linear4_bn(h)
         self.classifiers.append(y)
 
         h = self.resdec3(h)  #28x28
