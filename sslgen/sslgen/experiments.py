@@ -118,3 +118,128 @@ class Experiment(object):
         r = to_device(r, self.device)
         return r
 
+
+class Experiment001(object):
+
+    def __init__(self, device=None, 
+                 n_cls=10, dim=100, learning_rate=1e-3, act=F.relu):
+        # Settings
+        self.device = device
+        self.n_cls = n_cls
+        self.dim = dim
+        self.act = act
+        self.learning_rate = 1e-3
+
+        from sslgen.cnn_model_001 \
+            import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
+
+        # Model
+        self.encoder = Encoder(device=device, act=act, n_cls=n_cls)
+        self.decoder = Decoder(device=device, act=act, n_cls=n_cls)
+        self.generator1 = decoder
+        self.generator0 = Generator0(device=device, act=act, n_cls, dim=dim)
+        self.image_discriminator = ImageDiscriminator(device=device, act=act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.generator0.to_gpu(device) if self.device else None
+        self.image_discriminator.to_gpu(device) if self.device else None
+
+        self.autoencoder = Chain()
+        self.autoencoder.add_link(self.encoder)
+        self.autoencoder.add_link(self.decoder)
+        self.generator = Chain()
+        self.generator.add_link(self.generator0)
+        self.generator.add_link(self.generator1)
+                
+        # Optimizer
+        self.optimizer_ae = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen = optimizers.Adam(self.learning_rate)
+        self.optimizer_dis = optimizers.Adam(self.learning_rate)
+        self.optimizer_ae.setup(autoencoder)
+        self.optimizer_gen.setup(generator)
+        self.optimizer_dis.setup(image_discriminator)
+        self.optimizer_ae.use_cleargrads()
+        self.optimizer_gen.use_cleargrads()
+        self.optimizer_dis.use_cleargrads()
+        
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.gan_loss = GANLoss()
+        
+    def train(self, x_l, y_l, x_u):
+        # Train for labeled sampels
+        self._train(x_l, y_l)
+
+        # Train for unlabeled sampels
+        self._train(x_u, None)
+
+    def _train(self, x_real, y=None):
+        # Encoder
+        h = self.encoder(x_real)
+        x_rec = self.decoder(h, y)
+        loss_rec = self.recon_loss(x_rec, x_real)
+        self.autoencoder.cleargrads()
+        loss_rec.backward()
+        self.optimizer_ae.update()
+        
+        # Generator
+        bs = x_real.shape[0]        
+        z = self.generate_random(bs, self.dim)
+        h = self.genrator0(z)
+        x_gen = self.generator1(h, y)
+        d_x_gen = self.image_discriminator(x_gen)
+        loss_gen = self.gan_loss(d_x_gen)
+        self.generator.cleargrads()
+        self.discriminator.cleargrads()
+        loss_gen.backward()
+        self.optimizer_gen.update()
+
+        # Discriminator
+        z = self.generate_random(bs, self.dim)
+        h = self.genrator0(z)
+        x_gen = self.generator1(h, y)
+        d_x_gen = self.image_discriminator(x_gen)
+        d_x_real = self.image_discriminator(x_real)
+        loss_dis = self.gan_loss(d_x_gen, d_x_real)
+        self.generator.cleargrads()
+        self.discriminator.cleargrads()
+        loss_dis.backward()
+        self.optimizer_dis.update()
+
+    def test(self, x, y):
+        # Generate Images
+        bs = x.shape[0]
+        z = self.generate_random(bs, self.dim)
+        x_gen = self.generator(x, y, z)
+        d_x_gen = self.discriminator(x_gen)
+
+        # Save generated images
+        if os.path.exists("./test_gen"):
+            shutil.rmtree("./test_gen")
+            os.mkdir("./test_gen")
+        else:
+            os.mkdir("./test_gen")
+
+        x_gen_data = cuda.to_cpu(x_gen.data)
+        for i, img in enumerate(x_gen_data):
+            fpath = "./test_gen/{:05d}.png".format(i)
+            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+
+        # D(x_gen) values
+        d_x_gen_data = [float(data[0]) for data in cuda.to_cpu(d_x_gen.data)][0:100]
+
+        return d_x_gen_data
+        
+    def save_model(self, epoch):
+        dpath  = "./model"
+        if not os.path.exists(dpath):
+            os.makedirs(dpath)
+            
+        fpath = "./model/generator_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator)
+
+    def generate_random(self, bs, dim=30):
+        r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
+        r = to_device(r, self.device)
+        return r
+

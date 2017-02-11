@@ -46,7 +46,7 @@ class Encoder(Chain, Mixin):
         self.act = act
         self.n_cls = n_cls
 
-    def __call__(self, x, y=None, test=False):
+    def __call__(self, x, test=False):
         h = self.conv0(x)  # 28x28 -> 14x14
         h = self.bn0(h)
         h = self.act(h)
@@ -59,15 +59,15 @@ class Encoder(Chain, Mixin):
 class Decoder(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, n_cls=10):
         super(Decoder, self).__init__(
-            deconv0=L.Deconvolution2D(128+n_cls, 64, ksize=4, stride=2, pad=1, )
-            deconv1=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, )
+            deconv0=L.Deconvolution2D(128+n_cls, 64, ksize=4, stride=2, pad=1, ),
+            deconv1=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
             bn0=L.BatchNormalization(128, decay=0.9),
         )
         self.device = device        
         self.act = act
         self.n_cls = n_cls
 
-    def __call__(self, h, test=False):
+    def __call__(self, h, y=None, test=False):
         # Concat
         bs = h.shape[0]
         sd = h.shape[2]
@@ -83,13 +83,13 @@ class Decoder(Chain, Mixin):
         return h
 
 # Alias
-Generator = Decoder
+Generator1 = Decoder
 
-class Geneartor0(Chain, Mixin):
+class Generator0(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, n_cls=10, dim=100):
         super(Generator0, self).__init__(
             linear0=L.Linear(dim, 128*7*7),
-            bn0=L.Normalization(128*7*7, decay=0.9),
+            bn0=L.BatchNormalization(128*7*7, decay=0.9),
         )
         self.device = device        
         self.act = act
@@ -105,20 +105,20 @@ class Geneartor0(Chain, Mixin):
         dim = np.prod(z.shape[1:])
         h = F.reshape(h, (bs, dim))  # 7x7
         return h
-    
+
 class ImageDiscriminator(Chain, Mixin):
-    def __init__(self, device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu, n_cls=10):
         super(ImageDiscriminator, self).__init__(
             conv0=L.Convolution2D(1, 64, ksize=4, stride=2, pad=1, ),
-            conv1=L.Convolution2D(64 128, ksize=4, stride=2, pad=1, ),
+            conv1=L.Convolution2D(64, 128, ksize=4, stride=2, pad=1, ),
             bn0=L.BatchNormalization(64, decay=0.9),
             bn1=L.BatchNormalization(128, decay=0.9),
-            linear0=L.linear(128*7*7, 1),
+            linear0=L.linear(128*7*7 + n_cls, 1),
         )
         self.device = device
         self.act = act
 
-    def __call__(self, x):
+    def __call__(self, x, y=None):
         h = self.conv0(x)  # 28x28 -> 14x14
         h = self.bn0(h)
         h = self.act(h)
@@ -126,6 +126,10 @@ class ImageDiscriminator(Chain, Mixin):
         h = self.conv1(h)  # 14x14 -> 7x7
         h = self.bn1(h)
         h = self.act(h)
+
+        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
+        y = self.generate_onehot(h.shape[0], y)
+        h = F.concat((h, y))
 
         h = self.linear0(h)
         h = F.sigmoid(h)
@@ -138,8 +142,9 @@ class PatchDiscriminator(Chain, Mixin):
         )
         self.device = device
         self.act = act
+        self.n_cls = n_cls
 
-    def __call__(self, x):
+    def __call__(self, x, y=None):
         pass
 
 class PixelDiscriminator(Chain, Mixin):
@@ -150,5 +155,5 @@ class PixelDiscriminator(Chain, Mixin):
         self.device = device
         self.act = act
 
-    def __call__(self, x):
+    def __call__(self, x, y=None):
         pass
