@@ -185,7 +185,7 @@ class Experiment001(object):
         # Generator
         bs = x_real.shape[0]        
         z = self.generate_random(bs, self.dim)
-        h = self.genrator0(z)
+        h = self.generator0(z)
         x_gen = self.generator1(h, y)
         d_x_gen = self.image_discriminator(x_gen)
         loss_gen = self.gan_loss(d_x_gen)
@@ -196,7 +196,7 @@ class Experiment001(object):
 
         # Discriminator
         z = self.generate_random(bs, self.dim)
-        h = self.genrator0(z)
+        h = self.generator0(z)
         x_gen = self.generator1(h, y)
         d_x_gen = self.image_discriminator(x_gen)
         d_x_real = self.image_discriminator(x_real)
@@ -210,7 +210,8 @@ class Experiment001(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        x_gen = self.generator(x, y, z)
+        h = self.generator0(z)
+        x_gen = self.generator1(h, y)
         d_x_gen = self.discriminator(x_gen)
 
         # Save generated images
