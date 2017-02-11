@@ -77,7 +77,7 @@ def main():
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                np.mean(accs))
+                np.mean(accs, axis=0))
             print(msg)
             
             st = time.time()
