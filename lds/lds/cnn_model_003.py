@@ -112,7 +112,7 @@ class Encoder(Chain):
             linear0_bn=L.Linear(32*14*14, 10),
             linear1_bn=L.Linear(32*14*14, 10),
             linear2_bn=L.Linear(64*7*7, 10),
-            linear4_bn=L.Linear(64*7*7, 10),
+            linear3_bn=L.Linear(64*7*7, 10),
             linear4_bn=L.Linear(32, 10),
         )
 
