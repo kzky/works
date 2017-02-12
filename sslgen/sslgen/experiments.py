@@ -147,17 +147,19 @@ class Experiment000(object):
         # Optimizer
         self.optimizer_enc = optimizers.Adam(self.learning_rate)
         self.optimizer_dec = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen0 = optimizers.Adam(self.learning_rate)        
-        self.optimizer_gen1 = self.optimizer_dec
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen1 = optimizers.Adam(self.learning_rate)
         self.optimizer_dis = optimizers.Adam(self.learning_rate)
 
-        self.optimizer_enc.setup(self.encoer)
+        self.optimizer_enc.setup(self.encoder)
         self.optimizer_dec.setup(self.decoder)
-        self.optimizer_gen0.setup(self.decoder)
-        self.optimizer_dis.setup(image_discriminator)
+        self.optimizer_gen0.setup(self.generator0)
+        self.optimizer_gen1.setup(self.generator1)
+        self.optimizer_dis.setup(self.image_discriminator)
         self.optimizer_enc.use_cleargrads()
         self.optimizer_dec.use_cleargrads()
         self.optimizer_gen0.use_cleargrads()
+        self.optimizer_gen1.use_cleargrads()
         self.optimizer_dis.use_cleargrads()
         
         # Losses
@@ -179,8 +181,8 @@ class Experiment000(object):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
         loss_rec.backward()
-        self.optimizer_encoder.update()
-        self.optimizer_decoder.update()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
         
         # Generator
         bs = x_real.shape[0]        
@@ -191,10 +193,10 @@ class Experiment000(object):
         loss_gen = self.gan_loss(d_x_gen)
         self.generator0.cleargrads()
         self.generator1.cleargrads()
-        self.discriminator.cleargrads()
+        self.image_discriminator.cleargrads()
         loss_gen.backward()
         self.optimizer_gen0.update()
-        self.optimizer_dec.update()
+        self.optimizer_gen1.update()
 
         # Discriminator
         z = self.generate_random(bs, self.dim)
@@ -205,7 +207,7 @@ class Experiment000(object):
         loss_dis = self.gan_loss(d_x_gen, d_x_real)
         self.generator0.cleargrads()
         self.generator1.cleargrads()
-        self.discriminator.cleargrads()
+        self.image_discriminator.cleargrads()
         loss_dis.backward()
         self.optimizer_dis.update()
 
@@ -215,7 +217,7 @@ class Experiment000(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z)
         x_gen = self.generator1(h, y)
-        d_x_gen = self.discriminator(x_gen)
+        d_x_gen = self.image_discriminator(x_gen)
 
         # Save generated images
         if os.path.exists("./test_gen"):
@@ -239,8 +241,10 @@ class Experiment000(object):
         if not os.path.exists(dpath):
             os.makedirs(dpath)
             
-        fpath = "./model/generator_{:05d}.h5py".format(epoch)
-        serializers.save_hdf5(fpath, self.generator)
+        fpath = "./model/generator0_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator0)
+        fpath = "./model/generator1_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator1)
 
     def generate_random(self, bs, dim=30):
         r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)

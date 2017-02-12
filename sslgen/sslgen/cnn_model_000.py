@@ -61,7 +61,7 @@ class Decoder(Chain, Mixin):
         super(Decoder, self).__init__(
             deconv0=L.Deconvolution2D(128+n_cls, 64, ksize=4, stride=2, pad=1, ),
             deconv1=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
-            bn0=L.BatchNormalization(128, decay=0.9),
+            bn0=L.BatchNormalization(64, decay=0.9),
         )
         self.device = device        
         self.act = act
@@ -78,7 +78,7 @@ class Decoder(Chain, Mixin):
         h = self.bn0(h)
         h = self.act(h)
 
-        h = self.decovn1(h)  # 14x14 -> 28x28
+        h = self.deconv1(h)  # 14x14 -> 28x28
         h = F.tanh(h)
         return h
 
@@ -102,8 +102,7 @@ class Generator0(Chain, Mixin):
         h = self.act(h)
 
         bs = z.shape[0]
-        dim = np.prod(z.shape[1:])
-        h = F.reshape(h, (bs, dim))  # 7x7
+        h = F.reshape(h, (bs, 128, 7, 7))  # 7x7
         return h
 
 class ImageDiscriminator(Chain, Mixin):
@@ -117,6 +116,7 @@ class ImageDiscriminator(Chain, Mixin):
         )
         self.device = device
         self.act = act
+        self.n_cls = n_cls
 
     def __call__(self, x, y=None):
         h = self.conv0(x)  # 28x28 -> 14x14
