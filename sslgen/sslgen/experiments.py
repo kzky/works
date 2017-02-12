@@ -136,8 +136,8 @@ class Experiment000(object):
         # Model
         self.encoder = Encoder(device=device, act=act, n_cls=n_cls)
         self.decoder = Decoder(device=device, act=act, n_cls=n_cls)
-        self.generator1 = decoder
-        self.generator0 = Generator0(device=device, act=act, n_cls, dim=dim)
+        self.generator1 = self.decoder
+        self.generator0 = Generator0(device=device, act=act, n_cls=n_cls, dim=dim)
         self.image_discriminator = ImageDiscriminator(device=device, act=act)
         self.encoder.to_gpu(device) if self.device else None
         self.decoder.to_gpu(device) if self.device else None
@@ -145,11 +145,11 @@ class Experiment000(object):
         self.image_discriminator.to_gpu(device) if self.device else None
 
         self.autoencoder = Chain()
-        self.autoencoder.add_link(self.encoder)
-        self.autoencoder.add_link(self.decoder)
+        self.autoencoder.add_link("encoder", self.encoder)
+        self.autoencoder.add_link("decoder", self.decoder)
         self.generator = Chain()
-        self.generator.add_link(self.generator0)
-        self.generator.add_link(self.generator1)
+        self.generator.add_link("generator0", self.generator0)
+        self.generator.add_link("generator1", self.generator1)
                 
         # Optimizer
         self.optimizer_ae = optimizers.Adam(self.learning_rate)

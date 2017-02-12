@@ -113,7 +113,7 @@ class ImageDiscriminator(Chain, Mixin):
             conv1=L.Convolution2D(64, 128, ksize=4, stride=2, pad=1, ),
             bn0=L.BatchNormalization(64, decay=0.9),
             bn1=L.BatchNormalization(128, decay=0.9),
-            linear0=L.linear(128*7*7 + n_cls, 1),
+            linear0=L.Linear(128*7*7 + n_cls, 1),
         )
         self.device = device
         self.act = act

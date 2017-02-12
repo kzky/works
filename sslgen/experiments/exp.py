@@ -20,7 +20,7 @@ def main():
     dims = 100
 
     learning_rate = 1. * 1e-5
-    n_epoch = 10
+    n_epoch = 50
     act = F.relu
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
