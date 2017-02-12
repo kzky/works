@@ -211,7 +211,7 @@ class Experiment000(object):
         loss_dis.backward()
         self.optimizer_dis.update()
 
-    def test(self, x, y):
+    def test(self, x, y, ecpoch):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
@@ -220,15 +220,13 @@ class Experiment000(object):
         d_x_gen = self.image_discriminator(x_gen)
 
         # Save generated images
-        if os.path.exists("./test_gen"):
-            shutil.rmtree("./test_gen")
-            os.mkdir("./test_gen")
-        else:
-            os.mkdir("./test_gen")
+        dirpath_out = "./test_gen/{:05d}".format(epoch)
+        if not os.path.exists(dirpath_out):
+            os.mkdir(dirpath_out)
 
         x_gen_data = cuda.to_cpu(x_gen.data)
         for i, img in enumerate(x_gen_data):
-            fpath = "./test_gen/{:05d}.png".format(i)
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # D(x_gen) values
