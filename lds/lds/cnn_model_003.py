@@ -1,5 +1,8 @@
 """Models
+
+Resnet Encoder and Decoder. The residual block consists of two convolution.
 """
+
 import numpy as np
 import chainer
 import chainer.variable as variable
