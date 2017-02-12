@@ -107,7 +107,8 @@ class Experiment(object):
         return accs
 
 class Experiment000(Experiment):
-
+    """Regularize hiddnes of decoders with LDS.
+    """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
         super(Experiment000, self).__init__(
             device=device,
@@ -509,6 +510,66 @@ class Experiment008(Experiment002):
         )        
         # Model
         from lds.cnn_model_003 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+class Experiment009(Experiment):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+        super(Experiment009, self).__init__(
+            device=device, learning_rate=learning_rate, act=act
+        )        
+        # Model
+        from lds.cnn_model_004 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+class Experiment010(Experiment000):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+        super(Experiment010, self).__init__(
+            device=device, learning_rate=learning_rate, act=act
+        )        
+        # Model
+        from lds.cnn_model_004 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+class Experiment011(Experiment001):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+        super(Experiment011, self).__init__(
+            device=device, learning_rate=learning_rate, act=act
+        )        
+        # Model
+        from lds.cnn_model_004 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+class Experiment012(Experiment002):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+        super(Experiment012, self).__init__(
+            device=device, learning_rate=learning_rate, act=act
+        )        
+        # Model
+        from lds.cnn_model_004 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
