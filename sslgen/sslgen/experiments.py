@@ -119,7 +119,7 @@ class Experiment(object):
         return r
 
 
-class Experiment001(object):
+class Experiment000(object):
 
     def __init__(self, device=None, 
                  n_cls=10, dim=100, learning_rate=1e-3, act=F.relu):
@@ -130,7 +130,7 @@ class Experiment001(object):
         self.act = act
         self.learning_rate = 1e-3
 
-        from sslgen.cnn_model_001 \
+        from sslgen.cnn_model_000 \
             import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
 
         # Model
