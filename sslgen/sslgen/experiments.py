@@ -144,22 +144,20 @@ class Experiment000(object):
         self.generator0.to_gpu(device) if self.device else None
         self.image_discriminator.to_gpu(device) if self.device else None
 
-        self.autoencoder = Chain()
-        self.autoencoder.add_link("encoder", self.encoder)
-        self.autoencoder.add_link("decoder", self.decoder)
-        self.generator = Chain()
-        self.generator.add_link("generator0", self.generator0)
-        self.generator.add_link("generator1", self.generator1)
-                
         # Optimizer
-        self.optimizer_ae = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen = optimizers.Adam(self.learning_rate)
+        self.optimizer_enc = optimizers.Adam(self.learning_rate)
+        self.optimizer_dec = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate)        
+        self.optimizer_gen1 = self.optimizer_dec
         self.optimizer_dis = optimizers.Adam(self.learning_rate)
-        self.optimizer_ae.setup(autoencoder)
-        self.optimizer_gen.setup(generator)
+
+        self.optimizer_enc.setup(self.encoer)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_gen0.setup(self.decoder)
         self.optimizer_dis.setup(image_discriminator)
-        self.optimizer_ae.use_cleargrads()
-        self.optimizer_gen.use_cleargrads()
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen0.use_cleargrads()
         self.optimizer_dis.use_cleargrads()
         
         # Losses
@@ -178,9 +176,11 @@ class Experiment000(object):
         h = self.encoder(x_real)
         x_rec = self.decoder(h, y)
         loss_rec = self.recon_loss(x_rec, x_real)
-        self.autoencoder.cleargrads()
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
         loss_rec.backward()
-        self.optimizer_ae.update()
+        self.optimizer_encoder.update()
+        self.optimizer_decoder.update()
         
         # Generator
         bs = x_real.shape[0]        
@@ -189,10 +189,12 @@ class Experiment000(object):
         x_gen = self.generator1(h, y)
         d_x_gen = self.image_discriminator(x_gen)
         loss_gen = self.gan_loss(d_x_gen)
-        self.generator.cleargrads()
+        self.generator0.cleargrads()
+        self.generator1.cleargrads()
         self.discriminator.cleargrads()
         loss_gen.backward()
-        self.optimizer_gen.update()
+        self.optimizer_gen0.update()
+        self.optimizer_dec.update()
 
         # Discriminator
         z = self.generate_random(bs, self.dim)
@@ -201,7 +203,8 @@ class Experiment000(object):
         d_x_gen = self.image_discriminator(x_gen)
         d_x_real = self.image_discriminator(x_real)
         loss_dis = self.gan_loss(d_x_gen, d_x_real)
-        self.generator.cleargrads()
+        self.generator0.cleargrads()
+        self.generator1.cleargrads()
         self.discriminator.cleargrads()
         loss_dis.backward()
         self.optimizer_dis.update()
