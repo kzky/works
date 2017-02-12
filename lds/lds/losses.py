@@ -60,7 +60,7 @@ class NegativeEntropyLoss(Chain):
 class NegativeEntropyHingeLoss(Chain):
 
     def __init__(self, test=False):
-        super(NegativeEntropyLoss, self).__init__()
+        super(NegativeEntropyHingeLoss, self).__init__()
         self.loss = None
         
     def __call__(self, y, ):
@@ -69,8 +69,13 @@ class NegativeEntropyHingeLoss(Chain):
 
         y_normalized = F.softmax(y)
         y_log_softmax = F.log_softmax(y)
-        entropy = - y_normalized * y_log_softmax
-        self.loss = F.sum(F.maximum(0, 1- F.max(entropy, axis=1))) / bs
+        negentropy = F.sum(y_normalized * y_log_softmax, axis=1) / d
+
+        #zeros = to_device(np.zeros(bs).astype(np.float32), 2)
+        ones = to_device(-np.ones(bs).astype(np.float32), 2)
+        self.loss = F.sum(F.maximum(
+            Variable(ones), 
+            - negentropy)) / bs
         
         return self.loss
     
