@@ -1,6 +1,6 @@
 """Models
 
-Resnet Encoder and Decoder. The residual block consists of two convolution.
+Resnet Encoder and Decoder. The residual block consists of two convolutions.
 """
 
 import numpy as np
