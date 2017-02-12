@@ -57,6 +57,23 @@ class NegativeEntropyLoss(Chain):
 
         return self.loss
 
+class NegativeEntropyHingeLoss(Chain):
+
+    def __init__(self, test=False):
+        super(NegativeEntropyLoss, self).__init__()
+        self.loss = None
+        
+    def __call__(self, y, ):
+        bs = y.data.shape[0]
+        d = np.prod(y.data.shape[1:])
+
+        y_normalized = F.softmax(y)
+        y_log_softmax = F.log_softmax(y)
+        entropy = - y_normalized * y_log_softmax
+        self.loss = F.sum(F.maximum(0, 1- F.max(entropy, axis=1))) / bs
+        
+        return self.loss
+    
 class JensenShannonDivergenceLoss(Chain):
 
     def __init__(self, test=False):
@@ -77,21 +94,3 @@ class JensenShannonDivergenceLoss(Chain):
 
         return (kl0 + kl1) / 2
 
-class GANLoss(Chain):
-
-    def __init__(self, ):
-        super(GANLoss, self).__init__(
-        )
-        
-    def __call__(self, d_x_gen, d_x=None):
-        #TODO: reverse trick
-        bs_d_x_gen = d_x_gen.shape[0]
-        if d_x is not None:
-            bs_d_x = d_x.shape[0]
-            loss = F.sum(F.log(F.sigmoid(d_x))) / bs_d_x \
-                   + F.sum(F.log(1 - F.sigmoid(d_x_gen))) / bs_d_x_gen
-            return - loss  # to minimize
-            
-        else:
-            loss = F.sum(F.log(1 - F.sigmoid(d_x_gen))) / bs_d_x_gen
-            return loss
