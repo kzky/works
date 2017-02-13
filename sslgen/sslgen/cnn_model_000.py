@@ -139,7 +139,7 @@ class PatchDiscriminator(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, n_cls=10):
         super(PatchDiscriminator, self).__init__(
             conv0=L.Convolution2D(1, 64, ksize=4, stride=2, pad=1, ),            
-            b0=L.BatchNormalization(64, decay=0.9),
+            bn0=L.BatchNormalization(64, decay=0.9),
             linear0=L.Linear(64*7*7+n_cls, 1),
         )
         self.device = device
