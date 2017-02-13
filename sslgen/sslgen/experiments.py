@@ -380,9 +380,7 @@ class Experiment001(object):
             fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
-        # D(x_gen) values
-        loss_gen_data = [float(data[0]) for data in cuda.to_cpu(loss_gen.data)][0:100]
-
+        loss_gen_data = cuda.to_cpu(loss_gen.data)
         return loss_gen_data
         
     def save_model(self, epoch):
