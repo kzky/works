@@ -362,7 +362,7 @@ class Experiment001(object):
             loss_dis += self.gan_loss(d_x_gen_patch, d_x_real_patch)
         return loss_dis
 
-    def test(self, x, y, ecpoch):
+    def test(self, x, y, epoch):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
