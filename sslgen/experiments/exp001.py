@@ -46,7 +46,7 @@ def main():
         n_cls,
         dims,
         learning_rate,
-        learning_rate_ga,
+        learning_rate_gan,
         act,
         )
 
