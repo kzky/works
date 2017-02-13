@@ -368,7 +368,7 @@ class Experiment001(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z)
         x_gen = self.generator1(h, y)
-        d_x_gen = self.patch_loss_gen(x_gen, y)
+        loss_gen = self.patch_loss_gen(x_gen, y)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
@@ -381,9 +381,9 @@ class Experiment001(object):
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # D(x_gen) values
-        d_x_gen_data = [float(data[0]) for data in cuda.to_cpu(d_x_gen.data)][0:100]
+        loss_gen_data = [float(data[0]) for data in cuda.to_cpu(loss_gen.data)][0:100]
 
-        return d_x_gen_data
+        return loss_gen_data
         
     def save_model(self, epoch):
         dpath  = "./model"
