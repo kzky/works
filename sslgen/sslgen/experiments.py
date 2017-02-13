@@ -30,7 +30,7 @@ class Experiment(object):
         self.n_cls = n_cls
         self.dims = dims
         self.act = act
-        self.learning_rate = 1e-3
+        self.learning_rate = learning_rate
 
         # Model
         self.generator = Generator(device=device, act=act, n_cls=n_cls, dims=dims)
@@ -122,13 +122,15 @@ class Experiment(object):
 class Experiment000(object):
 
     def __init__(self, device=None, 
-                 n_cls=10, dim=100, learning_rate=1e-3, act=F.relu):
+                 n_cls=10, dim=100, 
+                 learning_rate=1e-3, learning_rate_gan=1e-5, act=F.relu):
         # Settings
         self.device = device
         self.n_cls = n_cls
         self.dim = dim
         self.act = act
-        self.learning_rate = 1e-3
+        self.learning_rate = learing_reate
+        self.learning_rate_gan = learning_rate_gan
 
         from sslgen.cnn_model_000 \
             import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
@@ -147,9 +149,9 @@ class Experiment000(object):
         # Optimizer
         self.optimizer_enc = optimizers.Adam(self.learning_rate)
         self.optimizer_dec = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen0 = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen1 = optimizers.Adam(self.learning_rate)
-        self.optimizer_dis = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_gen1 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_dis = optimizers.Adam(self.learning_rate_gan)
 
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_dec.setup(self.decoder)
@@ -252,13 +254,15 @@ class Experiment000(object):
 class Experiment001(object):
 
     def __init__(self, device=None, 
-                 n_cls=10, dim=100, learning_rate=1e-3, act=F.relu):
+                 n_cls=10, dim=100, 
+                 learning_rate=1e-3, learning_rate_gan=1e-5, act=F.relu):
         # Settings
         self.device = device
         self.n_cls = n_cls
         self.dim = dim
         self.act = act
-        self.learning_rate = 1e-3
+        self.learning_rate = learning_rate
+        self.learning_rate_gan = learning_rate_gan
 
         from sslgen.cnn_model_000 \
             import Encoder, Decoder, Generator0, Generator1, PatchDiscriminator
@@ -277,9 +281,9 @@ class Experiment001(object):
         # Optimizer
         self.optimizer_enc = optimizers.Adam(self.learning_rate)
         self.optimizer_dec = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen0 = optimizers.Adam(self.learning_rate)
-        self.optimizer_gen1 = optimizers.Adam(self.learning_rate)
-        self.optimizer_dis = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_gen1 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_dis = optimizers.Adam(self.learning_rate_gan)
 
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_dec.setup(self.decoder)
