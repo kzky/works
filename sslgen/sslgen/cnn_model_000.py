@@ -136,16 +136,28 @@ class ImageDiscriminator(Chain, Mixin):
         return h
 
 class PatchDiscriminator(Chain, Mixin):
-    def __init__(self, device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu, n_cls=10):
         super(PatchDiscriminator, self).__init__(
-
+            conv0=L.Convolution2D(1, 64, ksize=4, stride=2, pad=1, ),            
+            b0=L.BatchNormalization(64, decay=0.9),
+            linear0=L.Linear(64*7*7+n_cls, 1),
         )
         self.device = device
         self.act = act
         self.n_cls = n_cls
 
     def __call__(self, x, y=None):
-        pass
+        h = self.conv0(x)
+        h = self.bn0(h)
+        h = self.act(h)
+
+        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
+        y = self.generate_onehot(h.shape[0], y)
+        h = F.concat((h, y))
+
+        h = self.linear0(h)
+        h = F.sigmoid(h)
+        return h
 
 class PixelDiscriminator(Chain, Mixin):
     def __init__(self, device=None, act=F.relu):
