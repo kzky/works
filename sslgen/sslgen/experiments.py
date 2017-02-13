@@ -364,7 +364,7 @@ class Experiment001(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z)
         x_gen = self.generator1(h, y)
-        d_x_gen = self.patch_discriminator(x_gen, y)
+        d_x_gen = self.patch_loss_gen(x_gen, y)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
