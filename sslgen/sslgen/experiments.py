@@ -129,7 +129,7 @@ class Experiment000(object):
         self.n_cls = n_cls
         self.dim = dim
         self.act = act
-        self.learning_rate = learing_reate
+        self.learning_rate = learing_rate
         self.learning_rate_gan = learning_rate_gan
 
         from sslgen.cnn_model_000 \
