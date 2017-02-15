@@ -48,11 +48,11 @@ class Encoder(Chain, Mixin):
 
     def __call__(self, x, test=False):
         h = self.conv0(x)  # 28x28 -> 14x14
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = self.conv1(h)  # 14x14 -> 7x7
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
         return h
         
@@ -75,7 +75,7 @@ class Decoder(Chain, Mixin):
         h = F.concat((h, y))        
 
         h = self.deconv0(h)  # 7x7 -> 14x14
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = self.deconv1(h)  # 14x14 -> 28x28
@@ -96,9 +96,9 @@ class Generator0(Chain, Mixin):
         self.n_cls = n_cls
         self.dim = dim
 
-    def __call__(self, z):
+    def __call__(self, z, test=False):
         h = self.linear0(z)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         bs = z.shape[0]
@@ -120,11 +120,11 @@ class ImageDiscriminator(Chain, Mixin):
 
     def __call__(self, x, y=None):
         h = self.conv0(x)  # 28x28 -> 14x14
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = self.conv1(h)  # 14x14 -> 7x7
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
 
         h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
@@ -148,7 +148,7 @@ class PatchDiscriminator(Chain, Mixin):
 
     def __call__(self, x, y=None):
         h = self.conv0(x)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
 
         h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
