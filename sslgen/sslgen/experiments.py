@@ -85,8 +85,8 @@ class Experiment(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dims)
-        x_gen = self.generator(x, y, z)
-        d_x_gen = self.discriminator(x_gen)
+        x_gen = self.generator(x, y, test=False)
+        d_x_gen = self.discriminator(x_gen, test=False)
 
         # Save generated images
         if os.path.exists("./test_gen"):
@@ -217,8 +217,8 @@ class Experiment000(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        h = self.generator0(z)
-        x_gen = self.generator1(h, y)
+        h = self.generator0(z, test=False)
+        x_gen = self.generator1(h, y, test=False)
         d_x_gen = self.image_discriminator(x_gen, y)
 
         # Save generated images
@@ -366,9 +366,9 @@ class Experiment001(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        h = self.generator0(z)
-        x_gen = self.generator1(h, y)
-        loss_gen = self.patch_loss_gen(x_gen, y)
+        h = self.generator0(z, test=False)
+        x_gen = self.generator1(h, y, test=False)
+        loss_gen = self.patch_loss_gen(x_gen, y, test=False)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
