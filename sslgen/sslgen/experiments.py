@@ -85,8 +85,8 @@ class Experiment(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dims)
-        x_gen = self.generator(x, y, test=False)
-        d_x_gen = self.discriminator(x_gen, test=False)
+        x_gen = self.generator(x, y, test=True)
+        d_x_gen = self.discriminator(x_gen, test=True)
 
         # Save generated images
         if os.path.exists("./test_gen"):
@@ -217,9 +217,9 @@ class Experiment000(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        h = self.generator0(z, test=False)
-        x_gen = self.generator1(h, y, test=False)
-        d_x_gen = self.image_discriminator(x_gen, y)
+        h = self.generator0(z, test=True)
+        x_gen = self.generator1(h, y, test=True)
+        d_x_gen = self.image_discriminator(x_gen, y, test=True)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
@@ -346,9 +346,9 @@ class Experiment001(object):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        h = self.generator0(z, test=False)
-        x_gen = self.generator1(h, y, test=False)
-        loss_gen = self.patch_loss_gen(x_gen, y, test=False)
+        h = self.generator0(z, test=True)
+        x_gen = self.generator1(h, y, test=True)
+        d_x_gen = self.patch_discriminator(x_gen, test=True)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
@@ -360,7 +360,9 @@ class Experiment001(object):
             fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
-        loss_gen_data = cuda.to_cpu(loss_gen.data)
+        # D(x_gen) values
+        d_x_gen_data = [float(data[0]) for data in cuda.to_cpu(d_x_gen.data)][0:100]
+
         return loss_gen_data
         
     def save_model(self, epoch):
