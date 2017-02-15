@@ -17,7 +17,7 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss, JensenShannonDivergenceLoss
+from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss
 from sklearn.metrics import confusion_matrix
 from lds.cnn_model import AutoEncoder
 
@@ -175,7 +175,7 @@ class Experiment000(Experiment):
         self.optimizer.update()
     
 class Experiment001(Experiment):
-    """Decoder predict label and use NE loss on these predictions.
+    """Decoder predicts labels and use NE loss on these predictions.
     """
 
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
