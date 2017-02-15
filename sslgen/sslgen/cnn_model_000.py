@@ -165,6 +165,7 @@ class PatchDiscriminator(Chain, Mixin):
 
         h = self.conv3(h)  # 10 -> 10
         h = F.sigmoid(h)
+
         return h
 
 class PixelDiscriminator(Chain, Mixin):
