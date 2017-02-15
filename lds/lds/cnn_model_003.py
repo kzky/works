@@ -41,7 +41,7 @@ class ResEnc(Chain):
         self.act = act
         self.dn = dn
 
-    def __call__(self, x):
+    def __call__(self, x, test=False):
         h = self.conv0(x)
         h = self.bn0(h, test)
         h = self.act(h)
@@ -81,7 +81,7 @@ class ResDec(Chain):
         self.up = up
         self.outmap = outmap
 
-    def __call__(self, x):
+    def __call__(self, x, test=False):
         h = self.decovn0(x)
         h = self.bn0(h, test)
         h = self.act(h)
