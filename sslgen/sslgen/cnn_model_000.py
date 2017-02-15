@@ -138,24 +138,32 @@ class ImageDiscriminator(Chain, Mixin):
 class PatchDiscriminator(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, n_cls=10):
         super(PatchDiscriminator, self).__init__(
-            conv0=L.Convolution2D(1, 64, ksize=4, stride=2, pad=1, ),            
+            conv0=L.Convolution2D(1, 64, ksize=7, stride=1, pad=0, ),
+            conv1=L.Convolution2D(64, 32, ksize=7, stride=1, pad=0, ),
+            conv2=L.Convolution2D(32, 16, ksize=7, stride=1, pad=0, ),
+            conv3=L.Convolution2D(16, 1, ksize=1, stride=1, pad=0, ),
             bn0=L.BatchNormalization(64, decay=0.9),
-            linear0=L.Linear(64*7*7+n_cls, 1),
+            bn1=L.BatchNormalization(64, decay=0.9),
+            bn2=L.BatchNormalization(64, decay=0.9),
         )
         self.device = device
         self.act = act
         self.n_cls = n_cls
 
     def __call__(self, x, y=None, test=False):
-        h = self.conv0(x)
+        h = self.conv0(x)  # 28 -> 22
         h = self.bn0(h, test)
         h = self.act(h)
 
-        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
-        y = self.generate_onehot(h.shape[0], y)
-        h = F.concat((h, y))
+        h = self.conv1(x)  # 22 -> 16
+        h = self.bn1(h, test)
+        h = self.act(h)
 
-        h = self.linear0(h)
+        h = self.conv2(x)  # 16 -> 10
+        h = self.bn2(h, test)
+        h = self.act(h)
+
+        h = self.conv3(x)  # 10 -> 10
         h = F.sigmoid(h)
         return h
 

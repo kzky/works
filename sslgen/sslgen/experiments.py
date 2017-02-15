@@ -323,7 +323,7 @@ class Experiment001(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z)
         x_gen = self.generator1(h, y)
-        loss_gen = self.patch_loss_gen(x_gen, y)
+        loss_gen = self.gan_loss(x_gen)
         self.generator0.cleargrads()
         self.generator1.cleargrads()
         self.patch_discriminator.cleargrads()
@@ -335,32 +335,12 @@ class Experiment001(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z)
         x_gen = self.generator1(h, y)
-        loss_dis = self.patch_loss_dis(x_gen, x_real, y)
+        loss_dis = self.gan_loss(x_gen, x_real)
         self.generator0.cleargrads()
         self.generator1.cleargrads()
         self.patch_discriminator.cleargrads()
         loss_dis.backward()
         self.optimizer_dis.update()
-
-    def patch_loss_gen(self, x_gen, y, patch=14):
-        s = x_gen.shape[2]
-        loss_gen = 0
-        for i in range(0, s - patch):
-            x_gen_patch = x_gen[:, :, i:i + patch, i:i + patch]
-            d_x_gen_patch = self.patch_discriminator(x_gen_patch, y)
-            loss_gen += self.gan_loss(d_x_gen_patch)
-        return loss_gen
-            
-    def patch_loss_dis(self, x_gen, x_real, y, patch=14):
-        s = x_gen.shape[2]
-        loss_dis = 0
-        for i in range(0, s - patch):
-            x_gen_patch = x_gen[:, :, i:i + patch, i:i + patch]
-            d_x_gen_patch = self.patch_discriminator(x_gen_patch, y)
-            x_real_patch = x_gen[:, :, i:i + patch, i:i + patch]
-            d_x_real_patch = self.patch_discriminator(x_real_patch, y)
-            loss_dis += self.gan_loss(d_x_gen_patch, d_x_real_patch)
-        return loss_dis
 
     def test(self, x, y, epoch):
         # Generate Images
