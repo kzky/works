@@ -118,7 +118,7 @@ class ImageDiscriminator(Chain, Mixin):
         self.act = act
         self.n_cls = n_cls
 
-    def __call__(self, x, y=None):
+    def __call__(self, x, y=None, test=False):
         h = self.conv0(x)  # 28x28 -> 14x14
         h = self.bn0(h, test)
         h = self.act(h)
@@ -146,7 +146,7 @@ class PatchDiscriminator(Chain, Mixin):
         self.act = act
         self.n_cls = n_cls
 
-    def __call__(self, x, y=None):
+    def __call__(self, x, y=None, test=False):
         h = self.conv0(x)
         h = self.bn0(h, test)
         h = self.act(h)
@@ -167,5 +167,5 @@ class PixelDiscriminator(Chain, Mixin):
         self.device = device
         self.act = act
 
-    def __call__(self, x, y=None):
+    def __call__(self, x, y=None, test=False):
         pass
