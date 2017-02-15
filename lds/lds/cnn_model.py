@@ -42,21 +42,21 @@ class Encoder(Chain):
         self.classifiers = []
 
         h = self.conv0(x)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
         cls = self.linear0_bn(h)
         self.classifiers.append(cls)
 
         h = self.conv1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
         cls = self.linear1_bn(h)
         self.classifiers.append(cls)
 
         h = self.linear0(h)
-        h = self.bn2(h)
+        h = self.bn2(h, test)
         h = self.act(h)
         self.hiddens.append(h)
         cls = self.linear2_bn(h)
@@ -86,19 +86,19 @@ class Decoder(Chain):
         self.hiddens = []
 
         h = self.linear0(y)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
         bs = h.shape[0]
         h = F.reshape(h, (bs, 64, 7, 7))
         self.hiddens.append(h)
 
         h = self.deconv0(h)
-        h = self.bn2(h)
+        h = self.bn2(h, test)
         h = self.act(h)
         self.hiddens.append(h)
 

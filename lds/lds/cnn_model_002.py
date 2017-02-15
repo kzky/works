@@ -40,16 +40,16 @@ class ResEnc(Chain):
 
     def __call__(self, x):
         h = self.conv0(x)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         h = self.conv1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
 
         h_s = x
         if self.dn:
             h_s = self.conv2(x)
-            h_s = self.bn2(h_s)
+            h_s = self.bn2(h_s, test)
             h_s = self.act(h_s)
 
         return h + h_s
@@ -80,17 +80,17 @@ class ResDec(Chain):
 
     def __call__(self, x):
         h = self.decovn0(x)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         h = self.decovn1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         if self.outmap != 1:
             h = self.act(h)
 
         h_s = x
         if self.up:
             h_s = self.decovn2(x)
-            h_s = self.bn2(h_s)
+            h_s = self.bn2(h_s, test)
             if self.outmap != 1:
                 h_s = self.act(h_s)
 
@@ -132,7 +132,7 @@ class Encoder(Chain):
         self.hiddens.append(h)
         
         h = self.linear0(h)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
 
@@ -168,12 +168,12 @@ class Decoder(Chain):
         bs = y.shape[0]
 
         h = self.linear0(y)
-        h = self.bn0(h)
+        h = self.bn0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
 
         h = self.linear1(h)
-        h = self.bn1(h)
+        h = self.bn1(h, test)
         h = self.act(h)
 
         h = F.reshape(h, (bs, 64, 7, 7))
