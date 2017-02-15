@@ -150,7 +150,7 @@ class PatchDiscriminator(Chain, Mixin):
         self.act = act
         self.n_cls = n_cls
 
-    def __call__(self, x, y=None, test=False):
+    def __call__(self, x, test=False):
         h = self.conv0(x)  # 28 -> 22
         h = self.bn0(h, test)
         h = self.act(h)
