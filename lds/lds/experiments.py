@@ -29,6 +29,7 @@ class Experiment(object):
         self.act = act
         self.learning_rate = 1e-3
         self.lr_decay = lr_decay
+        self.acc_data = 0.0
 
         # Model
         self.ae = AutoEncoder(act=act, lr_decay=lr_decay)
@@ -101,10 +102,15 @@ class Experiment(object):
     def test(self, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
         acc = F.accuracy(y, y_l)
+        acc_data_cur = cuda.to_cpu(acc.data)
         
         accs = [F.accuracy(y_, y_l) \
-                for y_ in self.ae.encoder.classifiers] + [acc] 
-        
+                for y_ in self.ae.encoder.classifiers] + [acc]
+
+        if acc_data_cur  < self.acc_data:
+            self.optimizer.alpha = 0.1 * self.optimizer.alpha
+
+        self.acc_data = acc_data_cur
         return accs
 
 class Experiment000(Experiment):
@@ -264,13 +270,17 @@ class Experiment001(Experiment):
         x = self.ae.decoder(y, test=True)
         
         acc = F.accuracy(y, y_l)
+        acc_data_cur = cuda.to_cpu(acc.data)
         
         accs = [F.accuracy(y_, y_l) \
                 for y_ in self.ae.encoder.classifiers] \
                     + [F.accuracy(y_, y_l)\
                        for y_ in self.ae.decoder.classifiers] \
                            + [acc] 
-        
+        if acc_data_cur  < self.acc_data:
+            self.optimizer.alpha = 0.1 * self.optimizer.alpha
+
+        self.acc_data = acc_data_cur
         return accs
     
 class Experiment002(Experiment001):
