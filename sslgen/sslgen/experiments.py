@@ -640,8 +640,7 @@ class Experiment003(Experiment002):
         r = to_device(r, self.device)
         return r
 
-    
-class Experiment004(Experiment002):
+class Experiment004(Experiment000):
     """Wasserstein GAN Loss
     """
 
