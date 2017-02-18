@@ -1,4 +1,4 @@
-from sslgen.experiments import Experiment002
+from sslgen.experiments import Experiment003
 from sslgen.utils import to_device
 from sslgen.datasets import MNISTDataReader, Separator
 import numpy as np
