@@ -75,6 +75,7 @@ class ResDec(Chain):
                 bn0=L.BatchNormalization(outmap, decay=0.9),
                 bn1=L.BatchNormalization(outmap, decay=0.9),
                 bn2=L.BatchNormalization(outmap, decay=0.9),
+                bn3=L.BatchNormalization(outmap, decay=0.9),
             )
         else:
             super(ResDec, self).__init__(
@@ -84,6 +85,7 @@ class ResDec(Chain):
                 bn0=L.BatchNormalization(inmap, decay=0.9),
                 bn1=L.BatchNormalization(inmap, decay=0.9),
                 bn2=L.BatchNormalization(inmap, decay=0.9)
+                bn3=L.BatchNormalization(inmap, decay=0.9)
             )
             
         self.act = act
