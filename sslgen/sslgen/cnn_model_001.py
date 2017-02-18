@@ -69,7 +69,7 @@ class Decoder(Chain, Mixin):
 
     def __call__(self, h, h_gen=None, test=False):
         # Concat
-        if z is not None:
+        if h_gen is not None:
             h = F.concat((h, h_gen))
         else:
             h_zero = Variable(to_device(np.zeros(h.shape), self.device))
