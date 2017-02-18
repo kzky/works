@@ -426,3 +426,83 @@ class Experiment002(Experiment000):
         # Losses
         self.recon_loss = ReconstructionLoss()
         self.gan_loss = GANLoss()
+
+    def train(self, x_u):
+        # Encoder
+        h = self.encoder(x_real)
+        x_rec = self.decoder(h)
+        loss_rec = self.recon_loss(x_rec, x_real)
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
+        loss_rec.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+        
+        # Generator
+        h = self.encoder(x_real)
+        h.volatile = True
+        bs = x_real.shape[0]        
+        z = self.generate_random(bs, self.dim)
+        h_gen = self.generator0(z)
+        x_gen = self.generator1(h, h_gen)
+        d_x_gen = self.image_discriminator(x_gen)
+        loss_gen = self.gan_loss(d_x_gen)
+        self.generator0.cleargrads()
+        self.generator1.cleargrads()
+        self.image_discriminator.cleargrads()
+        loss_gen.backward()
+        self.optimizer_gen0.update()
+        self.optimizer_gen1.update()
+
+        # Discriminator
+        h = self.encoder(x_real)
+        h.volatile = True
+        z = self.generate_random(bs, self.dim)
+        h_gen = self.generator0(z)
+        x_gen = self.generator1(h, h_gen)
+        d_x_gen = self.image_discriminator(x_gen, y)
+        d_x_real = self.image_discriminator(x_real, y)
+        loss_dis = self.gan_loss(d_x_gen, d_x_real)
+        self.generator0.cleargrads()
+        self.generator1.cleargrads()
+        self.image_discriminator.cleargrads()
+        loss_dis.backward()
+        self.optimizer_dis.update()
+
+    def test(self, x, y, epoch):
+        # Generate Images
+        bs = x.shape[0]
+        z = self.generate_random(bs, self.dim)
+        h = self.generator0(z, test=True)
+        x_gen = self.generator1(h, y, test=True)
+        d_x_gen = self.image_discriminator(x_gen, y, test=True)
+
+        # Save generated images
+        dirpath_out = "./test_gen/{:05d}".format(epoch)
+        if not os.path.exists(dirpath_out):
+            os.mkdir(dirpath_out)
+
+        x_gen_data = cuda.to_cpu(x_gen.data)
+        for i, img in enumerate(x_gen_data):
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
+            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+
+        # D(x_gen) values
+        d_x_gen_data = [float(data[0]) for data in cuda.to_cpu(d_x_gen.data)][0:100]
+
+        return d_x_gen_data
+        
+    def save_model(self, epoch):
+        dpath  = "./model"
+        if not os.path.exists(dpath):
+            os.makedirs(dpath)
+            
+        fpath = "./model/generator0_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator0)
+        fpath = "./model/generator1_{:05d}.h5py".format(epoch)
+        serializers.save_hdf5(fpath, self.generator1)
+
+    def generate_random(self, bs, dim=30):
+        r = np.random.uniform(-1, 1, (bs, dim)).astype(np.float32)
+        r = to_device(r, self.device)
+        return r

@@ -122,7 +122,7 @@ class ImageDiscriminator(Chain, Mixin):
         self.device = device
         self.act = act
 
-    def __call__(self, x, y=None, test=False):
+    def __call__(self, x, test=False):
         h = self.conv0(x)  # 28x28 -> 14x14
         h = self.bn0(h, test)
         h = self.act(h)
@@ -130,10 +130,6 @@ class ImageDiscriminator(Chain, Mixin):
         h = self.conv1(h)  # 14x14 -> 7x7
         h = self.bn1(h, test)
         h = self.act(h)
-
-        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
-        y = self.generate_onehot(h.shape[0], y)
-        h = F.concat((h, y))
 
         h = self.linear0(h)
         h = F.sigmoid(h)
