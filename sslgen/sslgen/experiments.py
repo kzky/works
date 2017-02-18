@@ -451,7 +451,7 @@ class Experiment002(Experiment000):
         self.generator1.cleargrads()
         self.image_discriminator.cleargrads()
         loss_gen.backward()
-        self.otpimizer_enc.update()
+        self.optimizer_enc.update()
         self.optimizer_gen0.update()
         self.optimizer_gen1.update()
 
