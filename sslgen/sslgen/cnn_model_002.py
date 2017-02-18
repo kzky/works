@@ -67,9 +67,9 @@ class Decoder(Chain, Mixin):
 
     def __call__(self, h, h_gen=None, test=False):
         # Concat
-        if h_gen is None:
+        if h_gen is None and test == False:
             h = h
-        else:
+        elif h_gen is not None and test == False:
             # Restrict Decoder with input image
             h_stacked = ()
             for i in range(h_gen.shape[1]):
@@ -78,7 +78,9 @@ class Decoder(Chain, Mixin):
                 else:
                     h_stacked += (F.expand_dims(h_gen[:, i, :, :], axis=1), )
             h = F.concat(h_stacked)
-            
+        else:
+            h = h_gen
+                    
         h = self.deconv0(h)  # 7x7 -> 14x14
         h = self.bn0(h, test)
         h = self.act(h)
