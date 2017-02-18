@@ -32,7 +32,7 @@ class Experiment(object):
         self.acc_data = 0.0
 
         # Model
-        self.ae = AutoEncoder(act=act, lr_decay=lr_decay)
+        self.ae = AutoEncoder(act=act)
         self.ae.to_gpu(device) if self.device else None
 
         # Optimizer
