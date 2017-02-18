@@ -74,7 +74,7 @@ def main():
             x_l = Variable(to_device(x_l, device))
 
             d_x_gen = exp.test(x_l, y_l, epoch)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
+            msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
                 d_x_gen)
