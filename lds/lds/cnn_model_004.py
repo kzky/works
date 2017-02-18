@@ -96,7 +96,7 @@ class ResDec(Chain):
         h = self.act(h)
         h = self.decovn1(h)
         h = self.bn1(h, test)
-        h = sel.act(h)
+        h = self.act(h)
         h = self.decovn2(h)
         h = self.bn2(h, test)
 
