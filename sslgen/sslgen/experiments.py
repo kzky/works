@@ -17,7 +17,7 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss
+from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss, WGANLoss
 from sklearn.metrics import confusion_matrix
 from sslgen.cnn_model import Generator, Discriminator
         
@@ -640,3 +640,77 @@ class Experiment003(Experiment002):
         r = to_device(r, self.device)
         return r
 
+    
+class Experiment004(Experiment002):
+    """Wasserstein GAN Loss
+    """
+
+    def __init__(self, device=None, 
+                 n_cls=10, dim=100, 
+                 learning_rate=1e-3, learning_rate_gan=1e-5, act=F.relu):
+        # Settings
+        self.device = device
+        self.n_cls = n_cls
+        self.dim = dim
+        self.act = act
+        self.learning_rate = learning_rate
+        self.learning_rate_gan = learning_rate_gan
+
+        from sslgen.cnn_model_000 \
+            import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
+
+        # Model
+        self.encoder = Encoder(device=device, act=act, n_cls=n_cls)
+        self.decoder = Decoder(device=device, act=act, n_cls=n_cls)
+        self.generator1 = self.decoder
+        self.generator0 = Generator0(device=device, act=act, n_cls=n_cls, dim=dim)
+        self.image_discriminator = ImageDiscriminator(device=device, act=act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.generator0.to_gpu(device) if self.device else None
+        self.image_discriminator.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(self.learning_rate)
+        self.optimizer_dec = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_gen1 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_dis = optimizers.Adam(self.learning_rate_gan)
+
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_gen0.setup(self.generator0)
+        self.optimizer_gen1.setup(self.generator1)
+        self.optimizer_dis.setup(self.image_discriminator)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen0.use_cleargrads()
+        self.optimizer_gen1.use_cleargrads()
+        self.optimizer_dis.use_cleargrads()
+        
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.gan_loss = WGANLoss()
+        
+    def test(self, x, y, epoch):
+        # Generate Images
+        bs = x.shape[0]
+        z = self.generate_random(bs, self.dim)
+        h = self.generator0(z, test=True)
+        x_gen = self.generator1(h, y, test=True)
+        d_x_gen = self.image_discriminator(x_gen, y, test=True)
+        d_x_real = self.image_discriminator(x, y, test=True)
+        loss = self.gan_loss(d_x_gen, d_x_real)
+
+        # Save generated images
+        dirpath_out = "./test_gen/{:05d}".format(epoch)
+        if not os.path.exists(dirpath_out):
+            os.mkdir(dirpath_out)
+
+        x_gen_data = cuda.to_cpu(x_gen.data)
+        for i, img in enumerate(x_gen_data):
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
+            cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
+
+        return cuda.to_cpu(loss.data)
+        
