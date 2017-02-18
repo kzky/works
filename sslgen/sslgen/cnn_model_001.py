@@ -39,8 +39,8 @@ class Encoder(Chain, Mixin):
         super(Encoder, self).__init__(
             conv0=L.Convolution2D(1, 32, ksize=4, stride=2, pad=1, ),
             conv1=L.Convolution2D(32, 64, ksize=4, stride=2, pad=1, ),
-            bn0=L.BatchNormalization(32, decay=0.9),
-            bn1=L.BatchNormalization(64, decay=0.9),
+            bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
         )
         self.device = device        
         self.act = act
@@ -61,8 +61,8 @@ class Decoder(Chain, Mixin):
             deconv0=L.Deconvolution2D(128, 64, ksize=1, stride=1, pad=0, ),
             deconv1=L.Deconvolution2D(64, 32, ksize=4, stride=2, pad=1, ),
             deconv2=L.Deconvolution2D(32, 1, ksize=4, stride=2, pad=1, ),
-            bn0=L.BatchNormalization(64, decay=0.9),
-            bn1=L.BatchNormalization(32, decay=0.9),
+            bn0=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
         )
         self.device = device        
         self.act = act
@@ -95,7 +95,7 @@ class Generator0(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, dim=100):
         super(Generator0, self).__init__(
             linear0=L.Linear(dim, 64*7*7),
-            bn0=L.BatchNormalization(64*7*7, decay=0.9),
+            bn0=L.BatchNormalization(64*7*7, decay=0.9, use_cudnn=False),
         )
         self.device = device        
         self.act = act
@@ -115,8 +115,8 @@ class ImageDiscriminator(Chain, Mixin):
         super(ImageDiscriminator, self).__init__(
             conv0=L.Convolution2D(1, 64, ksize=4, stride=2, pad=1, ),
             conv1=L.Convolution2D(64, 128, ksize=4, stride=2, pad=1, ),
-            bn0=L.BatchNormalization(64, decay=0.9),
-            bn1=L.BatchNormalization(128, decay=0.9),
+            bn0=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(128, decay=0.9, use_cudnn=False),
             linear0=L.Linear(128*7*7, 1),
         )
         self.device = device
@@ -142,9 +142,9 @@ class PatchDiscriminator(Chain, Mixin):
             conv1=L.Convolution2D(64, 32, ksize=7, stride=1, pad=0, ),
             conv2=L.Convolution2D(32, 16, ksize=7, stride=1, pad=0, ),
             conv3=L.Convolution2D(16, 1, ksize=1, stride=1, pad=0, ),
-            bn0=L.BatchNormalization(64, decay=0.9),
-            bn1=L.BatchNormalization(64, decay=0.9),
-            bn2=L.BatchNormalization(64, decay=0.9),
+            bn0=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
+            bn2=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
         )
         self.device = device
         self.act = act
