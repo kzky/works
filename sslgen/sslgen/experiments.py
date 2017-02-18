@@ -471,8 +471,8 @@ class Experiment002(Experiment000):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
-        h = self.generator0(z, test=True)
-        x_gen = self.generator1(h, test=True)
+        h_gen = self.generator0(z, test=True)
+        x_gen = self.generator1(x, h_gen, test=True)
         d_x_gen = self.image_discriminator(x_gen, test=True)
 
         # Save generated images
