@@ -427,7 +427,7 @@ class Experiment002(Experiment000):
         self.recon_loss = ReconstructionLoss()
         self.gan_loss = GANLoss()
 
-    def train(self, x_u):
+    def train(self, x_real):
         # Encoder
         h = self.encoder(x_real)
         x_rec = self.decoder(h)
