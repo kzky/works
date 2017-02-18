@@ -446,10 +446,12 @@ class Experiment002(Experiment000):
         x_gen = self.generator1(h, h_gen)
         d_x_gen = self.image_discriminator(x_gen)
         loss_gen = self.gan_loss(d_x_gen)
+        self.encoder.cleargrads()
         self.generator0.cleargrads()
         self.generator1.cleargrads()
         self.image_discriminator.cleargrads()
         loss_gen.backward()
+        self.otpimizer_enc.update()
         self.optimizer_gen0.update()
         self.optimizer_gen1.update()
 
