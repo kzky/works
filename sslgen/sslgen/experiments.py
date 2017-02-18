@@ -118,7 +118,6 @@ class Experiment(object):
         r = to_device(r, self.device)
         return r
 
-
 class Experiment000(object):
 
     def __init__(self, device=None, 
@@ -380,3 +379,50 @@ class Experiment001(object):
         r = to_device(r, self.device)
         return r
 
+class Experiment002(Experiment000):
+
+    def __init__(self, device=None, 
+                 dim=100, 
+                 learning_rate=1e-3, learning_rate_gan=1e-5, act=F.relu):
+        # Settings
+        self.device = device
+        self.dim = dim
+        self.act = act
+        self.learning_rate = learning_rate
+        self.learning_rate_gan = learning_rate_gan
+
+        from sslgen.cnn_model_001 \
+            import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
+
+        # Model
+        self.encoder = Encoder(device=device, act=act)
+        self.decoder = Decoder(device=device, act=act)
+        self.generator1 = self.decoder
+        self.generator0 = Generator0(device=device, act=act, dim=dim)
+        self.image_discriminator = ImageDiscriminator(device=device, act=act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.generator0.to_gpu(device) if self.device else None
+        self.image_discriminator.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(self.learning_rate)
+        self.optimizer_dec = optimizers.Adam(self.learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_gen1 = optimizers.Adam(self.learning_rate_gan)
+        self.optimizer_dis = optimizers.Adam(self.learning_rate_gan)
+
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_gen0.setup(self.generator0)
+        self.optimizer_gen1.setup(self.generator1)
+        self.optimizer_dis.setup(self.image_discriminator)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen0.use_cleargrads()
+        self.optimizer_gen1.use_cleargrads()
+        self.optimizer_dis.use_cleargrads()
+        
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.gan_loss = GANLoss()
