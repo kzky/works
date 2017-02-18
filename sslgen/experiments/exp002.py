@@ -43,7 +43,6 @@ def main():
                                   shape=True)
     exp = Experiment002(
         device,
-        n_cls,
         dims,
         learning_rate,
         learning_rate_gan,
