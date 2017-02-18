@@ -55,16 +55,11 @@ def main():
     st = time.time()
     for i in range(n_iter):
         # Get data
-        #x_l, y_l = [Variable(to_device(x, device)) \
-        #                for x in data_reader.get_l_train_batch()]
-        x_l, y_l = [x for x in data_reader.get_l_train_batch()]
-        x_l = Variable(to_device(x_l, device))
-
         x_u, _ = [Variable(to_device(x, device)) \
                       for x in data_reader.get_u_train_batch()]
 
         # Train
-        exp.train(x_l, y_l, x_u)
+        exp.train(x_u)
         
         # Eval
         if (i+1) % iter_epoch == 0:
@@ -72,7 +67,7 @@ def main():
             x_l, y_l = [x for x in data_reader.get_test_batch()]
             x_l = Variable(to_device(x_l, device))
 
-            d_x_gen = exp.test(x_l, y_l, epoch)
+            d_x_gen = exp.test(x_l, epoch)
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch, 
                 time.time() - st, 

@@ -469,7 +469,7 @@ class Experiment002(Experiment000):
         loss_dis.backward()
         self.optimizer_dis.update()
 
-    def test(self, x, y, epoch):
+    def test(self, x, epoch):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
