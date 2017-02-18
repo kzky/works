@@ -72,7 +72,7 @@ class Decoder(Chain, Mixin):
         else:
             # Restrict Decoder with input image
             h = ()
-            for i in h.shape[0]:
+            for i in h_gen.shape[0]:
                 if np.random.randint(2) == 0:
                     h += (F.expand_dims(h[:, i, :, :], axis=1), )
                 else:
