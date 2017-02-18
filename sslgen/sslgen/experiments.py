@@ -440,7 +440,6 @@ class Experiment002(Experiment000):
         
         # Generator
         h = self.encoder(x_real)
-        h.volatile = True
         bs = x_real.shape[0]        
         z = self.generate_random(bs, self.dim)
         h_gen = self.generator0(z)
@@ -456,7 +455,6 @@ class Experiment002(Experiment000):
 
         # Discriminator
         h = self.encoder(x_real)
-        h.volatile = True
         z = self.generate_random(bs, self.dim)
         h_gen = self.generator0(z)
         x_gen = self.generator1(h, h_gen)
