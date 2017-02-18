@@ -89,6 +89,6 @@ class WGANLoss(Chain):
             return  - loss  # to minimize
             
         else:
-            loss = F.sum(F.log(d_x_gen)) / bs_d_x_gen
+            loss = F.sum(d_x_gen) / bs_d_x_gen
             return - loss  # to minimize (reverse trick)
         
