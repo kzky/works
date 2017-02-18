@@ -72,7 +72,8 @@ class Decoder(Chain, Mixin):
         if h_gen is not None:
             h = F.concat((h, h_gen))
         else:
-            h_zero = Variable(to_device(np.zeros(h.shape), self.device))
+            h_zero = Variable(to_device(
+                np.zeros(h.shape, dtype=np.float32), self.device))
             h = F.concat((h, h_zero))
 
         h = self.deconv0(h)
