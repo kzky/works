@@ -381,7 +381,7 @@ class Experiment001(object):
         return r
 
 class Experiment002(Experiment000):
-    """Train also encoder when training gan
+    """Train also encoder when training gan and conncat h and h_gen
     """
 
     def __init__(self, device=None, 
