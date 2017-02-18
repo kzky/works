@@ -699,7 +699,7 @@ class Experiment004(Experiment000):
         x_gen = self.generator1(h, y, test=True)
         d_x_gen = self.image_discriminator(x_gen, y, test=True)
         d_x_real = self.image_discriminator(x, y, test=True)
-        loss = self.gan_loss(d_x_gen, d_x_real)
+        loss = - self.gan_loss(d_x_gen, d_x_real)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
