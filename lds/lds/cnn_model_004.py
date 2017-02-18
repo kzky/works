@@ -84,7 +84,7 @@ class ResDec(Chain):
                 decovn2=L.Deconvolution2D(inmap, outmap, 1, stride=1, pad=0),
                 bn0=L.BatchNormalization(inmap, decay=0.9),
                 bn1=L.BatchNormalization(inmap, decay=0.9),
-                bn2=L.BatchNormalization(inmap, decay=0.9)
+                bn2=L.BatchNormalization(inmap, decay=0.9),
                 bn3=L.BatchNormalization(inmap, decay=0.9)
             )
             
