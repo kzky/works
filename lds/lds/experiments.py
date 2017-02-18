@@ -267,7 +267,6 @@ class Experiment001(Experiment):
 
     def test(self, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
-        x = self.ae.decoder(y, test=True)
         
         acc = F.accuracy(y, y_l)
         acc_data_cur = cuda.to_cpu(acc.data)
