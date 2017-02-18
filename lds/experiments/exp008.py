@@ -49,6 +49,7 @@ def main():
     print("# Training loop")
     epoch = 1
     st = time.time()
+    acc_prev = 0.0
     for i in range(n_iter):
         # Get data
         x_l, y_l = [Variable(to_device(x, device)) \
@@ -74,12 +75,16 @@ def main():
                 for acc_for_each_y_ in acc_for_each_y:
                     accs_.append(float(acc_for_each_y_.data))
                 accs.append(accs_)
+            acc_mean = np.mean(accs, axis=0) 
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                np.mean(accs, axis=0))
+                acc_mean)
             print(msg)
-            
+            if acc_mean[-1] < acc_prev:
+                exp.optimizer.alpha = 0.1 * exp.optimizer.alpha
+                print("Learning rate decays")
+            acc_prev = acc_mean[-1]
             st = time.time()
             epoch +=1
             
