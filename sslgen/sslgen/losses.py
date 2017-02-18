@@ -78,7 +78,7 @@ class GANLoss(Chain):
 class WGANLoss(Chain):
 
     def __init__(self, ):
-        super(GANLoss, self).__init__(
+        super(WGANLoss, self).__init__(
         )
         
     def __call__(self, d_x_gen, d_x_real=None):
