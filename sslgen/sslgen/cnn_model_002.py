@@ -71,13 +71,13 @@ class Decoder(Chain, Mixin):
             h = h
         else:
             # Restrict Decoder with input image
-            h = ()
+            h_stacked = ()
             for i in range(h_gen.shape[0]):
                 if np.random.randint(2) == 0:
-                    h += (F.expand_dims(h[:, i, :, :], axis=1), )
+                    h_stacked += (F.expand_dims(h[:, i, :, :], axis=1), )
                 else:
-                    h += (F.expand_dims(h_gen[:, i, :, :], axis=1), )
-            h = F.concat(h)
+                    h_stacked += (F.expand_dims(h_gen[:, i, :, :], axis=1), )
+            h = F.concat(h_stacked)
             
         h = self.deconv0(h)  # 7x7 -> 14x14
         h = self.bn0(h, test)
