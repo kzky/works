@@ -108,6 +108,7 @@ class Experiment(object):
                 for y_ in self.ae.encoder.classifiers] + [acc]
 
         if acc_data_cur  < self.acc_data:
+            print("Learning rate decays")
             self.optimizer.alpha = 0.1 * self.optimizer.alpha
 
         self.acc_data = acc_data_cur
@@ -278,6 +279,7 @@ class Experiment001(Experiment):
                        for y_ in self.ae.decoder.classifiers] \
                            + [acc] 
         if acc_data_cur  < self.acc_data:
+            print("Learning rate decays")
             self.optimizer.alpha = 0.1 * self.optimizer.alpha
 
         self.acc_data = acc_data_cur
