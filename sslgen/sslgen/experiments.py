@@ -460,8 +460,8 @@ class Experiment002(Experiment000):
         z = self.generate_random(bs, self.dim)
         h_gen = self.generator0(z)
         x_gen = self.generator1(h, h_gen)
-        d_x_gen = self.image_discriminator(x_gen, y)
-        d_x_real = self.image_discriminator(x_real, y)
+        d_x_gen = self.image_discriminator(x_gen)
+        d_x_real = self.image_discriminator(x_real)
         loss_dis = self.gan_loss(d_x_gen, d_x_real)
         self.generator0.cleargrads()
         self.generator1.cleargrads()
@@ -474,8 +474,8 @@ class Experiment002(Experiment000):
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z, test=True)
-        x_gen = self.generator1(h, y, test=True)
-        d_x_gen = self.image_discriminator(x_gen, y, test=True)
+        x_gen = self.generator1(h, test=True)
+        d_x_gen = self.image_discriminator(x_gen, test=True)
 
         # Save generated images
         dirpath_out = "./test_gen/{:05d}".format(epoch)
