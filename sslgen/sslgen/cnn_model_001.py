@@ -94,8 +94,8 @@ Generator1 = Decoder
 class Generator0(Chain, Mixin):
     def __init__(self, device=None, act=F.relu, dim=100):
         super(Generator0, self).__init__(
-            linear0=L.Linear(dim, 128*7*7),
-            bn0=L.BatchNormalization(128*7*7, decay=0.9),
+            linear0=L.Linear(dim, 64*7*7),
+            bn0=L.BatchNormalization(64*7*7, decay=0.9),
         )
         self.device = device        
         self.act = act
@@ -107,7 +107,7 @@ class Generator0(Chain, Mixin):
         h = self.act(h)
 
         bs = z.shape[0]
-        h = F.reshape(h, (bs, 128, 7, 7))  # 7x7
+        h = F.reshape(h, (bs, 64, 7, 7))  # 7x7
         return h
 
 class ImageDiscriminator(Chain, Mixin):
