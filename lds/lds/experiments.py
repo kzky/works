@@ -23,14 +23,16 @@ from lds.cnn_model import AutoEncoder
 
 class Experiment(object):
 
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         # Settings
         self.device = device
         self.act = act
         self.learning_rate = 1e-3
+        self.lr_decay = lr_decay
+        self.acc_data = 0.0
 
         # Model
-        self.ae = AutoEncoder(act=act)
+        self.ae = AutoEncoder(act=act, lr_decay=lr_decay)
         self.ae.to_gpu(device) if self.device else None
 
         # Optimizer
@@ -100,20 +102,26 @@ class Experiment(object):
     def test(self, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
         acc = F.accuracy(y, y_l)
+        acc_data_cur = cuda.to_cpu(acc.data)
         
         accs = [F.accuracy(y_, y_l) \
-                for y_ in self.ae.encoder.classifiers] + [acc] 
-        
+                for y_ in self.ae.encoder.classifiers] + [acc]
+
+        if acc_data_cur  < self.acc_data:
+            self.optimizer.alpha = 0.1 * self.optimizer.alpha
+
+        self.acc_data = acc_data_cur
         return accs
 
 class Experiment000(Experiment):
     """Regularize hiddnes of decoders with LDS.
     """
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment000, self).__init__(
             device=device,
             learning_rate=learning_rate,
-            act=act,
+            act=act, 
+            lr_decay=lr_decay,
         )
         
     def train(self, x_l, y_l, x_u):
@@ -178,9 +186,9 @@ class Experiment001(Experiment):
     """Decoder predicts labels and use NE loss on these predictions.
     """
 
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment001, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )
         
         # Model
@@ -262,13 +270,17 @@ class Experiment001(Experiment):
         x = self.ae.decoder(y, test=True)
         
         acc = F.accuracy(y, y_l)
+        acc_data_cur = cuda.to_cpu(acc.data)
         
         accs = [F.accuracy(y_, y_l) \
                 for y_ in self.ae.encoder.classifiers] \
                     + [F.accuracy(y_, y_l)\
                        for y_ in self.ae.decoder.classifiers] \
                            + [acc] 
-        
+        if acc_data_cur  < self.acc_data:
+            self.optimizer.alpha = 0.1 * self.optimizer.alpha
+
+        self.acc_data = acc_data_cur
         return accs
     
 class Experiment002(Experiment001):
@@ -359,9 +371,9 @@ class Experiment003(Experiment002):
     between predictions between encoder and decoder.
     """
 
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment003, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )
 
         self.jsd_loss = JensenShannonDivergenceLoss()
@@ -443,9 +455,9 @@ class Experiment003(Experiment002):
         self.optimizer.update()
     
 class Experiment004(Experiment000):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment004, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )
         
         # Model
@@ -459,9 +471,9 @@ class Experiment004(Experiment000):
         self.optimizer.use_cleargrads()
 
 class Experiment005(Experiment):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment005, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_003 import AutoEncoder
@@ -474,9 +486,9 @@ class Experiment005(Experiment):
         self.optimizer.use_cleargrads()
 
 class Experiment006(Experiment000):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment006, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_003 import AutoEncoder
@@ -489,9 +501,9 @@ class Experiment006(Experiment000):
         self.optimizer.use_cleargrads()
 
 class Experiment007(Experiment001):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment007, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_003 import AutoEncoder
@@ -504,9 +516,9 @@ class Experiment007(Experiment001):
         self.optimizer.use_cleargrads()
 
 class Experiment008(Experiment002):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment008, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_003 import AutoEncoder
@@ -519,9 +531,9 @@ class Experiment008(Experiment002):
         self.optimizer.use_cleargrads()
 
 class Experiment009(Experiment):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment009, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_004 import AutoEncoder
@@ -534,9 +546,9 @@ class Experiment009(Experiment):
         self.optimizer.use_cleargrads()
 
 class Experiment010(Experiment000):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment010, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_004 import AutoEncoder
@@ -549,9 +561,9 @@ class Experiment010(Experiment000):
         self.optimizer.use_cleargrads()
 
 class Experiment011(Experiment001):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment011, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_004 import AutoEncoder
@@ -564,9 +576,9 @@ class Experiment011(Experiment001):
         self.optimizer.use_cleargrads()
 
 class Experiment012(Experiment002):
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment012, self).__init__(
-            device=device, learning_rate=learning_rate, act=act
+            device=device, learning_rate=learning_rate, act=act, lr_decay=lr_decay
         )        
         # Model
         from lds.cnn_model_004 import AutoEncoder
