@@ -78,7 +78,7 @@ class Decoder(Chain, Mixin):
         h = self.bn0(h, test)
         h = self.act(h)
 
-        h = self.deconv0(h)  # 14x14 -> 28x28
+        h = self.deconv1(h)  # 14x14 -> 28x28
         h = F.tanh(h)
         return h
 
