@@ -858,7 +858,7 @@ class Experiment006(Experiment000):
         self.learning_rate = learning_rate
         self.learning_rate_gan = learning_rate_gan
 
-        from sslgen.cnn_model_003 \
+        from sslgen.cnn_model_004 \
             import Encoder, Decoder, Generator0, Generator1, ImageDiscriminator
 
         # Model
