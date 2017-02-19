@@ -71,12 +71,16 @@ def main():
             # Get data
             x_l, y_l = [x for x in data_reader.get_test_batch()]
             x_l = Variable(to_device(x_l, device))
+            loss = []
 
-            d_x_gen = exp.test(x_l, y_l, epoch)
+            bs = 100
+            for i in range(0, x_l.shape[0], bs):
+                l = exp.test(x_l[i:i+bs, :], y_l[i:i+bs, :], epoch)
+                loss.append(l)
             msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
-                d_x_gen)
+                np.mean(loss))
             print(msg)
             exp.save_model(epoch)
             
