@@ -579,3 +579,113 @@ class Experiment012(Experiment002):
         self.optimizer.setup(self.ae)
         self.optimizer.use_cleargrads()
 
+class Experiment013(Experiment008):
+    
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment013, self).__init__(
+            device=device, learning_rate=learning_rate, act=act, 
+        )        
+
+    def train(self, x_l, y_l, x_u):
+        # Labeled samples
+        y_pred_l = self.ae.encoder(x_l)
+        preds_enc_l = self.ae.encoder.hiddens
+        hiddens_enc_l = self.ae.encoder.hiddens
+        x_rec_l = self.ae.decoder(y)
+        preds_dec_l = self.ae.decoder.hiddens
+        hiddens_dec_l = self.ae.decoder.hiddens
+
+        # cronss entropy loss
+        l_ce_l = 0
+        l_ce_l += F.softmax_cross_entropy(y_pred_l, y_l) \
+                  + reduce(lambda x, y: x + y, 
+                           [F.softmax_cross_entropy(y_, y_l) \
+                            for y_ in preds_enc_l]) \
+                                + reduce(lambda x, y: x + y, 
+                                         [F.softmax_cross_entropy(y_, y_l) \
+                                          for y_ in preds_dec_l])
+    
+        # negative entropy loss
+        l_ne_l = 0
+        l_ne_l += self.ne_loss(y_pred_l) \
+                  + reduce(lambda x, y: x + y, 
+                           [self.ne_loss(y_) for y_ in preds_enc_l]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self.ne_loss(y_) for y_ in preds_dec_l])
+        
+        # reconstruction loss
+        l_rec_l = 0
+        l_rec_l += self.recon_loss(x_l, x_rec_l) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                hiddens_enc_l,
+                                hiddens_dec_l[::-1])])
+
+        # label reconstruction loss
+        l_lrec_l = reduce(lambda x, y: x + y,
+                          [self.recon_loss(x, y) for x, y in zip(
+                              preds_enc_l,
+                              preds_dec_l[::-1])])
+
+        # loss for labeled samples
+        loss_l = l_ce_l + l_ne_l + l_rec_l + l_lrec_l
+
+        # Unlabeled samples
+        y_pred_u = self.ae.encoder(x_u)
+        preds_enc_u = self.ae.encoder.hiddens
+        hiddens_enc_u = self.ae.encoder.hiddens
+        x_rec_u = self.ae.decoder(y)
+        preds_dec_u = self.ae.decoder.hiddens
+        hiddens_dec_u = self.ae.decoder.hiddens
+
+        # cronss entropy loss
+        l_ce_u = 0
+        l_ce_u += F.softmax_cross_entropy(y_pred_u, y_l) \
+                  + reduce(lambda x, y: x + y, 
+                           [F.softmax_cross_entropy(y_, y_l) \
+                            for y_ in preds_enc_u]) \
+                                + reduce(lambda x, y: x + y, 
+                                         [F.softmax_cross_entropy(y_, y_l) \
+                                          for y_ in preds_dec_u])
+    
+        # negative entropy loss
+        l_ne_u = 0
+        l_ne_u += self.ne_loss(y_pred_u) \
+                  + reduce(lambda x, y: x + y, 
+                           [self.ne_loss(y_) for y_ in preds_enc_u]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self.ne_loss(y_) for y_ in preds_dec_u])
+        
+        # reconstruction loss
+        l_rec_u = 0
+        l_rec_u += self.recon_loss(x_u, x_rec_u) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                hiddens_enc_u,
+                                hiddens_dec_u[::-1])])
+
+        # label reconstruction loss
+        l_lrec_u = reduce(lambda x, y: x + y,
+                          [self.recon_loss(x, y) for x, y in zip(
+                              preds_enc_u,
+                              preds_dec_u[::-1])])
+
+        # loss for unlabeled samples
+        loss_u = l_ne_u + l_rec_u + l_lrec_u
+
+        # Labeled and Unlabeled samples
+        l_rec_lu -= reduce(lambda x, y: x + y,
+                           [self.recon_loss(x, y) for x, y in zip(
+                               hiddens_enc_l,
+                               hiddens_enc_u)]) - \
+                               reduce(lambda x, y: x + y,
+                                      [self.recon_loss(x, y) for x, y in zip(
+                                          hiddens_dnc_l,
+                                          hiddens_dec_u)]) + 
+
+        loss = loss_l + loss_u + l_rec_lu
+
+        # Backward and Update
+        self.ae.cleargrads()
+        loss.backward()
+        self.optimizer.update()
