@@ -806,7 +806,7 @@ class Experiment005(Experiment000):
         loss_dis.backward()
         self.optimizer_dis.update()
 
-    def test(self, x, y, epoch):
+    def test(self, x, y, epoch, k):
         # Generate Images
         self.encoder(x)
         bs = x.shape[0]
@@ -824,7 +824,7 @@ class Experiment005(Experiment000):
 
         x_gen_data = cuda.to_cpu(x_gen.data)
         for i, img in enumerate(x_gen_data):
-            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(k+i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         return cuda.to_cpu(loss.data)
