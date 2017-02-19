@@ -75,7 +75,7 @@ def main():
 
             bs = 100
             for i in range(0, x_l.shape[0], bs):
-                l = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ], epoch)
+                l = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ], epoch, i)
                 loss.append(l)
             msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
