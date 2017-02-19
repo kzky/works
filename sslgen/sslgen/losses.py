@@ -57,6 +57,22 @@ class NegativeEntropyLoss(Chain):
 
         return self.loss
 
+class KLLoss(Chain):
+    """Compute cross entropy between y_t and y_{t+1}.
+    """
+
+    def __init__(self, ):
+        pass
+        
+    def __call__(self, y, t):
+        t_normalized = F.softmax(t)
+        t_log_softmax = F.log_softmax(t)
+        y_log_softmax = F.log_softmax(y)
+        n = y.data.shape[0]
+
+        return F.sum((t_normalized * t_log_softmax) \
+                         - (t_normalized * y_log_softmax)) / n
+
 class GANLoss(Chain):
 
     def __init__(self, ):
