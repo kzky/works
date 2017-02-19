@@ -133,10 +133,6 @@ class ImageDiscriminator(Chain, Mixin):
         h = self.bn1(h, test)
         h = self.act(h)
 
-        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
-        y = self.generate_onehot(h.shape[0], y)
-        h = F.concat((h, y))
-
         h = self.linear0(h)
         h = F.sigmoid(h)
         return h
