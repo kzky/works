@@ -670,7 +670,7 @@ class Experiment013(Experiment008):
                                hiddens_enc_u)]) - \
                                reduce(lambda x, y: x + y,
                                       [self.recon_loss(x, y) for x, y in zip(
-                                          hiddens_dnc_l,
+                                          hiddens_dec_l,
                                           hiddens_dec_u)])
 
         loss = loss_l + loss_u + l_rec_lu
