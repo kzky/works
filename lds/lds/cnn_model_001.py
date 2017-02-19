@@ -26,9 +26,9 @@ class Encoder(Chain):
             conv1=L.Convolution2D(16, 32, 4, stride=2, pad=1),
             linear0=L.Linear(32 * 7 * 7, 16),
             linear1=L.Linear(16, 10),
-            bn0=L.BatchNormalization(16, decay=0.9),
-            bn1=L.BatchNormalization(32, decay=0.9),
-            bn2=L.BatchNormalization(16, decay=0.9),
+            bn0=L.BatchNormalization(16, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
+            bn2=L.BatchNormalization(16, decay=0.9, use_cudnn=False),
             # BranchNet
             linear0_bn=L.Linear(16*14*14, 10),
             linear1_bn=L.Linear(32*7*7, 10),
@@ -77,9 +77,9 @@ class Decoder(Chain):
             linear1=L.Linear(16, 32 * 7 * 7),
             deconv0=L.Deconvolution2D(32, 16, 4, stride=2, pad=1),
             deconv1=L.Deconvolution2D(16, 1, 4, stride=2, pad=1),
-            bn0=L.BatchNormalization(16, decay=0.9),
-            bn1=L.BatchNormalization(32 * 7 * 7, decay=0.9),
-            bn2=L.BatchNormalization(16, decay=0.9),
+            bn0=L.BatchNormalization(16, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(32 * 7 * 7, decay=0.9, use_cudnn=False),
+            bn2=L.BatchNormalization(16, decay=0.9, use_cudnn=False),
 
             # BranchNet
             linear0_bn=L.Linear(16, 10),

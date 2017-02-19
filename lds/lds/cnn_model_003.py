@@ -26,16 +26,16 @@ class ResEnc(Chain):
                 conv0=L.Convolution2D(inmap, outmap, 4, stride=2, pad=1),
                 conv1=L.Convolution2D(outmap, outmap, 3, stride=1, pad=1),
                 conv2=L.Convolution2D(inmap, outmap, 4, stride=2, pad=1),
-                bn0=L.BatchNormalization(outmap, decay=0.9),
-                bn1=L.BatchNormalization(outmap, decay=0.9),
-                bn2=L.BatchNormalization(outmap, decay=0.9)
+                bn0=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False),
+                bn1=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False),
+                bn2=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False)
             )
         else:
             super(ResEnc, self).__init__(
                 conv0=L.Convolution2D(inmap, outmap, 3, stride=1, pad=1),
                 conv1=L.Convolution2D(inmap, outmap, 3, stride=1, pad=1),
-                bn0=L.BatchNormalization(inmap, decay=0.9),
-                bn1=L.BatchNormalization(inmap, decay=0.9)
+                bn0=L.BatchNormalization(inmap, decay=0.9, use_cudnn=False),
+                bn1=L.BatchNormalization(inmap, decay=0.9, use_cudnn=False)
             )
             
         self.act = act
@@ -65,16 +65,16 @@ class ResDec(Chain):
                 decovn0=L.Deconvolution2D(inmap, outmap, 4, stride=2, pad=1),
                 decovn1=L.Deconvolution2D(outmap, outmap, 3, stride=1, pad=1),
                 decovn2=L.Deconvolution2D(inmap, outmap, 4, stride=2, pad=1),
-                bn0=L.BatchNormalization(outmap, decay=0.9),
-                bn1=L.BatchNormalization(outmap, decay=0.9),
-                bn2=L.BatchNormalization(outmap, decay=0.9)
+                bn0=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False),
+                bn1=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False),
+                bn2=L.BatchNormalization(outmap, decay=0.9, use_cudnn=False)
             )
         else:
             super(ResDec, self).__init__(
                 decovn0=L.Deconvolution2D(inmap, outmap, 3, stride=1, pad=1),
                 decovn1=L.Deconvolution2D(inmap, outmap, 3, stride=1, pad=1),
-                bn0=L.BatchNormalization(inmap, decay=0.9),
-                bn1=L.BatchNormalization(inmap, decay=0.9)
+                bn0=L.BatchNormalization(inmap, decay=0.9, use_cudnn=False),
+                bn1=L.BatchNormalization(inmap, decay=0.9, use_cudnn=False)
             )
             
         self.act = act
@@ -110,7 +110,7 @@ class Encoder(Chain):
             resenc3=ResEnc(64, 64, act),
             linear0=L.Linear(64 * 7 * 7, 32),
             linear1=L.Linear(32, 10),
-            bn0=L.BatchNormalization(32, decay=0.9),
+            bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
             # BranchNet
             linear0_bn=L.Linear(32*14*14, 10),
             linear1_bn=L.Linear(32*14*14, 10),
@@ -164,8 +164,8 @@ class Decoder(Chain):
             # Decoer
             linear0=L.Linear(10, 32),
             linear1=L.Linear(32, 64 * 7 * 7),
-            bn0=L.BatchNormalization(32, decay=0.9),
-            bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9),
+            bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(64 * 7 * 7, decay=0.9, use_cudnn=False),
             resdec0=ResDec(64, 64, act),
             resdec1=ResDec(64, 32, act, up=True),
             resdec2=ResDec(32, 32, act),
