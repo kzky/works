@@ -591,7 +591,7 @@ class Experiment013(Experiment008):
         y_pred_l = self.ae.encoder(x_l)
         preds_enc_l = self.ae.encoder.hiddens
         hiddens_enc_l = self.ae.encoder.hiddens
-        x_rec_l = self.ae.decoder(y)
+        x_rec_l = self.ae.decoder(y_pred_l)
         preds_dec_l = self.ae.decoder.hiddens
         hiddens_dec_l = self.ae.decoder.hiddens
 
@@ -634,7 +634,7 @@ class Experiment013(Experiment008):
         y_pred_u = self.ae.encoder(x_u)
         preds_enc_u = self.ae.encoder.hiddens
         hiddens_enc_u = self.ae.encoder.hiddens
-        x_rec_u = self.ae.decoder(y)
+        x_rec_u = self.ae.decoder(y_pred_u)
         preds_dec_u = self.ae.decoder.hiddens
         hiddens_dec_u = self.ae.decoder.hiddens
 
