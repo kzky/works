@@ -17,7 +17,7 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss
+from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss
 from sklearn.metrics import confusion_matrix
 from lds.cnn_model import AutoEncoder
 
@@ -586,6 +586,8 @@ class Experiment013(Experiment008):
             device=device, learning_rate=learning_rate, act=act, 
         )        
 
+        self.kl_loss = KLLoss()
+
     def train(self, x_l, y_l, x_u):
         # Labeled samples
         y_pred_l = self.ae.encoder(x_l)
@@ -665,11 +667,11 @@ class Experiment013(Experiment008):
 
         # Labeled and Unlabeled samples
         l_rec_lu = - reduce(lambda x, y: x + y,
-                           [self.recon_loss(x, y) for x, y in zip(
+                           [self.kl_loss(x, y) for x, y in zip(
                                hiddens_enc_l,
                                hiddens_enc_u)]) - \
                                reduce(lambda x, y: x + y,
-                                      [self.recon_loss(x, y) for x, y in zip(
+                                      [self.kl_loss(x, y) for x, y in zip(
                                           hiddens_dec_l,
                                           hiddens_dec_u)])
 
