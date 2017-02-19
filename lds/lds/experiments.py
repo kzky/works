@@ -664,7 +664,7 @@ class Experiment013(Experiment008):
         loss_u = l_ne_u + l_rec_u + l_lrec_u
 
         # Labeled and Unlabeled samples
-        l_rec_lu -= reduce(lambda x, y: x + y,
+        l_rec_lu = reduce(lambda x, y: x + y,
                            [self.recon_loss(x, y) for x, y in zip(
                                hiddens_enc_l,
                                hiddens_enc_u)]) - \
