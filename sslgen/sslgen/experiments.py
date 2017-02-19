@@ -772,7 +772,7 @@ class Experiment005(Experiment000):
         h = self.encoder(x_real)
         x_rec = self.decoder(h, self.encoder.hiddens, y)
         loss_rec = reduce(lambda x, y: x + y, 
-                          [self.recon_loss(h0, 1) for h0, h1 in \ 
+                          [self.recon_loss(h0, 1) for h0, h1 in \
                            zip(self.encoder.hiddens, self.decoder.hiddens[::-1])])
         self.encoder.cleargrads()
         self.decoder.cleargrads()
