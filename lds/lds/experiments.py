@@ -589,10 +589,10 @@ class Experiment013(Experiment008):
     def train(self, x_l, y_l, x_u):
         # Labeled samples
         y_pred_l = self.ae.encoder(x_l)
-        preds_enc_l = self.ae.encoder.hiddens
+        preds_enc_l = self.ae.encoder.classifiers
         hiddens_enc_l = self.ae.encoder.hiddens
         x_rec_l = self.ae.decoder(y_pred_l)
-        preds_dec_l = self.ae.decoder.hiddens
+        preds_dec_l = self.ae.decoder.classifiers
         hiddens_dec_l = self.ae.decoder.hiddens
 
         # cronss entropy loss
@@ -632,10 +632,10 @@ class Experiment013(Experiment008):
 
         # Unlabeled samples
         y_pred_u = self.ae.encoder(x_u)
-        preds_enc_u = self.ae.encoder.hiddens
+        preds_enc_u = self.ae.encoder.classifiers
         hiddens_enc_u = self.ae.encoder.hiddens
         x_rec_u = self.ae.decoder(y_pred_u)
-        preds_dec_u = self.ae.decoder.hiddens
+        preds_dec_u = self.ae.decoder.classifiers
         hiddens_dec_u = self.ae.decoder.hiddens
 
         # cronss entropy loss
