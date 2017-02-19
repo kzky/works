@@ -595,7 +595,7 @@ class Experiment013(Experiment008):
         preds_dec_l = self.ae.decoder.classifiers
         hiddens_dec_l = self.ae.decoder.hiddens
 
-        # cronss entropy loss
+        # cross entropy loss
         l_ce_l = 0
         l_ce_l += F.softmax_cross_entropy(y_pred_l, y_l) \
                   + reduce(lambda x, y: x + y, 
@@ -638,16 +638,6 @@ class Experiment013(Experiment008):
         preds_dec_u = self.ae.decoder.classifiers
         hiddens_dec_u = self.ae.decoder.hiddens
 
-        # cronss entropy loss
-        l_ce_u = 0
-        l_ce_u += F.softmax_cross_entropy(y_pred_u, y_l) \
-                  + reduce(lambda x, y: x + y, 
-                           [F.softmax_cross_entropy(y_, y_l) \
-                            for y_ in preds_enc_u]) \
-                                + reduce(lambda x, y: x + y, 
-                                         [F.softmax_cross_entropy(y_, y_l) \
-                                          for y_ in preds_dec_u])
-    
         # negative entropy loss
         l_ne_u = 0
         l_ne_u += self.ne_loss(y_pred_u) \
