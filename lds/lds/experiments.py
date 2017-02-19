@@ -681,7 +681,7 @@ class Experiment013(Experiment008):
                                reduce(lambda x, y: x + y,
                                       [self.recon_loss(x, y) for x, y in zip(
                                           hiddens_dnc_l,
-                                          hiddens_dec_u)]) + 
+                                          hiddens_dec_u)])
 
         loss = loss_l + loss_u + l_rec_lu
 
