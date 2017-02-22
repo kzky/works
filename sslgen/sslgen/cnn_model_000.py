@@ -143,8 +143,8 @@ class PatchDiscriminator(Chain, Mixin):
             conv2=L.Convolution2D(32, 16, ksize=7, stride=1, pad=0, ),
             conv3=L.Convolution2D(16, 1, ksize=1, stride=1, pad=0, ),
             bn0=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
-            bn1=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
-            bn2=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
+            bn1=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
+            bn2=L.BatchNormalization(16, decay=0.9, use_cudnn=False),
         )
         self.device = device
         self.act = act
