@@ -1,4 +1,4 @@
-from sslgen.experiments import Experiment001
+from sslgen.experiments import Experiment007
 from sslgen.utils import to_device
 from sslgen.datasets import MNISTDataReader, Separator
 import numpy as np
@@ -41,9 +41,8 @@ def main():
                                   batch_size=batch_size,
                                   n_cls=n_cls,
                                   shape=True)
-    exp = Experiment001(
+    exp = Experiment007(
         device,
-        n_cls,
         dims,
         learning_rate,
         learning_rate_gan,
