@@ -65,11 +65,11 @@ def main():
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
 
-            accs = [acc.data for acc in exp.test(x_l, y_l)]
+            accs = [float(acc.data) for acc in exp.test(x_l, y_l)]
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                accs)
+                ",".join(accs))
             print(msg)
             
             st = time.time()
