@@ -84,14 +84,19 @@ class EntropyLossForEachMap(Chain):
     def __call__(self, y, ):
         bs = y.data.shape[0]
         d = np.prod(y.data.shape[1])
-        s = np.prod(y.data.shape[2:])
+        if len(y.shape) > 2:
+            s = np.prod(y.data.shape[2:])
 
-        y = F.reshape(y, (bs, d, s))
-        y = F.transpose(y, (0, 2, 1))
+            y = F.reshape(y, (bs, d, s))
+            y = F.transpose(y, (0, 2, 1))
 
-        y_normalized = F.softmax(y)
-        y_log_softmax = F.log_softmax(y)
-        self.loss = - F.sum(y_normalized * y_log_softmax) / bs / s
+            y_normalized = F.softmax(y, use_cudnn=False)
+            y_log_softmax = F.log_softmax(y, use_cudnn=False)
+            self.loss = - F.sum(y_normalized * y_log_softmax) / bs / s
+        else:
+            y_normalized = F.softmax(y)
+            y_log_softmax = F.log_softmax(y)
+            self.loss = - F.sum(y_normalized * y_log_softmax) / bs / d
 
         return self.loss
     
