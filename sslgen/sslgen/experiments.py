@@ -351,8 +351,8 @@ class Experiment001(object):
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z, test=True)
         x_gen = self.generator1(h, y, test=True)
-        d_x_gen = self.patch_discriminator(x_gen, y, test=True)
-        d_x_real = self.patch_discriminator(x, y, test=True)
+        d_x_gen = self.patch_discriminator(x_gen, test=True)
+        d_x_real = self.patch_discriminator(x, test=True)
         loss = - self.recon_loss(d_x_gen, d_x_real)
 
         # Save generated images
