@@ -79,7 +79,7 @@ def main():
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                acc_mean)
+                "|".join(map(str, acc_mean)))
             print(msg)
             if acc_mean[-1] < acc_prev:
                 exp.optimizer.alpha = 0.1 * exp.optimizer.alpha
