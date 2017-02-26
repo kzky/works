@@ -1087,7 +1087,7 @@ class Experiment007(object):
         (loss_pdis + loss_dis).backward()
         self.optimizer_pdis.update()
 
-    def test(self, x, y, epoch):
+    def test(self, x, y, epoch, k):
         # Generate Images
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
@@ -1102,7 +1102,7 @@ class Experiment007(object):
 
         x_gen_data = cuda.to_cpu(x_gen.data)
         for i, img in enumerate(x_gen_data):
-            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(k+i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
         # D(x_gen) values
