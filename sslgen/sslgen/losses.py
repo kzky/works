@@ -108,3 +108,17 @@ class WGANLoss(Chain):
             loss = F.sum(d_x_gen) / bs_d_x_gen
             return - loss  # to minimize (reverse trick)
         
+
+class FeatureMatching(Chain):
+
+    def __init__(self, ):
+        super(FeatureMatching, self).__init__()
+
+    def __call__(self, h_real, h_gen):
+
+        bs = h_real.shape[0]
+        d = np.prod(h_real.shape[1:])
+        l = (F.sum(h_real) - F.sum(h_gen)) / bs / d
+
+        return l
+        
