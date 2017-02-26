@@ -1172,6 +1172,7 @@ class Experiment008(object):
         # Losses
         self.recon_loss = ReconstructionLoss()
         self.gan_loss = GANLoss()
+        self.fm_loss = FeatureMatching()
         
     def train(self, x_l, y_l, x_u):
         # Train for labeled sampels
