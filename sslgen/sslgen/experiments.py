@@ -1125,6 +1125,8 @@ class Experiment007(object):
         return r
 
 class Experiment008(object):
+    """Feature Matching
+    """
 
     def __init__(self, device=None, 
                  n_cls=10, dim=100, 
