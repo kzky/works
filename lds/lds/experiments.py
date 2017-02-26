@@ -694,7 +694,7 @@ class Experiment014(Experiment000):
             learning_rate=learning_rate,
             act=act, 
         )
-        self.neg_ent_loss = EntropyLossForAll()
+        self.ne_loss = EntropyLossForAll()
         
 class Experiment015(Experiment000):
     """Regularize hiddnes of decoders with LDS.
@@ -707,5 +707,5 @@ class Experiment015(Experiment000):
             learning_rate=learning_rate,
             act=act, 
         )
-        self.neg_ent_loss = EntropyLossForEachMap()
+        self.ne_loss = EntropyLossForEachMap()
         
