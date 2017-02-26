@@ -17,7 +17,7 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss
+from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
 from sklearn.metrics import confusion_matrix
 from lds.cnn_model import AutoEncoder
 
@@ -681,3 +681,31 @@ class Experiment013(Experiment008):
         self.ae.cleargrads()
         loss.backward()
         self.optimizer.update()
+
+
+class Experiment014(Experiment000):
+    """Regularize hiddnes of decoders with LDS.
+
+    LDS for all values of the output of Convolution
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment014, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        self.neg_ent_loss = EntropyLossForAll()
+        
+class Experiment015(Experiment000):
+    """Regularize hiddnes of decoders with LDS.
+
+    LDS for each map
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment014, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        self.neg_ent_loss = EntropyLossForEachMap()
+        

@@ -57,6 +57,44 @@ class NegativeEntropyLoss(Chain):
 
         return self.loss
 
+class EntropyLossForAll(Chain):
+
+    def __init__(self, test=False):
+        super(EntropyLossForAll, self).__init__()
+        self.loss = None
+        
+    def __call__(self, y, ):
+        bs = y.data.shape[0]
+        d = np.prod(y.data.shape[1:])
+
+        y = F.reshape(y, (bs, d))
+
+        y_normalized = F.softmax(y)
+        y_log_softmax = F.log_softmax(y)
+        self.loss = - F.sum(y_normalized * y_log_softmax) / bs / d
+
+        return self.loss
+
+class EntropyLossForEachMap(Chain):
+
+    def __init__(self, test=False):
+        super(EntropyLossForEachMap, self).__init__()
+        self.loss = None
+        
+    def __call__(self, y, ):
+        bs = y.data.shape[0]
+        d = np.prod(y.data.shape[1])
+        s = np.prod(y.shape[2:])
+
+        y = F.reshape(y, (bs, d, s))
+        y = F.transpose(y, (0, 2, 1))
+
+        y_normalized = F.softmax(y)
+        y_log_softmax = F.log_softmax(y)
+        self.loss = - F.sum(y_normalized * y_log_softmax) / bs / s
+
+        return self.loss
+    
 class NegativeEntropyHingeLoss(Chain):
 
     def __init__(self, test=False):
