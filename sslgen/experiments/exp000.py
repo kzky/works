@@ -20,7 +20,7 @@ def main():
     dims = 100
 
     learning_rate = 1. * 1e-3
-    learning_rate_gan = 1. * 1e-3
+    learning_rate_gan = 1. * 1e-5
     n_epoch = 100
     act = F.relu
     iter_epoch = n_train_data / batch_size
@@ -74,7 +74,7 @@ def main():
             x_l = Variable(to_device(x_l, device))
 
             d_x_gen = exp.test(x_l, y_l, epoch)
-            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
+            msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
                 d_x_gen)
