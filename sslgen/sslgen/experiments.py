@@ -996,7 +996,7 @@ class Experiment007(object):
         self.learning_rate_gan = learning_rate_gan
 
         from sslgen.cnn_model_000 \
-            import Encoder, Decoder, Generator0, Generator1, PatchDiscriminator
+            import Encoder, Decoder, Generator0, Generator1, PatchDiscriminator, ImageDiscriminator
 
         # Model
         self.encoder = Encoder(device=device, act=act, n_cls=n_cls)
