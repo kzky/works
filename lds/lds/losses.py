@@ -84,7 +84,7 @@ class EntropyLossForEachMap(Chain):
     def __call__(self, y, ):
         bs = y.data.shape[0]
         d = np.prod(y.data.shape[1])
-        s = np.prod(y.shape[2:])
+        s = np.prod(y.data.shape[2:])
 
         y = F.reshape(y, (bs, d, s))
         y = F.transpose(y, (0, 2, 1))
