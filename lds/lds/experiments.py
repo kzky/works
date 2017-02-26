@@ -702,7 +702,7 @@ class Experiment015(Experiment000):
     LDS for each map
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
-        super(Experiment014, self).__init__(
+        super(Experiment015, self).__init__(
             device=device,
             learning_rate=learning_rate,
             act=act, 
