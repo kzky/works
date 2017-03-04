@@ -716,12 +716,13 @@ class Experiment016(Experiment000):
     Regularize with maxpooling.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
-        super(Experiment000, self).__init__(
+        super(Experiment016, self).__init__(
             device=device,
             learning_rate=learning_rate,
             act=act, 
             
         )
+        self.f_pool = F.max_pooling_2d
         
     def train(self, x_l, y_l, x_u):
         # Labeled samples
@@ -759,7 +760,7 @@ class Experiment016(Experiment000):
         l_ne_u = 0
         l_ne_u += self._ne_loss(y) \
                   + reduce(lambda x, y: x + y, 
-                           [self._ne_loss(h) for h in self.ae.encoder.hiddens]) \
+                           [self._ne_loss(h, ) for h in self.ae.encoder.hiddens]) \
                            + reduce(lambda x, y: x + y, 
                                     [self._ne_loss(h) for h in self.ae.decoder.hiddens])
         
@@ -781,7 +782,7 @@ class Experiment016(Experiment000):
         loss.backward()
         self.optimizer.update()
 
-    def _ne_loss(self, h, f_pool=F.max_pooling_2d):
+    def _ne_loss(self, h, ):
         """Entropy regularization depending on the output dimension
         """
 
@@ -794,11 +795,8 @@ class Experiment016(Experiment000):
             
         # Convolution2D
         if len(shape) == 4:
-            h = f_pool(h, (2, 2))
+            h = self.f_pool(h, (2, 2))
             h = self.ne_loss(h)
             return h
             
 
-
-            
-        
