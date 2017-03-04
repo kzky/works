@@ -960,7 +960,7 @@ class Experiment021(Experiment020):
 class Experiment022(Experiment000):
     """Regularize hiddnes of decoders with LDS.
 
-    Stochastic LDS for each dimension of the output of Convolution
+    Entropy Regularization for a certain receptive field not for 1x1 receptive field.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment022, self).__init__(
