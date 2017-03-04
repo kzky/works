@@ -794,7 +794,7 @@ class Experiment016(Experiment000):
             
         # Convolution2D
         if len(shape) == 4:
-            h = f_pool(h)
+            h = f_pool(h, (2, 2))
             h = self.ne_loss(h)
             return h
             
