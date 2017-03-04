@@ -940,3 +940,19 @@ class Experiment020(Experiment014):
         else:
             return self.ne_loss(h)
     
+class Experiment021(Experiment020):
+    """Regularize hiddnes of decoders with LDS.
+
+    Stochastic LDS for all values of the output of Convolution
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment021, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+
+    def _ne_loss(self, h, ):
+        h = F.dropout(h)
+        h = self.ne_loss(h)
+        return h
