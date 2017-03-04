@@ -864,10 +864,10 @@ class Experiment019(Experiment018):
         )
         self.f_pool = F.average_pooling_2d
 
-class Experiment020(Experiment014):
+class Experiment020(Experiment00):
     """Regularize hiddnes of decoders with LDS.
 
-    Stochastic LDS for all values of the output of Convolution
+    Stochastic LDS for each dimension of the output of Convolution
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment020, self).__init__(
