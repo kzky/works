@@ -1060,8 +1060,8 @@ class Experiment023(Experiment022):
             act=act, 
         )
         
-        self.ne_loss = EntropyLossForAll()
-        self.ne_loss_all = NegativeEntropyLoss()
+        self.ne_loss_all = EntropyLossForAll()
+        self.ne_loss = NegativeEntropyLoss()
 
     def _ne_loss(self, h, ):
         shape = h.shape
