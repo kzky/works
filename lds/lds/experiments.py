@@ -863,3 +863,80 @@ class Experiment019(Experiment018):
             
         )
         self.f_pool = F.average_pooling_2d
+
+class Experiment020(Experiment014):
+    """Regularize hiddnes of decoders with LDS.
+
+    Stochastic LDS for all values of the output of Convolution
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment020, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+    def train(self, x_l, y_l, x_u):
+        # Labeled samples
+        y = self.ae.encoder(x_l)
+        x_rec = self.ae.decoder(y)
+
+        # cronss entropy loss
+        l_ce_l = 0
+        l_ce_l += F.softmax_cross_entropy(y, y_l)
+
+        # negative entropy loss
+        l_ne_l = 0
+        l_ne_l += self._ne_loss(y) \
+                  + reduce(lambda x, y: x + y, 
+                           [self._ne_loss(h) for h in self.ae.encoder.hiddens]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self._ne_loss(h) for h in self.ae.decoder.hiddens])
+        
+        # reconstruction loss
+        l_rec_l = 0
+        l_rec_l += self.recon_loss(x_l, x_rec) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                self.ae.encoder.hiddens,
+                                self.ae.decoder.hiddens[::-1])])
+
+        # loss for labeled samples
+        loss_l = l_ce_l + l_ne_l + l_rec_l
+
+        # Unlabeled samples
+        y = self.ae.encoder(x_u)
+        x_rec = self.ae.decoder(y)
+
+        # negative entropy loss
+        l_ne_u = 0
+        l_ne_u += self._ne_loss(y) \
+                  + reduce(lambda x, y: x + y, 
+                           [self._ne_loss(h, ) for h in self.ae.encoder.hiddens]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self._ne_loss(h) for h in self.ae.decoder.hiddens])
+        
+        # reconstruction loss
+        l_rec_u = 0
+        l_rec_u += self.recon_loss(x_u, x_rec) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                self.ae.encoder.hiddens,
+                                self.ae.decoder.hiddens[::-1])])
+
+        # loss for unlabeled samples
+        loss_u = l_ne_u + l_rec_u
+
+        loss = loss_l + loss_u
+
+        # Backward and Update
+        self.ae.cleargrads()
+        loss.backward()
+        self.optimizer.update()
+
+    def _ne_loss(self, h, ):
+        if np.random.randint(2) == 0:
+            return h
+        else:
+            return self.ne_loss(h)
+    
