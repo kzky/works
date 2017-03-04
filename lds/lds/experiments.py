@@ -785,7 +785,7 @@ class Experiment016(Experiment000):
         """Entropy regularization depending on the output dimension
         """
 
-        shape = hidden.shape
+        shape = h.shape
 
         # Linear
         if len(shape) == 2:
