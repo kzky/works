@@ -936,7 +936,7 @@ class Experiment020(Experiment014):
 
     def _ne_loss(self, h, ):
         if np.random.randint(2) == 0:
-            return h
+            return 0
         else:
             return self.ne_loss(h)
     
