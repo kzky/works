@@ -1073,7 +1073,7 @@ class Experiment023(Experiment022):
 
         b, d, w, w = shape
         v_list = []
-        sizes = [2, 3, 4]
+        sizes = [2, 3, ]
 
         # Multi scale
         for s in sizes:
