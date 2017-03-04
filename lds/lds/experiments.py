@@ -1082,7 +1082,7 @@ class Experiment023(Experiment022):
                 h_ = self.ne_loss_all(h_)
                 v_list.append(h_)
         h_ = self.ne_loss(h)
-        v_list.append()
+        v_list.append(h_)
 
         return reduce(lambda x, y: x + y, v_list)
         
