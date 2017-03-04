@@ -795,7 +795,7 @@ class Experiment016(Experiment000):
             
         # Convolution2D
         if len(shape) == 4:
-            h = self.f_pool(h, (2, 2))
+            h = self.f_pool(h, (2, 2), )
             h = self.ne_loss(h)
             return h
             
@@ -813,3 +813,39 @@ class Experiment017(Experiment016):
         )
         self.f_pool = F.average_pooling_2d
 
+class Experiment018(Experiment016):
+    """Regularize hiddnes of decoders with LDS.
+
+    Regularize with maxpooling.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment018, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+            
+        )
+        self.f_pool = F.max_pooling_2d
+
+    def _ne_loss(self, h, ):
+        """Entropy regularization depending on the output dimension 
+        using various deterministic receptive fields.
+        """
+        shape = h.shape
+
+        # Linear
+        if len(shape) == 2:
+            h = self.ne_loss(h)
+            return h
+
+        if len(shape) == 4:
+            v_list = []
+            sizes = [(2, 2), (3, 3), (4, 4), (5, 5)]
+            for size in sizes:
+                h_ = self.f_pool(h_, size, )
+                h_ = self.ne_loss(h_)
+                v_list.append(h)
+            h = self.ne_loss(h)
+            v_list.append(h)
+            
+            return reduce(lambda x, y: x+y, v_list)
