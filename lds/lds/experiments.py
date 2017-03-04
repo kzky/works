@@ -1048,3 +1048,41 @@ class Experiment022(Experiment000):
 
         return reduce(lambda x, y: x + y, v_list)
     
+class Experiment023(Experiment022):
+    """Regularize hiddnes of decoders with LDS.
+
+    Entropy Regularization for multi-scale receptive field.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment023, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        self.ne_loss = EntropyLossForAll()
+        self.ne_loss_all = EntropyLoss()
+
+    def _ne_loss(self, h, ):
+        shape = h.shape
+
+        # Linear
+        if len(shape) == 2:
+            h = self.ne_loss(h)
+            return h
+
+        b, d, w, w = shape
+        v_list = []
+        sizes = [2, 3, 4]
+
+        # Multi scale
+        for s in sizes:
+            for i in range(0, w - s):
+                h_ = h[:, :, i:i+s, i:i+s]
+                h_ = self.ne_loss_all(h_)
+                v_list.append(h_)
+        h_ = self.ne_loss(h)
+        v_list.append()
+
+        return reduce(lambda x, y: x + y, v_list)
+        
