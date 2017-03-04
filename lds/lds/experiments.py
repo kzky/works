@@ -849,3 +849,17 @@ class Experiment018(Experiment016):
             v_list.append(h)
             
             return reduce(lambda x, y: x+y, v_list)
+
+class Experiment019(Experiment018):
+    """Regularize hiddnes of decoders with LDS.
+
+    Regularize with maxpooling.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment019, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+            
+        )
+        self.f_pool = F.average_pooling_2d
