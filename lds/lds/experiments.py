@@ -1037,13 +1037,13 @@ class Experiment022(Experiment000):
             h = self.ne_loss(h)
             return h
 
-        b, d, h, w = shape
+        b, d, w, w = shape
         v_list = []
         s = 2
 
-        for i in range(0, h - s):
+        for i in range(0, w - s):
             h_ = h[:, :, i:i+s, i:i+s]
-            h_ = self.ne_loss(h)
+            h_ = self.ne_loss(h_)
             v_list.append(h_)
 
         return reduce(lambda x, y: x + y, v_list)
