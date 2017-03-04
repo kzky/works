@@ -969,7 +969,8 @@ class Experiment022(Experiment000):
             act=act, 
         )
         
-        self.ne_loss = EntropyLossForAll()        
+        self.ne_loss = EntropyLossForAll()
+        self.size = 2
         
     def train(self, x_l, y_l, x_u):
         # Labeled samples
@@ -1039,7 +1040,7 @@ class Experiment022(Experiment000):
 
         b, d, w, w = shape
         v_list = []
-        s = 2
+        s = self.size
 
         for i in range(0, w - s):
             h_ = h[:, :, i:i+s, i:i+s]
@@ -1086,3 +1087,17 @@ class Experiment023(Experiment022):
 
         return reduce(lambda x, y: x + y, v_list)
         
+class Experiment024(Experiment022):
+    """Regularize hiddnes of decoders with LDS.
+
+    Entropy Regularization for a certain size of receptive field.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment024, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        self.ne_loss = EntropyLossForAll()
+        self.size = 3
