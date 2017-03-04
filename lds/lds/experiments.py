@@ -844,7 +844,7 @@ class Experiment018(Experiment016):
             for size in sizes:
                 h_ = self.f_pool(h, size, )
                 h_ = self.ne_loss(h_)
-                v_list.append(h)
+                v_list.append(h_)
             h = self.ne_loss(h)
             v_list.append(h)
             
