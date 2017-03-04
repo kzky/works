@@ -1030,7 +1030,14 @@ class Experiment022(Experiment000):
         self.optimizer.update()
 
     def _ne_loss(self, h, ):
-        b, d, h, w = h.shape
+        shape = h.shape
+
+        # Linear
+        if len(shape) == 2:
+            h = self.ne_loss(h)
+            return h
+
+        b, d, h, w = shape
         v_list = []
         s = 2
 
