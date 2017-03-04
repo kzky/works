@@ -15,8 +15,6 @@ import time
 from utils import to_device
 from chainer_fix import BatchNormalization
 
-f = 1
-        
 class Encoder(Chain):
 
     def __init__(self, act=F.relu):
