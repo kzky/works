@@ -49,7 +49,7 @@ class NegativeEntropyLoss(Chain):
         
     def __call__(self, y, ):
         bs = y.data.shape[0]
-        d = np.prod(y.data.shape[1])
+        d = np.prod(y.data.shape[1:])
 
         y_normalized = F.softmax(y)
         y_log_softmax = F.log_softmax(y)
