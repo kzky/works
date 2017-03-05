@@ -1104,6 +1104,8 @@ class Experiment024(Experiment022):
 
 class Experiment025(Experiment):
     """Regularize hiddnes of decoders with LDS.
+
+    Using the lambda decay for entropy regularizatoin
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment025, self).__init__(
