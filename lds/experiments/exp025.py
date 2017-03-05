@@ -74,6 +74,7 @@ def main():
             print(msg)
             if acc_prev > accs[-1]:
                 exp.lambda_ne *= 0.5
+                print("lambda decay")
             acc_prev = accs[-1]
 
             st = time.time()
