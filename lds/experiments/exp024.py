@@ -65,12 +65,15 @@ def main():
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                             for x in data_reader.get_test_batch()]
-
-            accs = [float(acc.data) for acc in exp.test(x_l, y_l)]
+            bs = 100
+            accs = []
+            for i in range(0, x_l.shape[0], bs):
+                accs.append(
+                    [float(acc.data) for acc in exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ])][-1])
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                "|".join(map(str, accs)))
+                np.mean(accs))
             print(msg)
             if acc_prev > accs[-1]:
                 exp.lambda_ *= 0.5
