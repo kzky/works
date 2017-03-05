@@ -1329,7 +1329,8 @@ class Experiment009(object):
         h = self.encoder(x_real)
         x_rec = self.decoder(h, y)
         loss_rec = self.recon_loss(x_rec, x_real)
-        loss_mlp = F.softmax_cross_entropy(self.mlp(h), y)
+        loss_mlp = F.softmax_cross_entropy(self.mlp(h), 
+                                           Variable(to_device(y, self.device)))
         self.encoder.cleargrads()
         self.decoder.cleargrads()
         self.mlp.cleargrads()
