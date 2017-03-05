@@ -49,6 +49,7 @@ def main():
     print("# Training loop")
     epoch = 1
     st = time.time()
+    acc_prev = 0.
     for i in range(n_iter):
         # Get data
         x_l, y_l = [Variable(to_device(x, device)) \
@@ -60,7 +61,6 @@ def main():
         exp.train(x_l, y_l, x_u)
         
         # Eval
-        acc_prev = 0.
         if (i+1) % iter_epoch == 0:
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
