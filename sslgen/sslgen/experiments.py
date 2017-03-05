@@ -1288,6 +1288,7 @@ class Experiment009(object):
         self.image_discriminator = ImageDiscriminator(device=device, act=act)
         self.encoder.to_gpu(device) if self.device else None
         self.decoder.to_gpu(device) if self.device else None
+        self.mlp.to_gpu(device) if self.device else None
         self.generator0.to_gpu(device) if self.device else None
         self.image_discriminator.to_gpu(device) if self.device else None
 
