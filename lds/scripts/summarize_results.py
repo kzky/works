@@ -19,11 +19,9 @@ def compute_acc_std(filepath,  epochs = 50):
                 acc = l[-1].split(":")[-1].split("|")[-1]  # Use the last layers accuracy
                 accs_over_epoch[j, i] = float(acc)
                 j += 1
-
-    max_idx = np.argmax(accs_over_epoch, axis=0)
-    mean = np.mean(accs_over_epoch[max_idx, :])
-    std = np.std(accs_over_epoch[max_idx, :])
-
+    max_values = np.max(accs_over_epoch, axis=0)
+    mean = np.mean(max_values)
+    std = np.std(max_values)
     return mean, std
 
 def summarize_acc_std(filepaths, epochs = 50):
@@ -44,6 +42,10 @@ def main():
         "/home/kzk/documents/fy16/20160221/exp002",
         "/home/kzk/documents/fy16/20160221/exp008",
         "/home/kzk/documents/fy16/20160221/exp012",
+        "/home/kzk/documents/fy16/20160221/exp014",
+        "/home/kzk/documents/fy16/20160221/exp015",
+        "/home/kzk/documents/fy16/20160221/exp022",
+        "/home/kzk/documents/fy16/20160221/exp023",
     ]
     summarize_acc_std(filepaths)
 
