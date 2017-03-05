@@ -73,7 +73,7 @@ def main():
                 "|".join(map(str, accs)))
             print(msg)
             if acc_prev > accs[-1]:
-                exp.lambda_ne *= 0.5
+                exp.lambda_ *= 0.5
                 print("lambda decay")
             acc_prev = accs[-1]
 
