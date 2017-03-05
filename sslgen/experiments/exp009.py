@@ -83,6 +83,7 @@ def main():
                 epoch, 
                 time.time() - st, 
                 np.mean(loss))
+            print(msg)
             np.save("./pred_{:05d}".format(epoch), np.concatenate(pred))
             exp.save_model(epoch)
             
