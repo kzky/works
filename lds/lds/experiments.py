@@ -1114,7 +1114,7 @@ class Experiment025(Experiment):
             act=act, 
             
         )
-        self.labmda_ = 1.0
+        self.lambda_ = 1.0
         
     def train(self, x_l, y_l, x_u):
         # Labeled samples
