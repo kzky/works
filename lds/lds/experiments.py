@@ -971,6 +971,7 @@ class Experiment022(Experiment000):
         
         self.ne_loss = EntropyLossForAll()
         self.size = 2
+        self.lambda_ = 1.0
         
     def train(self, x_l, y_l, x_u):
         # Labeled samples
@@ -988,6 +989,7 @@ class Experiment022(Experiment000):
                            [self._ne_loss(h) for h in self.ae.encoder.hiddens]) \
                            + reduce(lambda x, y: x + y, 
                                     [self._ne_loss(h) for h in self.ae.decoder.hiddens])
+        l_ne_l = self.lambda_ * l_ne_l
         
         # reconstruction loss
         l_rec_l = 0
@@ -996,6 +998,7 @@ class Experiment022(Experiment000):
                             [self.recon_loss(x, y) for x, y in zip(
                                 self.ae.encoder.hiddens,
                                 self.ae.decoder.hiddens[::-1])])
+        l_rec_l = self.lambda_ * l_rec_l
 
         # loss for labeled samples
         loss_l = l_ce_l + l_ne_l + l_rec_l
@@ -1011,7 +1014,8 @@ class Experiment022(Experiment000):
                            [self._ne_loss(h, ) for h in self.ae.encoder.hiddens]) \
                            + reduce(lambda x, y: x + y, 
                                     [self._ne_loss(h) for h in self.ae.decoder.hiddens])
-        
+        l_ne_u = self.lambda_ * l_ne_u
+
         # reconstruction loss
         l_rec_u = 0
         l_rec_u += self.recon_loss(x_u, x_rec) \
@@ -1019,6 +1023,7 @@ class Experiment022(Experiment000):
                             [self.recon_loss(x, y) for x, y in zip(
                                 self.ae.encoder.hiddens,
                                 self.ae.decoder.hiddens[::-1])])
+        l_rec_u = self.lambda_ * l_rec_u
 
         # loss for unlabeled samples
         loss_u = l_ne_u + l_rec_u
@@ -1063,7 +1068,8 @@ class Experiment023(Experiment022):
         
         self.ne_loss_all = EntropyLossForAll()
         self.ne_loss = NegativeEntropyLoss()
-
+        self.lambda_ = 1.0
+        
     def _ne_loss(self, h, ):
         shape = h.shape
 
@@ -1098,9 +1104,10 @@ class Experiment024(Experiment022):
             learning_rate=learning_rate,
             act=act, 
         )
-        
+
         self.ne_loss = EntropyLossForAll()
         self.size = 3
+        self.lambda_ = 1.0
 
 class Experiment025(Experiment000):
     """Regularize hiddnes of decoders with LDS.

@@ -49,6 +49,7 @@ def main():
     print("# Training loop")
     epoch = 1
     st = time.time()
+    acc_prev = 0.
     for i in range(n_iter):
         # Get data
         x_l, y_l = [Variable(to_device(x, device)) \
@@ -71,6 +72,10 @@ def main():
                 time.time() - st, 
                 "|".join(map(str, accs)))
             print(msg)
+            if acc_prev > accs[-1]:
+                exp.lambda_ *= 0.5
+                print("lambda decay")
+            acc_prev = accs[-1]
             
             st = time.time()
             epoch +=1
