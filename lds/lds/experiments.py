@@ -1102,7 +1102,7 @@ class Experiment024(Experiment022):
         self.ne_loss = EntropyLossForAll()
         self.size = 3
 
-class Experiment025(Experiment):
+class Experiment025(Experiment000):
     """Regularize hiddnes of decoders with LDS.
 
     Using the lambda decay for entropy regularizatoin
