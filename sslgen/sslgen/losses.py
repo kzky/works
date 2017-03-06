@@ -113,7 +113,7 @@ class LSGANLoss(Chain):
     """Least Square GAN Loss
     """
     def __init__(self, ):
-        super(GANLoss, self).__init__(
+        super(LSGANLoss, self).__init__(
         )
         
     def __call__(self, d_x_gen, d_x_real=None):
