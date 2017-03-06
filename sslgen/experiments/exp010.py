@@ -73,18 +73,15 @@ def main():
             x_l, y_l = [x for x in data_reader.get_test_batch()]
             x_l = Variable(to_device(x_l, device))
             loss = []
-            pred = []
             bs = 100
             for i in range(0, x_l.shape[0], bs):
-                l, y = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ], epoch, i)
+                l = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ], epoch, i)
                 loss.append(l)
-                pred.append(y)
             msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
                 np.mean(loss))
             print(msg)
-            np.save("./pred_{:05d}".format(epoch), np.concatenate(pred))
             exp.save_model(epoch)
             
             st = time.time()
