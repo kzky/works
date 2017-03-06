@@ -17,7 +17,7 @@ import shutil
 import csv
 from utils import to_device
 from chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss, WGANLoss, FeatureMatching
+from losses import ReconstructionLoss, NegativeEntropyLoss, GANLoss, WGANLoss, LSGANLoss, FeatureMatching
 from sklearn.metrics import confusion_matrix
 from sslgen.cnn_model import Generator, Discriminator
         
