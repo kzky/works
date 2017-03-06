@@ -92,7 +92,8 @@ class GANLoss(Chain):
             return - loss  # to minimize (reverse trick)
 
 class WGANLoss(Chain):
-
+    """Wasserstein GAN loss
+    """
     def __init__(self, ):
         super(WGANLoss, self).__init__(
         )
@@ -108,6 +109,25 @@ class WGANLoss(Chain):
             loss = F.sum(d_x_gen) / bs_d_x_gen
             return - loss  # to minimize (reverse trick)
         
+class LSGANLoss(Chain):
+    """Least Square GAN Loss
+    """
+    def __init__(self, ):
+        super(GANLoss, self).__init__(
+        )
+        
+    def __call__(self, d_x_gen, d_x_real=None):
+        bs_d_x_gen = d_x_gen.shape[0]
+        if d_x_real is not None:
+            bs_d_x_real = d_x_real.shape[0]
+            loss = F.sum(F.square(d_x_real - 1)) / bs_d_x_real /2 \
+                   + F.sum(F.square(d_x_gen)) / bs_d_x_gen / 2
+            return loss
+            
+        else:
+            loss = F.sum(F.square(d_x_gen - 1)) / bs_d_x_gen / 2
+            return loss
+
 
 class FeatureMatching(Chain):
 
