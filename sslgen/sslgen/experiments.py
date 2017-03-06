@@ -1504,14 +1504,16 @@ class Experiment010(object):
         loss_dis.backward()
         self.optimizer_dis.update()
 
-    def test(self, x, y, epoch):
+    def test(self, x, y, epoch, k):
         # Generate Images
+        self.encoder(x)
         bs = x.shape[0]
         z = self.generate_random(bs, self.dim)
         h = self.generator0(z, test=True)
+        pred = F.softmax(self.mlp(h, test=True))
         x_gen = self.generator1(h, y, test=True)
-        d_x_gen = self.image_discriminator(x_gen, y, test=True)
-        d_x_real = self.image_discriminator(x, y, test=True)
+        d_x_gen = self.image_discriminator(x_gen, test=True)
+        d_x_real = self.image_discriminator(x, test=True)
         loss = - self.gan_loss(d_x_gen, d_x_real)
 
         # Save generated images
@@ -1521,11 +1523,11 @@ class Experiment010(object):
 
         x_gen_data = cuda.to_cpu(x_gen.data)
         for i, img in enumerate(x_gen_data):
-            fpath = os.path.join(dirpath_out, "{:05d}.png".format(i))
+            fpath = os.path.join(dirpath_out, "{:05d}.png".format(k+i))
             cv2.imwrite(fpath, img.reshape(28, 28) * 127.5 + 127.5)
 
-        return cuda.to_cpu(loss.data)
-        
+        return cuda.to_cpu(loss.data), cuda.to_cpu(pred.data)
+
     def save_model(self, epoch):
         dpath  = "./model"
         if not os.path.exists(dpath):
