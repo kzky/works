@@ -100,7 +100,7 @@ class Decoder(Chain):
             bn_linear1=L.BatchNormalization(64 * 7 * 7, decay=0.9, use_cudnn=True),
             bn_deconv0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_deconv1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_deconv2=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
+            bn_deconv2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_deconv3=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
             bn_deconv4=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
         )
