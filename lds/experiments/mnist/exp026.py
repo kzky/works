@@ -8,6 +8,7 @@ import sys
 import time
 import chainer.functions as F
 from chainer import Variable
+from chainer import cuda
 
 def main():
     # Settings
@@ -68,8 +69,8 @@ def main():
             bs = 100
             accs = []
             for i in range(0, x_l.shape[0], bs):
-                accs.append(
-                    [float(acc.data) for acc in exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ])][-1])
+                acc = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ])
+                accs.append(cuda.to_cpu(acc.data))
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
