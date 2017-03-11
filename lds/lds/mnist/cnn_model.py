@@ -12,7 +12,7 @@ import chainer.links as L
 from collections import OrderedDict
 import logging
 import time
-from lds.utils import to_devicea
+from lds.utils import to_device
 from lds.chainer_fix import BatchNormalization
 
 class Encoder(Chain):
