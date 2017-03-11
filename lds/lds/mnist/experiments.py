@@ -1378,3 +1378,8 @@ class Experiment029(Experiment025):
         v_list.append(h_)
 
         return reduce(lambda x, y: x + y, v_list)
+
+    def test(self, x_l, y_l):
+        y = self.ae.encoder(x_l, test=True)
+        acc = F.accuracy(y, y_l)
+        return acc
