@@ -1191,7 +1191,7 @@ class Experiment026(Experiment025):
     """Regularize hiddnes of decoders with LDS.
 
     Using max pooling in Encoder and deconvolution instead of unpooling in 
-    Decoder
+    Decoder, and regularize not between maxpooing and upsample deconvolution.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment026, self).__init__(
@@ -1218,8 +1218,9 @@ class Experiment026(Experiment025):
 class Experiment027(Experiment026):
     """Regularize hiddnes of decoders with LDS.
 
-    Using max pooling in Encoder and deconvolution instead of unpooling in 
-    Decoder
+    Using strided convolution in Encoder and deconvolution instead of unpooling 
+    in Decoder, and regularize not between maxpooing and upsample 
+    deconvolution.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment027, self).__init__(
