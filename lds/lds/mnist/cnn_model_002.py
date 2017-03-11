@@ -12,8 +12,8 @@ import chainer.links as L
 from collections import OrderedDict
 import logging
 import time
-from utils import to_device
-from chainer_fix import BatchNormalization
+from lds.utils import to_device
+from lds.chainer_fix import BatchNormalization
 
 class ResEnc(Chain):
 

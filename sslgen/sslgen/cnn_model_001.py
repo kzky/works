@@ -64,7 +64,7 @@ class Decoder(Chain, Mixin):
             bn0=L.BatchNormalization(64, decay=0.9, use_cudnn=False),
             bn1=L.BatchNormalization(32, decay=0.9, use_cudnn=False),
         )
-        self.device = device        
+        self.device = device
         self.act = act
 
     def __call__(self, h, h_gen=None, test=False):
