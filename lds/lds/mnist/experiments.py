@@ -1508,7 +1508,7 @@ class Experiment031(Experiment025):
         x_rec = self.ae.decoder(y)
 
         # negative entropy loss
-        l_ne_ = 0
+        l_ne_u = 0
         l_ne_u += self.ne_loss(y)
 
         # reconstruction loss
