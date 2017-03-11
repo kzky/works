@@ -1,6 +1,6 @@
-from lds.experiments import Experiment005
+from lds.mnist.experiments import Experiment005
 from lds.utils import to_device
-from lds.datasets import MNISTDataReader, Separator
+from lds.mnist.datasets import MNISTDataReader, Separator
 import numpy as np
 import os
 import numpy as np

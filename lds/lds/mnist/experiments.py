@@ -19,7 +19,7 @@ from utils import to_device
 from chainer_fix import BatchNormalization
 from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
 from sklearn.metrics import confusion_matrix
-from lds.cnn_model import AutoEncoder
+from lds.mnist.cnn_model import AutoEncoder
 
 class Experiment(object):
 
@@ -185,7 +185,7 @@ class Experiment001(Experiment):
         )
         
         # Model
-        from lds.cnn_model_001 import AutoEncoder
+        from lds.mnist.cnn_model_001 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -450,7 +450,7 @@ class Experiment004(Experiment000):
         )
         
         # Model
-        from lds.cnn_model_002 import AutoEncoder
+        from lds.mnist.cnn_model_002 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -465,7 +465,7 @@ class Experiment005(Experiment):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_003 import AutoEncoder
+        from lds.mnist.cnn_model_003 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -480,7 +480,7 @@ class Experiment006(Experiment000):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_003 import AutoEncoder
+        from lds.mnist.cnn_model_003 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -495,7 +495,7 @@ class Experiment007(Experiment001):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_003 import AutoEncoder
+        from lds.mnist.cnn_model_003 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -510,7 +510,7 @@ class Experiment008(Experiment002):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_003 import AutoEncoder
+        from lds.mnist.cnn_model_003 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -525,7 +525,7 @@ class Experiment009(Experiment):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_004 import AutoEncoder
+        from lds.mnist.cnn_model_004 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -540,7 +540,7 @@ class Experiment010(Experiment000):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_004 import AutoEncoder
+        from lds.mnist.cnn_model_004 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -555,7 +555,7 @@ class Experiment011(Experiment001):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_004 import AutoEncoder
+        from lds.mnist.cnn_model_004 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
@@ -570,7 +570,7 @@ class Experiment012(Experiment002):
             device=device, learning_rate=learning_rate, act=act, 
         )        
         # Model
-        from lds.cnn_model_004 import AutoEncoder
+        from lds.mnist.cnn_model_004 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 

@@ -45,7 +45,11 @@ def main():
         "/home/kzk/documents/fy16/20160221/exp014",
         "/home/kzk/documents/fy16/20160221/exp015",
         "/home/kzk/documents/fy16/20160221/exp022",
+        "/home/kzk/documents/fy16/20160221/exp022_m128",
         "/home/kzk/documents/fy16/20160221/exp023",
+        "/home/kzk/documents/fy16/20160221/exp023_m128",
+        "/home/kzk/documents/fy16/20160221/exp024",
+        "/home/kzk/documents/fy16/20160221/exp025_m128",
     ]
     summarize_acc_std(filepaths)
 
