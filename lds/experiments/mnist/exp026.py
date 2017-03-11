@@ -71,12 +71,13 @@ def main():
             for i in range(0, x_l.shape[0], bs):
                 acc = exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ])
                 accs.append(cuda.to_cpu(acc.data))
+            acc_mean = np.mean(accs)
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                np.mean(accs))
+                )
             print(msg)
-            if acc_prev > accs[-1]:
+            if acc_prev > acc_mean:
                 exp.lambda_ *= 0.5
                 print("lambda decay")
             acc_prev = accs[-1]
