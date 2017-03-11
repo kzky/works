@@ -1210,3 +1210,7 @@ class Experiment026(Experiment025):
         self.optimizer.setup(self.ae)
         self.optimizer.use_cleargrads()
         
+    def test(self, x_l, y_l):
+        y = self.ae.encoder(x_l, test=True)
+        acc = F.accuracy(y, y_l)
+        return acc
