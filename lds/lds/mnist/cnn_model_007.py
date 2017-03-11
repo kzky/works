@@ -125,7 +125,7 @@ class Decoder(Chain):
         bs = h.shape[0]
         d = h.shape[1]
         h = F.reshape(h, (bs, 64, 7, 7))
-        
+        self.hiddens.append(h)
 
         # Deconvolution
         h = self.deconv0(h)
@@ -141,6 +141,7 @@ class Decoder(Chain):
         h = self.deconv2(h)
         h = self.bn_deconv2(h, test)
         h = self.act(h)
+        self.hiddens.append(h)
 
         h = self.deconv3(h)  # 14x14 -> 28x28
         h = self.bn_deconv3(h, test)
