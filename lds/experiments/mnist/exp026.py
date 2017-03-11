@@ -75,7 +75,7 @@ def main():
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                )
+                acc_mean)
             print(msg)
             if acc_prev > acc_mean:
                 exp.lambda_ *= 0.5
