@@ -1230,7 +1230,7 @@ class Experiment027(Experiment026):
         )
         
         # Model
-        from lds.mnist.cnn_model_005 import AutoEncoder
+        from lds.mnist.cnn_model_006 import AutoEncoder
         self.ae = AutoEncoder(act)
         self.ae.to_gpu(device) if self.device else None
 
