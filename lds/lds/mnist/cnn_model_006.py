@@ -49,11 +49,13 @@ class Encoder(Chain):
         h = self.bn_conv0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.conv1(h)
         h = self.bn_conv1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.conv2(h)  # 28x28 -> 14x14
         h = self.bn_conv2(h, test)
@@ -63,11 +65,13 @@ class Encoder(Chain):
         h = self.bn_conv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.conv4(h)
         h = self.bn_conv4(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
         
         h = self.conv5(h)  # 14x14 -> 7x7
         h = self.bn_conv5(h)
@@ -78,6 +82,7 @@ class Encoder(Chain):
         h = self.bn_linear0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.linear1(h)
         return h
@@ -116,6 +121,7 @@ class Decoder(Chain):
         h = self.bn_linear0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.linear1(h)
         h = self.bn_linear1(h, test)
@@ -123,17 +129,19 @@ class Decoder(Chain):
         bs = h.shape[0]
         d = h.shape[1]
         h = F.reshape(h, (bs, 64, 7, 7))
-        self.hiddens.append(h)
+        
 
         # Deconvolution
         h = self.deconv0(h)
         h = self.bn_deconv0(h, test)  # 7x7 -> 14x14
         h = self.act(h)
+        self.hiddens.append(h)
 
         h = self.deconv1(h)
         h = self.bn_deconv1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.deconv2(h)
         h = self.bn_deconv2(h, test)
@@ -143,11 +151,13 @@ class Decoder(Chain):
         h = self.bn_deconv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.deconv4(h)
         h = self.bn_deconv4(h, test)
         h = self.act(h)
         self.hiddens.append(h)
+        
 
         h = self.deconv5(h)
         return h
