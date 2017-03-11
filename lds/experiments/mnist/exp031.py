@@ -77,6 +77,10 @@ def main():
                 time.time() - st, 
                 acc_mean)
             print(msg)
+            if acc_prev > acc_mean:
+                exp.lambda_ *= 0.5
+                print("lambda decay")
+            acc_prev = acc_mean
 
             st = time.time()
             epoch +=1

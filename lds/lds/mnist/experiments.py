@@ -1473,6 +1473,8 @@ class Experiment031(Experiment025):
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.setup(self.ae)
         self.optimizer.use_cleargrads()
+
+        self.lambda_ = 1.0
         
     def test(self, x_l, y_l):
         y = self.ae.encoder(x_l, test=True)
@@ -1491,6 +1493,7 @@ class Experiment031(Experiment025):
         # negative entropy loss
         l_ne_l = 0
         l_ne_l += self.ne_loss(y)
+        l_ne_l = self.lambda_ * l_ne_l
 
         # reconstruction loss
         l_rec_l = 0
@@ -1499,6 +1502,7 @@ class Experiment031(Experiment025):
                             [self.recon_loss(x, y) for x, y in zip(
                                 self.ae.encoder.hiddens,
                                 self.ae.decoder.hiddens[::-1])])
+        l_rec_l = self.lambda_ * l_rec_l
 
         # loss for labeled samples
         loss_l = l_ce_l + l_ne_l + l_rec_l
@@ -1510,6 +1514,7 @@ class Experiment031(Experiment025):
         # negative entropy loss
         l_ne_u = 0
         l_ne_u += self.ne_loss(y)
+        l_ne_u = self.lambda_ * l_ne_u
 
         # reconstruction loss
         l_rec_u = 0
@@ -1518,6 +1523,7 @@ class Experiment031(Experiment025):
                             [self.recon_loss(x, y) for x, y in zip(
                                 self.ae.encoder.hiddens,
                                 self.ae.decoder.hiddens[::-1])])
+        l_rec_u = self.lambda_ * l_rec_u
 
         # loss for unlabeled samples
         loss_u = l_ne_u + l_rec_u
