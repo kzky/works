@@ -41,7 +41,7 @@ class Encoder(Chain):
         self.hiddens = []
         
         # Convolution
-        h = self.conv0(h)
+        h = self.conv0(x)
         h = self.bn_conv0(h, test)
         h = self.act(h)
         self.hidden.append(h)
