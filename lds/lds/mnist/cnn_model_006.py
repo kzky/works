@@ -91,8 +91,8 @@ class Decoder(Chain):
             linear1=L.Linear(32, 64 * 7 * 7),
             deconv0=L.Deconvolution2D(64, 64, 2, stride=2, pad=0),
             deconv1=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
-            deconv2=L.Deconvolution2D(64, 32, 3, stride=1, pad=1),
-            deconv3=L.Deconvolution2D(32, 32, 2, stride=2, pad=0),
+            deconv2=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
+            deconv3=L.Deconvolution2D(64, 32, 2, stride=2, pad=0),
             deconv4=L.Deconvolution2D(32, 32, 3, stride=1, pad=1),
             deconv5=L.Deconvolution2D(32, 1, 3, stride=1, pad=1),
             
