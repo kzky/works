@@ -1097,6 +1097,7 @@ class Experiment024(Experiment022):
     """Regularize hiddnes of decoders with LDS.
 
     Entropy Regularization for a certain size of receptive field.
+    Different size from Experiment022
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment024, self).__init__(
@@ -1139,7 +1140,7 @@ class Experiment025(Experiment000):
                            [self.ne_loss(h) for h in self.ae.encoder.hiddens]) \
                            + reduce(lambda x, y: x + y, 
                                     [self.ne_loss(h) for h in self.ae.decoder.hiddens])
-        l_ne_l = self.labmda_ * l_ne_l
+        l_ne_l = self.lambda_ * l_ne_l
 
         # reconstruction loss
         l_rec_l = 0
@@ -1164,7 +1165,7 @@ class Experiment025(Experiment000):
                            [self.ne_loss(h) for h in self.ae.encoder.hiddens]) \
                            + reduce(lambda x, y: x + y, 
                                     [self.ne_loss(h) for h in self.ae.decoder.hiddens])
-        l_ne_u = self.labmda_ * l_ne_u
+        l_ne_u = self.lambda_ * l_ne_u
 
         # reconstruction loss
         l_rec_u = 0
