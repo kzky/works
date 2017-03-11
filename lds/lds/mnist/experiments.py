@@ -1186,3 +1186,24 @@ class Experiment025(Experiment000):
         loss.backward()
         self.optimizer.update()
         
+
+class Experiment026(Experiment025):
+    """Regularize hiddnes of decoders with LDS.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment026, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        # Model
+        from lds.mnist.cnn_model_005 import AutoEncoder
+        self.ae = AutoEncoder(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+        
