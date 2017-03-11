@@ -17,7 +17,7 @@ import shutil
 import csv
 from lds.utils import to_device
 from lds.chainer_fix import BatchNormalization
-from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
+from lds.losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
 from sklearn.metrics import confusion_matrix
 from lds.mnist.cnn_model import AutoEncoder
 
