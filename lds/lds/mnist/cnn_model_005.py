@@ -50,7 +50,7 @@ class Encoder(Chain):
         h = self.bn_conv1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h)  # 28x28 -> 14x14
+        h = F.max_pooling_2d(h, (2, 2))  # 28x28 -> 14x14
 
         h = self.conv2(h)
         h = self.bn_conv2(h, test)
@@ -61,7 +61,7 @@ class Encoder(Chain):
         h = self.bn_conv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h)  # 14x14 -> 7x7
+        h = F.max_pooling_2d(h, (2, ))  # 14x14 -> 7x7
 
         # Linear
         h = self.linear1(h)   # 7x7 -> 32
