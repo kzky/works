@@ -24,8 +24,8 @@ class Encoder(Chain):
             conv1=L.Convolution2D(32, 32, 3, stride=1, pad=1),
             conv2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
             conv3=L.Convolution2D(64, 64, 3, stride=1, pad=1),
-            conv4=L.Convolution2D(64, 64, 3, stride=1, pad=1),
-            conv5=L.Convolution2D(64, 128, 4, stride=2, pad=1),
+            conv4=L.Convolution2D(64, 128, 3, stride=1, pad=1),
+            conv5=L.Convolution2D(128, 128, 4, stride=2, pad=1),
             linear0=L.Linear(128 * 7 * 7, 64),
             linear1=L.Linear(64, 10),
 
@@ -33,7 +33,7 @@ class Encoder(Chain):
             bn_conv1=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
             bn_conv2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_conv3=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_conv4=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_conv4=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             bn_conv5=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             bn_linear0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
         )
@@ -124,7 +124,7 @@ class Decoder(Chain):
         h = self.act(h)
         bs = h.shape[0]
         d = h.shape[1]
-        h = F.reshape(h, (bs, 64, 7, 7))
+        h = F.reshape(h, (bs, 128, 7, 7))
         self.hiddens.append(h)
 
         # Deconvolution
