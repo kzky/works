@@ -15,7 +15,7 @@ import os
 import cv2
 import shutil
 import csv
-from utils import to_device
+from lds.utils import to_device
 from chainer_fix import BatchNormalization
 from losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
 from sklearn.metrics import confusion_matrix
