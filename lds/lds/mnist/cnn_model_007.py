@@ -26,7 +26,7 @@ class Encoder(Chain):
             conv3=L.Convolution2D(32, 64, 3, stride=1, pad=1),
             conv4=L.Convolution2D(64, 64, 3, stride=1, pad=1),
             conv5=L.Convolution2D(64, 64, 4, stride=2, pad=1),
-            linear0=L.Linear(64 * 7 * 7, 64),
+            linear0=L.Linear(64 * 7 * 7, 32),
             linear1=L.Linear(32, 10),
 
             bn_conv0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
