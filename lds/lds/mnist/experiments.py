@@ -1454,7 +1454,7 @@ class Experiment030(Experiment025):
         self.optimizer.update()
 
 class Experiment031(Experiment025):
-    """Regularize with reconstruction
+    """Regularize with reconstruction and with Entropy Regularization on at the last.
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
