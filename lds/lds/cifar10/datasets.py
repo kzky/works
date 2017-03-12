@@ -11,7 +11,7 @@ class Cifar10DataReader(object):
             l_train_path=\
             "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/l_cifar-10.npz",
             u_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/u_cifar-10.npz", 
+            "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/cifar-10.npz", 
             test_path=\
             "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/cifar-10.npz",
             batch_size=64,
@@ -21,7 +21,8 @@ class Cifar10DataReader(object):
     ):
             
         self.l_train_data = dict(np.load(l_train_path))
-        self.u_train_data = dict(np.load(u_train_path))
+        _u_train_data = np.load(u_train_path)
+        self.u_train_data = {"x":_u_train_data["train_x"], "y":_u_train_data["train_y"]}
         _test_data = np.load(test_path)
         self.test_data = {"x": _test_data["test_x"], "y": _test_data["test_y"]}
 
