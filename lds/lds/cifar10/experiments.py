@@ -19,7 +19,7 @@ from lds.utils import to_device
 from lds.chainer_fix import BatchNormalization
 from lds.losses import ReconstructionLoss, NegativeEntropyLoss, JensenShannonDivergenceLoss, KLLoss, EntropyLossForAll, EntropyLossForEachMap
 from sklearn.metrics import confusion_matrix
-from lds.cifar10.cnn_model import AutoEncoder
+from lds.cifar10.cnn_model_000 import AutoEncoder
 
 class Experiment000(object):
     """Regularize hiddnes of decoders with LDS.
