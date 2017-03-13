@@ -1,4 +1,4 @@
-from lds.cifar10.experiments import Experiment026
+from lds.cifar10.experiments import Experiment000
 from lds.utils import to_device
 from lds.cifar10.datasets import Cifar10DataReader, Separator
 import numpy as np
