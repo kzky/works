@@ -97,18 +97,18 @@ class Decoder(Chain):
             
             deconv0=L.Deconvolution2D(256, 256, 2, stride=2, pad=0),
             deconv1=L.Deconvolution2D(256, 256, 3, stride=1, pad=1),
-            deconv2=L.Deconvolution2D(256, 256, 3, stride=1, pad=1),
-            deconv3=L.Deconvolution2D(256, 128, 2, stride=2, pad=0),
+            deconv2=L.Deconvolution2D(256, 128, 3, stride=1, pad=1),
+            deconv3=L.Deconvolution2D(128, 128, 2, stride=2, pad=0),
             deconv4=L.Deconvolution2D(128, 128, 3, stride=1, pad=1),
-            deconv5=L.Deconvolution2D(128, 64, 3, stride=1, pad=1),
-            deconv6=L.Deconvolution2D(64, 64, 3, stride=2, pad=0),
+            deconv5=L.Deconvolution2D(128, 64, 2, stride=2, pad=0),
+            deconv6=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
             deconv7=L.Deconvolution2D(64, 3, 3, stride=1, pad=1),
             
             bn_linear0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_linear1=L.BatchNormalization(256 * 4 * 4, decay=0.9, use_cudnn=True),
             bn_deconv0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
             bn_deconv1=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
-            bn_deconv2=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
+            bn_deconv2=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             bn_deconv3=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             bn_deconv4=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             bn_deconv5=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
@@ -133,13 +133,12 @@ class Decoder(Chain):
         h = self.act(h)
         bs = h.shape[0]
         d = h.shape[1]
-        h = F.reshape(h, (bs, 256, 8, 8))
-        
+        h = F.reshape(h, (bs, 256, 4, 4))
+
         # Deconvolution
         h = self.deconv0(h)
         h = self.bn_deconv0(h, test)  # 4x4 -> 8x8
         h = self.act(h)
-        self.hiddens.append(h)
 
         h = self.deconv1(h)
         h = self.bn_deconv1(h, test)
@@ -149,6 +148,7 @@ class Decoder(Chain):
         h = self.deconv2(h)
         h = self.bn_deconv2(h, test)
         h = self.act(h)
+        self.hiddens.append(h)
 
         h = self.deconv3(h)  # 8x8 -> 16x16
         h = self.bn_deconv3(h, test)
