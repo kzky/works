@@ -20,18 +20,18 @@ class Encoder(Chain):
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
             # Encoder
-            conv0=L.Convolution2D(3, 32, 3, stride=1, pad=1),
-            conv1=L.Convolution2D(32, 32, 3, stride=1, pad=1),
-            conv2=L.Convolution2D(32, 64, 3, stride=1, pad=1),
-            conv3=L.Convolution2D(64, 64, 3, stride=1, pad=1),
-            linear0=L.Linear(64 * 8 * 8, 32),
-            linear1=L.Linear(32, 10),
+            conv0=L.Convolution2D(3, 64, 3, stride=1, pad=1),
+            conv1=L.Convolution2D(64, 64, 3, stride=1, pad=1),
+            conv2=L.Convolution2D(64, 128, 3, stride=1, pad=1),
+            conv3=L.Convolution2D(128, 128, 3, stride=1, pad=1),
+            linear0=L.Linear(128 * 8 * 8, 64),
+            linear1=L.Linear(64, 10),
 
-            bn_conv0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            bn_conv1=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            bn_conv2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_conv3=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_linear0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
+            bn_conv0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_conv1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_conv2=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            bn_conv3=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            bn_linear0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
         )
 
         self.act = act
@@ -50,7 +50,7 @@ class Encoder(Chain):
         h = self.bn_conv1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h, (2, 2))  # 32x32 -> 18x18
+        h = F.max_pooling_2d(h, (2, 2))  # 32x32 -> 16x16
 
         h = self.conv2(h)
         h = self.bn_conv2(h, test)
@@ -61,10 +61,10 @@ class Encoder(Chain):
         h = self.bn_conv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h, (2, 2))  # 18x18 -> 8x8
+        h = F.max_pooling_2d(h, (2, 2))  # 16x16 -> 8x8
 
         # Linear
-        h = self.linear0(h)   # 8x8 -> 32
+        h = self.linear0(h)   # 8x8 -> 64
         h = self.bn_linear0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
@@ -77,22 +77,22 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            linear0=L.Linear(10, 32),
-            linear1=L.Linear(32, 64 * 8 * 8),
-            deconv0=L.Deconvolution2D(64, 64, 2, stride=2, pad=0),
-            deconv1=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
-            deconv2=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
-            deconv3=L.Deconvolution2D(64, 32, 2, stride=2, pad=0),
-            deconv4=L.Deconvolution2D(32, 32, 3, stride=1, pad=1),
-            deconv5=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
+            linear0=L.Linear(10, 64),
+            linear1=L.Linear(64, 128 * 8 * 8),
+            deconv0=L.Deconvolution2D(128, 128, 2, stride=2, pad=0),
+            deconv1=L.Deconvolution2D(128, 128, 3, stride=1, pad=1),
+            deconv2=L.Deconvolution2D(128, 128, 3, stride=1, pad=1),
+            deconv3=L.Deconvolution2D(128, 64, 2, stride=2, pad=0),
+            deconv4=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
+            deconv5=L.Deconvolution2D(64, 3, 3, stride=1, pad=1),
             
-            bn_linear0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            bn_linear1=L.BatchNormalization(64 * 8 * 8, decay=0.9, use_cudnn=True),
-            bn_deconv0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_deconv1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_deconv2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_deconv3=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            bn_deconv4=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
+            bn_linear0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_linear1=L.BatchNormalization(128 * 8 * 8, decay=0.9, use_cudnn=True),
+            bn_deconv0=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            bn_deconv1=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            bn_deconv2=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            bn_deconv3=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_deconv4=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
         )
                 
         self.act = act
@@ -112,12 +112,12 @@ class Decoder(Chain):
         h = self.act(h)
         bs = h.shape[0]
         d = h.shape[1]
-        h = F.reshape(h, (bs, 64, 8, 8))
+        h = F.reshape(h, (bs, 128, 8, 8))
         
 
         # Deconvolution
         h = self.deconv0(h)
-        h = self.bn_deconv0(h, test)  # 8x8 -> 18x18
+        h = self.bn_deconv0(h, test)  # 8x8 -> 16x16
         h = self.act(h)
         self.hiddens.append(h)
 
@@ -130,7 +130,7 @@ class Decoder(Chain):
         h = self.bn_deconv2(h, test)
         h = self.act(h)
 
-        h = self.deconv3(h)  # 18x18 -> 32x32
+        h = self.deconv3(h)  # 16x16 -> 32x32
         h = self.bn_deconv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
