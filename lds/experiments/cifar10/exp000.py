@@ -26,7 +26,7 @@ def main():
 
     # Separate dataset
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "datasets/cifar10/train.npz")
+    fpath = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
