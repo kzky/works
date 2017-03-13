@@ -24,7 +24,7 @@ class Encoder(Chain):
             conv1=L.Convolution2D(32, 32, 3, stride=1, pad=1),
             conv2=L.Convolution2D(32, 64, 3, stride=1, pad=1),
             conv3=L.Convolution2D(64, 64, 3, stride=1, pad=1),
-            linear0=L.Linear(64 * 7 * 7, 32),
+            linear0=L.Linear(64 * 8 * 8, 32),
             linear1=L.Linear(32, 10),
 
             bn_conv0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
@@ -50,7 +50,7 @@ class Encoder(Chain):
         h = self.bn_conv1(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h, (2, 2))  # 28x28 -> 14x14
+        h = F.max_pooling_2d(h, (2, 2))  # 32x32 -> 18x18
 
         h = self.conv2(h)
         h = self.bn_conv2(h, test)
@@ -61,10 +61,10 @@ class Encoder(Chain):
         h = self.bn_conv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
-        h = F.max_pooling_2d(h, (2, 2))  # 14x14 -> 7x7
+        h = F.max_pooling_2d(h, (2, 2))  # 18x18 -> 8x8
 
         # Linear
-        h = self.linear0(h)   # 7x7 -> 32
+        h = self.linear0(h)   # 8x8 -> 32
         h = self.bn_linear0(h, test)
         h = self.act(h)
         self.hiddens.append(h)
@@ -78,7 +78,7 @@ class Decoder(Chain):
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
             linear0=L.Linear(10, 32),
-            linear1=L.Linear(32, 64 * 7 * 7),
+            linear1=L.Linear(32, 64 * 8 * 8),
             deconv0=L.Deconvolution2D(64, 64, 2, stride=2, pad=0),
             deconv1=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
             deconv2=L.Deconvolution2D(64, 64, 3, stride=1, pad=1),
@@ -87,7 +87,7 @@ class Decoder(Chain):
             deconv5=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
             
             bn_linear0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            bn_linear1=L.BatchNormalization(64 * 7 * 7, decay=0.9, use_cudnn=True),
+            bn_linear1=L.BatchNormalization(64 * 8 * 8, decay=0.9, use_cudnn=True),
             bn_deconv0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_deconv1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
             bn_deconv2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
@@ -117,7 +117,7 @@ class Decoder(Chain):
 
         # Deconvolution
         h = self.deconv0(h)
-        h = self.bn_deconv0(h, test)  # 7x7 -> 14x14
+        h = self.bn_deconv0(h, test)  # 8x8 -> 18x18
         h = self.act(h)
         self.hiddens.append(h)
 
@@ -130,7 +130,7 @@ class Decoder(Chain):
         h = self.bn_deconv2(h, test)
         h = self.act(h)
 
-        h = self.deconv3(h)  # 14x14 -> 28x28
+        h = self.deconv3(h)  # 18x18 -> 32x32
         h = self.bn_deconv3(h, test)
         h = self.act(h)
         self.hiddens.append(h)
