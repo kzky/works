@@ -22,17 +22,21 @@ class Cifar10DataReader(object):
             
         self.l_train_data = dict(np.load(l_train_path))
         _u_train_data = np.load(u_train_path)
-        self.u_train_data = {"x":_u_train_data["train_x"], "y":_u_train_data["train_y"]}
+        self.u_train_data = {
+            "train_x":_u_train_data["train_x"], 
+            "train_y":_u_train_data["train_y"]}
         _test_data = np.load(test_path)
-        self.test_data = {"x": _test_data["test_x"], "y": _test_data["test_y"]}
+        self.test_data = {
+            "train_x": _test_data["test_x"], 
+            "train_y": _test_data["test_y"]}
 
         self._batch_size = batch_size
         self._next_position_l_train = 0
         self._next_position_u_train = 0
 
-        self._n_l_train_data = len(self.l_train_data["x"])
-        self._n_u_train_data = len(self.u_train_data["x"])
-        self._n_test_data = len(self.test_data["x"])
+        self._n_l_train_data = len(self.l_train_data["train_x"])
+        self._n_u_train_data = len(self.u_train_data["train_x"])
+        self._n_test_data = len(self.test_data["train_x"])
         self._n_cls = n_cls
         self._da = da
         self._shape = shape
@@ -62,8 +66,8 @@ class Cifar10DataReader(object):
         # Read data
         beg = self._next_position_l_train
         end = self._next_position_l_train+self._batch_size
-        batch_data_x_ = self.l_train_data["x"][beg:end, :]
-        batch_data_y_ = self.l_train_data["y"][beg:end]
+        batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
+        batch_data_y_ = self.l_train_data["train_y"][beg:end]
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
         if self._da:
             batch_data_x = self._transform(batch_data_x)
@@ -77,8 +81,8 @@ class Cifar10DataReader(object):
             # Shuffle
             idx = np.arange(self._n_l_train_data)
             np.random.shuffle(idx)
-            self.l_train_data["x"] = self.l_train_data["x"][idx]
-            self.l_train_data["y"] = self.l_train_data["y"][idx]
+            self.l_train_data["train_x"] = self.l_train_data["train_x"][idx]
+            self.l_train_data["train_y"] = self.l_train_data["train_y"][idx]
 
         batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
@@ -96,8 +100,8 @@ class Cifar10DataReader(object):
         # Read data
         beg = self._next_position_u_train
         end = self._next_position_u_train+self._batch_size
-        batch_data_x_ = self.u_train_data["x"][beg:end, :]
-        batch_data_y_ = self.u_train_data["y"][beg:end]
+        batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
+        batch_data_y_ = self.u_train_data["train_y"][beg:end]
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
         if self._da:
             batch_data_x = self._transform(batch_data_x)
@@ -111,8 +115,8 @@ class Cifar10DataReader(object):
             # Shuffle
             idx = np.arange(self._n_u_train_data)
             np.random.shuffle(idx)
-            self.u_train_data["x"] = self.u_train_data["x"][idx]
-            self.u_train_data["y"] = self.u_train_data["y"][idx]
+            self.u_train_data["train_x"] = self.u_train_data["train_x"][idx]
+            self.u_train_data["train_y"] = self.u_train_data["train_y"][idx]
 
         batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
@@ -128,8 +132,8 @@ class Cifar10DataReader(object):
         """
 
         # Read data
-        batch_data_x_ = self.test_data["x"]
-        batch_data_y_ = self.test_data["y"]
+        batch_data_x_ = self.test_data["train_x"]
+        batch_data_y_ = self.test_data["train_y"]
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
@@ -168,10 +172,10 @@ class Separator(object):
 
         ldata = {}
         udata = {}
-        ldata["x"] = data["train_x"][idxs_l]
-        ldata["y"] = data["train_y"][idxs_l]
-        udata["x"] = data["train_x"][idxs_u]
-        udata["y"] = data["train_y"][idxs_u]
+        ldata["train_x"] = data["train_x"][idxs_l]
+        ldata["train_y"] = data["train_y"][idxs_l]
+        udata["train_x"] = data["train_x"][idxs_u]
+        udata["train_y"] = data["train_y"][idxs_u]
 
         return ldata, udata
 
