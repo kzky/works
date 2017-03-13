@@ -112,7 +112,7 @@ class Decoder(Chain):
         h = self.act(h)
         bs = h.shape[0]
         d = h.shape[1]
-        h = F.reshape(h, (bs, 64, 7, 7))
+        h = F.reshape(h, (bs, 64, 8, 8))
         
 
         # Deconvolution
