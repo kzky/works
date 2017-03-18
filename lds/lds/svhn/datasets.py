@@ -171,9 +171,9 @@ class Separator(object):
 
         ldata = {}
         udata = {}
-        ldata["X"] = data["X"][:, :, :, idxs_l]
+        ldata["X"] = data["X"][idxs_l]
         ldata["y"] = np.squeeze(data["y"])[idxs_l]
-        udata["X"] = data["X"][:, :, :, idxs_u]
+        udata["X"] = data["X"][idxs_u]
         udata["y"] = np.squeeze(data["y"])[idxs_u]
 
         # Shuffle in advance since svhn label is ordered sequencially like 0, 0, ..., 1, 1, ..
