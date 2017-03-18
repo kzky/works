@@ -168,7 +168,7 @@ class Separator(object):
         data = scipy.io.loadmat(fpath)
         n = len(data["X"])
         idxs = np.arange(n)
-        idxs_l = self._sample_indices(data["y"])
+        idxs_l = self._sample_indices(np.squeeze(data["y"]))
         idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
 
         ldata = {}
