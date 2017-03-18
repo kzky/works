@@ -164,7 +164,7 @@ class Separator(object):
             fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train.mat"):
         
         data = scipy.io.loadmat(fpath)
-        n = data["X"].shape[-1]
+        n = len(data["X"])
         idxs = np.arange(n)
         idxs_l = self._sample_indices(np.squeeze(data["y"]))
         idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
