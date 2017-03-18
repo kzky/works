@@ -84,13 +84,13 @@ class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
             linear0=L.Linear(256, 10),
-            bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
+            #bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
         )
         self.act = act
 
     def __call__(self, h, test=False):
-        h = F.average_pooling_2d(h, (4, 4))
-        h = self.bn0(h, test)
+        #h = F.average_pooling_2d(h, (4, 4))
+        #h = self.bn0(h, test)
         h = self.linear0(h)
         return h
     
