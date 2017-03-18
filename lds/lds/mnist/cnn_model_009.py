@@ -157,7 +157,7 @@ class Decoder(Chain):
 class AutoEncoderWithMLP(Chain):
     
     def __init__(self, act=F.relu):
-        super(AutoEncoderWtihMLP, self).__init__(
+        super(AutoEncoderWithMLP, self).__init__(
             encoder=Encoder(act=act),
             decoder=Decoder(act=act),
             mlp=MLP(act),
