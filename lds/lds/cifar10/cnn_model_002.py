@@ -52,7 +52,7 @@ class Encoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            conv0=L.Convolution2D(1, 32, 3, stride=1, pad=1),
+            conv0=L.Convolution2D(3, 32, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
             block0=ConvUnitPoolFinetune(32, act),
             block1=ConvUnitPoolFinetune(64, act),
