@@ -33,7 +33,7 @@ class ConvUnit(Chain):
 class ConvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(ConvUnitPoolFinetune, self).__init__(
-            conv_unit=Convunit(maps, act),
+            conv_unit=ConvUnit(maps, act),
             conv=L.Convolution(maps, maps*2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
         )
@@ -111,7 +111,7 @@ class DeconvUnit(Chain):
 class DeconvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(DeconvUnitPoolFinetune, self).__init__(
-            deconv_unit=Deconvunit(maps, act),
+            deconv_unit=DeconvUnit(maps, act),
             deconv_pool=L.Deconvolution(maps, maps, 4, stride=2, pad=1),
             bn_pool=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
             deconv=L.Deconvolution(maps, maps/2, 3, stride=1, pad=1),
