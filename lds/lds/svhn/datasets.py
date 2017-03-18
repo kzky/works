@@ -152,7 +152,7 @@ class Separator(object):
     and the others are unlabeled samples.
     """
 
-    def __init__(self, l=4000):
+    def __init__(self, l=1000):
         self.l = l
 
     def separate_then_save(
