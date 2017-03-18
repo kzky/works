@@ -147,9 +147,9 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            block0=DeconvUnitPoolFinetune(128, act),
-            block1=DeconvUnitPoolFinetune(64, act),
-            block2=DeconvUnitPoolFinetune(32, act),
+            block0=DeconvUnitPoolFinetune(256, act),
+            block1=DeconvUnitPoolFinetune(128, act),
+            block2=DeconvUnitPoolFinetune(64, act),
             deconv=L.Deconvolution2D(32, 1, 3, stride=1, pad=1),
         )
                 
