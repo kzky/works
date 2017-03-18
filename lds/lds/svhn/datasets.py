@@ -47,12 +47,6 @@ class SVHNDataReader(object):
         print("Num. of test samples {}".format(self._n_test_data))
         print("Num. of classes {}".format(self._n_cls))
 
-    def transpose(self, x):
-        if self._shape:
-            bs = x.shape[-1]
-            return x.transpose(bs, 2, 0, 1)
-        return x
-    
     def get_l_train_batch(self,):
         """Return next batch data.
 
@@ -85,7 +79,6 @@ class SVHNDataReader(object):
             self.l_train_data["X"] = self.l_train_data["X"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
 
-        batch_data_x = self.transpose(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_u_train_batch(self,):
@@ -119,7 +112,6 @@ class SVHNDataReader(object):
             self.u_train_data["X"] = self.u_train_data["X"][idx]
             self.u_train_data["y"] = self.u_train_data["y"][idx]
 
-        batch_data_x = self.transpose(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_test_batch(self,):
@@ -138,7 +130,6 @@ class SVHNDataReader(object):
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
-        batch_data_x = self.transpose(batch_data_x)
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
