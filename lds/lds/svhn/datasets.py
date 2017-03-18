@@ -22,11 +22,11 @@ class SVHNDataReader(object):
     ):
             
         self.l_train_data = dict(scipy.io.loadmat(l_train_path))
-        _u_train_data = scipy.io.loatmat(u_train_path)
+        _u_train_data = scipy.io.loadmat(u_train_path)
         self.u_train_data = {
             "X":_u_train_data["X"], 
             "y":_u_train_data["y"]}
-        _test_data = scipy.io.loatmat(test_path)
+        _test_data = scipy.io.loadmat(test_path)
         self.test_data = {
             "X": _test_data["X"], 
             "y": _test_data["y"]}
@@ -165,7 +165,7 @@ class Separator(object):
             self,
             fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train_32x32.mat"):
         
-        data = scipy.io.loatmat(fpath)
+        data = scipy.io.loadmat(fpath)
         n = len(data["X"])
         idxs = np.arange(n)
         idxs_l = self._sample_indices(data["y"])
