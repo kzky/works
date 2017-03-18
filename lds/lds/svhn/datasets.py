@@ -10,11 +10,11 @@ class SVHNDataReader(object):
     def __init__(
             self,
             l_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/l_train_32x32.mat",
+            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/l_train.mat",
             u_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/u_train_32x32.mat", 
+            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/u_train.mat", 
             test_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/test_32x32.mat",
+            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/test.mat",
             batch_size=64,
             n_cls=10,
             da=False,
@@ -31,7 +31,7 @@ class SVHNDataReader(object):
             "y":np.squeeze(_u_train_data["y"])}
         _test_data = scipy.io.loadmat(test_path)
         self.test_data = {
-            "X": _test_data["X"].transpose((3, 2, 0, 1)), 
+            "X": _test_data["X"],
             "y": np.squeeze(_test_data["y"])}
 
         self._batch_size = batch_size
@@ -155,13 +155,13 @@ class Separator(object):
 
     def separate_then_save(
             self,
-            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train_32x32.mat"):
+            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train.mat"):
         ldata, udata = self._separate(fpath)
         self._save_ssl_data(fpath, ldata, udata)
         
     def _separate(
             self,
-            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train_32x32.mat"):
+            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train.mat"):
         
         data = scipy.io.loadmat(fpath)
         n = data["X"].shape[-1]
@@ -171,9 +171,9 @@ class Separator(object):
 
         ldata = {}
         udata = {}
-        ldata["X"] = data["X"][:, :, :, idxs_l].transpose((3, 2, 0, 1))
+        ldata["X"] = data["X"][:, :, :, idxs_l]
         ldata["y"] = np.squeeze(data["y"])[idxs_l]
-        udata["X"] = data["X"][:, :, :, idxs_u].transpose((3, 2, 0, 1))
+        udata["X"] = data["X"][:, :, :, idxs_u]
         udata["y"] = np.squeeze(data["y"])[idxs_u]
 
         # Shuffle in advance since svhn label is ordered sequencially like 0, 0, ..., 1, 1, ..
@@ -211,3 +211,29 @@ class Separator(object):
 
         scipy.io.savemat(ldata_fpath, ldata)
         scipy.io.savemat(udata_fpath, udata)
+
+class Converter(object):
+    """Convert svhn dataset
+    """
+    def __init__(self, ):
+        self.map_ = {1:0, 
+                     2:1, 
+                     3:2, 
+                     4:3, 
+                     5:4, 
+                     6:5, 
+                     7:6, 
+                     8:7, 
+                     9:8, 
+                     10:9,}
+
+    def convert_then_save(
+            self, 
+            fpath_inp="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train_32x32.mat", 
+            fpath_out="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train.mat"):
+        
+        data_ = scipy.io.loadmat(fpath_inp)
+        X = data_["X"].transpose((3, 2, 0, 1))
+        y = [self.map_[x] for x in np.squeeze(data_["y"])]
+        data = {"X": X , "y": y}
+        scipy.io.savemat(fpath_out, data)
