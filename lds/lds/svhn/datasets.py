@@ -22,7 +22,7 @@ class SVHNDataReader(object):
     ):
             
         _l_train_data = dict(scipy.io.loadmat(l_train_path))
-        self.l_train_path = {
+        self.l_train_data = {
             "X":_l_train_data["X"], 
             "y":np.squeeze(_l_train_data["y"])}
         _u_train_data = scipy.io.loadmat(u_train_path)
