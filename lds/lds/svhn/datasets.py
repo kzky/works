@@ -182,6 +182,17 @@ class Separator(object):
         udata["X"] = data["X"][:, :, :, idxs_u].transpose((3, 2, 0, 1))
         udata["y"] = np.squeeze(data["y"][idxs_u])
 
+        # Shuffle in advance since svhn label is ordered sequencially like 0, 0, ..., 1, 1, ..
+        idx = np.arange(len(ldata["X"]))
+        np.random.shuffle(idx)
+        ldata["X"] = ldata["X"][idx]
+        ldata["y"] = ldata["y"][idx]
+        
+        idx = np.arange(len(udata["X"]))
+        np.random.shuffle(idx)
+        udata["X"] = udata["X"][idx]
+        udata["y"] = udata["y"][idx]
+        
         return ldata, udata
 
     def _sample_indices(self, y):
