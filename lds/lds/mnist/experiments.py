@@ -1537,7 +1537,7 @@ class Experiment031(Experiment025):
         
 
 class Experiment032(Experiment025):
-    """Regularize with reconstruction and with Entropy Regularization on at the last.
+    """Regularize with reconstruction between blocks and with Entropy Regularization on at the last.
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
@@ -1623,7 +1623,8 @@ class Experiment032(Experiment025):
         
         
 class Experiment033(Experiment025):
-    """Regularize with reconstruction and with Entropy Regularization on at the last.
+    """Regularize with reconstruction between all enc/dec outputs execpt for after
+    max_pooling, and with Entropy Regularization on at the last
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
