@@ -15,7 +15,7 @@ def main():
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
     batch_size = 128
     n_l_train_data = 1000
-    n_train_data = 50000
+    n_train_data = 73257
     n_cls = 10
 
     learning_rate = 1. * 1e-3
