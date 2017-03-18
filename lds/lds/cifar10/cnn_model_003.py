@@ -90,7 +90,6 @@ class MLP(Chain):
 
     def __call__(self, h, test=False):
         h = F.average_pooling_2d(h, (4, 4))
-        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
         h = self.bn0(h, test)
         h = self.linear0(h)
         return h
