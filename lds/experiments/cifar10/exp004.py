@@ -14,8 +14,8 @@ def main():
     # Settings
     device = int(sys.argv[1]) if len(sys.argv) > 1 else None
     batch_size = 128
-    n_l_train_data = 100
-    n_train_data = 60000
+    n_l_train_data = 4000
+    n_train_data = 50000
     n_cls = 10
 
     learning_rate = 1. * 1e-3
@@ -26,13 +26,13 @@ def main():
 
     # Separate dataset
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "datasets/cifar10/train.npz")
+    fpath = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
-    l_train_path = os.path.join(home, "datasets/cifar10/l_train.npz")
-    u_train_path = os.path.join(home, "datasets/cifar10/train.npz")
-    test_path = os.path.join(home, "datasets/cifar10/test.npz")
+    l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
+    u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
@@ -40,7 +40,7 @@ def main():
                                   n_cls=n_cls,
                                   da=True,
                                   shape=True)
-    exp = Experiment004(
+    exp = Experiment003(
         device,
         learning_rate,
         act,
