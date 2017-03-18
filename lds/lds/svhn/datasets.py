@@ -142,6 +142,7 @@ class SVHNDataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
+        #TODO
         return imgs
 
 class Separator(object):
@@ -150,6 +151,9 @@ class Separator(object):
     Seprate the original samples to labeled samples and unlabeled samples in such
     way; the number of labeled samples are selected randomly, it is equal to `l`, 
     and the others are unlabeled samples.
+
+    Note SVNH dataset is of shape (h, w, c, b) so that Separaor transform to 
+    the shape (b, c, h, w) for the later use efficiently.
     """
 
     def __init__(self, l=1000):
@@ -173,9 +177,9 @@ class Separator(object):
 
         ldata = {}
         udata = {}
-        ldata["X"] = data["X"][:, :, :, idxs_l]
+        ldata["X"] = data["X"][:, :, :, idxs_l].transpose((3, 2, 0, 1))
         ldata["y"] = np.squeeze(data["y"][idxs_l])
-        udata["X"] = data["X"][:, :, :, idxs_u]
+        udata["X"] = data["X"][:, :, :, idxs_u].transpose((3, 2, 0, 1))
         udata["y"] = np.squeeze(data["y"][idxs_u])
 
         return ldata, udata
