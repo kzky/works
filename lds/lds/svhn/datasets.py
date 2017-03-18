@@ -161,7 +161,7 @@ class Separator(object):
             fpath="/home/kzk/.chainer/dataset/pfnet/chainer/svhn/train_32x32.mat"):
         
         data = scipy.io.loadmat(fpath)
-        n = len(data["X"])
+        n = len(data["X"].shape[-1])
         idxs = np.arange(n)
         idxs_l = self._sample_indices(np.squeeze(data["y"]))
         idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
@@ -169,9 +169,9 @@ class Separator(object):
         ldata = {}
         udata = {}
         ldata["X"] = data["X"][:, :, :, idxs_l].transpose((3, 2, 0, 1))
-        ldata["y"] = np.squeeze(data["y"][idxs_l])
+        ldata["y"] = np.squeeze(data["y"])[idxs_l]
         udata["X"] = data["X"][:, :, :, idxs_u].transpose((3, 2, 0, 1))
-        udata["y"] = np.squeeze(data["y"][idxs_u])
+        udata["y"] = np.squeeze(data["y"])[idxs_u]
 
         # Shuffle in advance since svhn label is ordered sequencially like 0, 0, ..., 1, 1, ..
         idx = np.arange(len(ldata["X"]))
