@@ -96,7 +96,7 @@ class MLP(Chain):
 class DeconvUnit(Chain):
 
     def __init__(self, maps, act=F.relu):
-        super(ConvUnit, self).__init__(
+        super(DeconvUnit, self).__init__(
             deconv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
         )
