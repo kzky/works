@@ -21,11 +21,15 @@ class SVHNDataReader(object):
             shape=False,
     ):
             
-        self.l_train_data = dict(scipy.io.loadmat(l_train_path))
+        ＿l_train_data = dict(scipy.io.loadmat(l_train_path))
+        self.l_train_path = {
+            "X":_l_train_data["X"], 
+            "y":np.squeeze(_l_train_data["y"])}
+            }
         _u_train_data = scipy.io.loadmat(u_train_path)
         self.u_train_data = {
             "X":_u_train_data["X"], 
-            "y":_u_train_data["y"]}
+            "y":np.squeeze(_u_train_data["y"])}
         _test_data = scipy.io.loadmat(test_path)
         self.test_data = {
             "X": _test_data["X"].transpose((3, 2, 0, 1)), 
