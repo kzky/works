@@ -18,7 +18,7 @@ from lds.chainer_fix import BatchNormalization
 class ConvUnit(Chain):
     def __init__(self, maps, act=F.relu):
         super(ConvUnit, self).__init__(
-            conv0=L.Convolution(maps, maps, 3, stride=1, pad=1),
+            conv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -34,7 +34,7 @@ class ConvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(ConvUnitPoolFinetune, self).__init__(
             conv_unit=ConvUnit(maps, act),
-            conv=L.Convolution(maps, maps*2, 3, stride=1, pad=1),
+            conv=L.Convolution2D(maps, maps*2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -52,7 +52,7 @@ class Encoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            covn0=L.Convolution(1, 32, 3, stride=1, pad=1),
+            covn0=L.Convolution2D(1, 32, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
             block0=ConvUnitPoolFinetune(32, act),
             block1=ConvUnitPoolFinetune(64, act),
@@ -97,7 +97,7 @@ class DeconvUnit(Chain):
 
     def __init__(self, maps, act=F.relu):
         super(ConvUnit, self).__init__(
-            deconv0=L.Convolution(maps, maps, 3, stride=1, pad=1),
+            deconv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -112,9 +112,9 @@ class DeconvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(DeconvUnitPoolFinetune, self).__init__(
             deconv_unit=DeconvUnit(maps, act),
-            deconv_pool=L.Deconvolution(maps, maps, 4, stride=2, pad=1),
+            deconv_pool=L.Deconvolution2D(maps, maps, 4, stride=2, pad=1),
             bn_pool=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
-            deconv=L.Deconvolution(maps, maps/2, 3, stride=1, pad=1),
+            deconv=L.Deconvolution2D(maps, maps/2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -136,7 +136,7 @@ class Decoder(Chain):
         super(Decoder, self).__init__(
             block0=DeconvUnitPoolFinetune(128, act),
             block1=DeconvUnitPoolFinetune(64, act),
-            deconv=L.Deconvolution(32, 1, 3, stride=1, pad=1),
+            deconv=L.Deconvolution2D(32, 1, 3, stride=1, pad=1),
         )
                 
         self.act = act
