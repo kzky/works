@@ -80,9 +80,11 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
-            linear0=L.Linear(64*7*7, 32),
-            linear1=L.Linear(32, 10),
-            bn_linear0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
+            linear0=L.Linear(128*7*7, 64),
+            linear1=L.Linear(64, 32),
+            linear2=L.Linear(32, 10),
+            bn_linear0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_linear1=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
         )
         self.act = act
 
@@ -91,6 +93,9 @@ class MLP(Chain):
         h = self.bn_linear0(h, test)
         h = self.act(h)
         h = self.linear1(h)
+        h = self.bn_linear1(h, test)
+        h = self.linear2(h)
+
         return h
     
 class DeconvUnit(Chain):
