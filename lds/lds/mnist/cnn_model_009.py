@@ -41,7 +41,7 @@ class ConvUnitPoolFinetune(Chain):
     
     def __call__(self, h, hiddens, test=False):
         h = self.conv_unit(h, hiddens, test)
-        h = F.max_pooling_2d(h)
+        h = F.max_pooling_2d(h, (2, 2))
         h = self.conv(h)
         h = self.bn(h, test)
         h = self.act(h)
