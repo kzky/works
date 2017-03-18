@@ -89,7 +89,7 @@ class MLP(Chain):
         self.act = act
 
     def __call__(self, h, test=False):
-        h = F.average_pooling_2d(h)
+        h = F.average_pooling_2d(h, (4, 4))
         h = self.bn_linear0(h, test)
         h = self.linear0(h)
         return h
