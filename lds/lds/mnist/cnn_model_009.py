@@ -154,7 +154,7 @@ class Decoder(Chain):
         h = self.deconv(h)
         return h
 
-class AutoEncoderWtihMLP(Chain):
+class AutoEncoderWithMLP(Chain):
     
     def __init__(self, act=F.relu):
         super(AutoEncoderWtihMLP, self).__init__(
