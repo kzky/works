@@ -28,8 +28,8 @@ class SVHNDataReader(object):
             "y":_u_train_data["y"]}
         _test_data = scipy.io.loadmat(test_path)
         self.test_data = {
-            "X": _test_data["X"], 
-            "y": _test_data["y"]}
+            "X": _test_data["X"].transpoze((3, 2, 0, 1)), 
+            "y": np.squeeze(_test_data["y"])}
 
         self._batch_size = batch_size
         self._next_position_l_train = 0
