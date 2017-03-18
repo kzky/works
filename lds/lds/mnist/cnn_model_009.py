@@ -71,9 +71,9 @@ class Encoder(Chain):
         self.hiddens.append(h)
 
         # Blocks
-        h = self.block0(h, hiddens, test)
+        h = self.block0(h, self.hiddens, test)
         self.hiddens.append(h)
-        h = self.block1(h, hiddens, test)
+        h = self.block1(h, self.hiddens, test)
         
         return h
 
