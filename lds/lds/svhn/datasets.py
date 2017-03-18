@@ -10,9 +10,9 @@ class SVHNDataReader(object):
     def __init__(
             self,
             l_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/l_train.mat",
+            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/l_train_32x32.mat",
             u_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/u_train.mat", 
+            "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/u_train_32x32.mat", 
             test_path=\
             "/home/kzk/.chainer/dataset/pfnet/chainer/svhn/test_32x32.mat",
             batch_size=64,
@@ -181,7 +181,7 @@ class Separator(object):
         return ldata, udata
 
     def _sample_indices(self, y):
-        classes = set(y)
+        classes = set(np.squeeze(y))
         indicies = []
         n_for_each_classes = int(1. * self.l / len(classes))
         for c in classes:

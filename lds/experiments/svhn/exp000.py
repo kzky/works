@@ -30,8 +30,8 @@ def main():
     separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
-    l_train_path = os.path.join(home, "datasets/svhn/l_train.mat")
-    u_train_path = os.path.join(home, "datasets/svhn/u_train.mat")
+    l_train_path = os.path.join(home, "datasets/svhn/l_train_32x32.mat")
+    u_train_path = os.path.join(home, "datasets/svhn/u_train_32x32.mat")
     test_path = os.path.join(home, "datasets/svhn/test_32x32.mat")
 
     # DataReader, Model, Optimizer, Losses
