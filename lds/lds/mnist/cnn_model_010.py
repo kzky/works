@@ -95,6 +95,7 @@ class MLP(Chain):
         h = self.act(h)
         h = self.linear1(h)
         h = self.bn_linear1(h, test)
+        h = self.act(h)
         h = self.linear2(h)
 
         return h
