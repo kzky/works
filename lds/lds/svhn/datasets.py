@@ -200,5 +200,5 @@ class Separator(object):
         ldata_fpath = os.path.join(dpath, l_fname)
         udata_fpath = os.path.join(dpath, u_fname)
 
-        np.savez(ldata_fpath, **ldata)
-        np.savez(udata_fpath, **udata)
+        scipy.io.savemat(ldata_fpath, **ldata)
+        scipy.io.savemat(udata_fpath, **udata)
