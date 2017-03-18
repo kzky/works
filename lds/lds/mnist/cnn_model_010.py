@@ -43,6 +43,7 @@ class ConvUnitPoolFinetune(Chain):
         h = self.conv_unit(h, hiddens, test)
         hiddens.append(h)
         h = F.max_pooling_2d(h, (2, 2))
+        hiddens.append(h)
         h = self.conv(h)
         h = self.bn(h, test)
         h = self.act(h)
@@ -131,6 +132,7 @@ class DeconvUnitPoolFinetune(Chain):
         h = self.deconv_pool(h)
         h = self.bn_pool(h, test)
         h = self.act(h)  # pooling is not actual pooling, so take activation here.
+        hiddens.append(h)
         h = self.deconv(h)
         h = self.bn(h, test)
         h = self.act(h)
