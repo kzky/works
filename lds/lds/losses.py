@@ -167,17 +167,17 @@ class FrobeniousConvLoss(object):
         if len(h.shape) != 4:
             return 0
         
-        # (b, c, h, w) -> (b, h, w, c) -> (b*h*w, c) -> (b*h*w, b*h*w)
+        # (b, c, h, w) -> (b, h, w, c) -> (b, h*w, c)
         h = F.transpose(h, (0, 2, 3, 1))
         shape = h.shape
-        h = F.reshape(h, (np.prod(shape[0:3]), shape[3]))
-        A = F.linear(h, h)
-        
-        # Compute square of Frobenius norm 
+        b, n, c =  shape[0], shape[1]*shape[2], shape[3]
+        h = F.reshape(h, (b, n, c))
+        s = 0
         xp = cuda.get_array_module(h.data)
-        I_ = xp.identity(h.shape[0])
-        l = F.sum(F.squere(A - I_)) / np.prod(shape)
-
+        I_ = xp.identity(n)
+        for h_ in h:
+            s += F.sum(F.squere(F.linear(h_, h_) - I_))
+        l = s / (b * n * c)
         return l
         
         
