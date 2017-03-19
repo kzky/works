@@ -141,7 +141,8 @@ class Cifar10DataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
-        imgs = imgs.reshape(imgs.shape[0], 3, 32, 32)
+        bs = imgs.shape[0]
+        imgs = imgs.reshape(bs, 3, 32, 32)
         imgs_ = np.zeros_like(imgs)
         for i, img in enumerate(imgs):
             # random flip
