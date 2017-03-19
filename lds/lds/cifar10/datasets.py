@@ -118,7 +118,7 @@ class Cifar10DataReader(object):
             self.u_train_data["train_x"] = self.u_train_data["train_x"][idx]
             self.u_train_data["train_y"] = self.u_train_data["train_y"][idx]
  
-       batch_data_x = self.reshape(batch_data_x)
+        batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_test_batch(self,):
