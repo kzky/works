@@ -145,9 +145,9 @@ class Cifar10DataReader(object):
         for i, img in enumerate(imgs):
             # random flip
             if np.random.randint(2):
-                imgs_[i] = img[i, :, :, ::-1]
+                imgs_[i] = img[:, :, ::-1]
             else:
-                imgs_[i] = img[i]
+                imgs_[i] = img
         return imgs
 
 class Separator(object):
