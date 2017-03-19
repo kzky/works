@@ -13,7 +13,6 @@ class MNISTDataReader(object):
                  "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/u_train.npz", 
                  test_path="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/test.npz",
                  batch_size=64,
-                 n_cls=10,
                  da=False,
                  shape=False,
     ):

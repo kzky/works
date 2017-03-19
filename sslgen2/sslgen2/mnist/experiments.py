@@ -95,9 +95,51 @@ class Experiment000(object):
         self.cleargrads()
         self.optimizer_gen.update()
 
-    def test(self, x_l, y_l, ):
-        pass
+    def test(self, x_l, y_l, epoch):
+        """generate samples, then save"""
+        x_gen = self.generate(x_l)
+        self.save(x_gen, epoch)
 
+        d_x_gen = self.discriminator(x_gen)
+        return d_x_gen
+        
+    def generate(self, x_l):
+        h = self.encoder(x_l, test)
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_cpu(xp.random.rand(x.shape[0], self.dim), self.device))
+        x_gen = self.generator(h, z)
+        return x_gen
+
+    def save(self, x_gen, epoch):
+        # Create dir path
+        dpath = "./images_{:05d}".format(epoch)
+        if os.path.exist(dpath):
+            os.removedirs(dpath)
+            os.makedir(dpath)
+        else:
+            os.makedir(dpath)
+
+        # Save
+        imgs = cuda.to_cpu(x_gen.data)
+        for i, img in enumerate(imgs):
+            fpath = os.path.join(dpath, "_{:05d}".format(i))
+            cv2.imwrite(fpath, img)
+
+    def serialize(self, epoch):
+        # Create dir path
+        dpath = "./model_{:05d}".format(epoch)
+        if os.path.exist(dpath):
+            os.removedirs(dpath)
+            os.makedir(dpath)
+        else:
+            os.makedir(dpath)
+
+        # Serialize
+        fpath = os.path.join(fpath, "encoder")
+        serializers.save_hdf5(fpath, self.encoder)
+        fpath = os.path.join(fpath, "decoder")
+        serializers.save_hdf5(fpath, self.generator)
+        
     def cleargrads(self, ):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
