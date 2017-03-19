@@ -16,7 +16,7 @@ def main():
     N = X.shape[0]
     D = X.shape[1]
     X = X / 255.
-    x_mean = np.mean(X, axis=0)
+    X_mean = np.mean(X, axis=0)
     X -= X_mean
     
     # Eigen value decomposition
