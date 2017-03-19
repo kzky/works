@@ -117,8 +117,8 @@ class Cifar10DataReader(object):
             np.random.shuffle(idx)
             self.u_train_data["train_x"] = self.u_train_data["train_x"][idx]
             self.u_train_data["train_y"] = self.u_train_data["train_y"][idx]
-
-        batch_data_x = self.reshape(batch_data_x)
+ 
+       batch_data_x = self.reshape(batch_data_x)
         return batch_data_x, batch_data_y
 
     def get_test_batch(self,):
@@ -149,7 +149,8 @@ class Cifar10DataReader(object):
                 imgs_[i] = img[:, :, ::-1]
             else:
                 imgs_[i] = img
-        return imgs
+        imgs_ = imgs_.reshape(bs, 3072)
+        return imgs_
 
 class Separator(object):
     """Seprate the original samples to labeled samples and unlabeled samples.
