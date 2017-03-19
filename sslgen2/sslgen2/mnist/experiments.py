@@ -96,17 +96,17 @@ class Experiment000(object):
 
     def test(self, x_l, y_l, epoch):
         """generate samples, then save"""
-        x_gen = self.generate(x_l)
+        x_gen = self.generate(x_l, test)
         self.save(x_gen, epoch)
 
-        d_x_gen = self.discriminator(x_gen)
+        d_x_gen = self.discriminator(x_gen, test)
         return d_x_gen
         
-    def generate(self, x_l):
+    def generate(self, x_l, test):
         h = self.encoder(x_l, test)
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_cpu(xp.random.rand(x.shape[0], self.dim), self.device))
-        x_gen = self.generator(h, z)
+        x_gen = self.generator(h, z, test)
         return x_gen
 
     def save(self, x_gen, epoch):
