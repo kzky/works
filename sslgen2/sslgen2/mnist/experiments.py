@@ -41,11 +41,11 @@ class Experiment000(object):
         self.encoder = Encoder(device, act)
         self.decoder = Decoder(device, act)
         self.generator = Generator(device, act ,dim)
-        self.discriminator = Discriminator(device, act ,dim)
+        self.discriminator = Discriminator(device, act)
 
-        self.ecndoer.to_gpu(device) if self.device else None
+        self.encoder.to_gpu(device) if self.device else None
         self.decoder.to_gpu(device) if self.device else None
-        self.genrator.to_gpu(device) if self.device else None
+        self.generator.to_gpu(device) if self.device else None
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
@@ -65,7 +65,7 @@ class Experiment000(object):
     def train(self, x):
         # Encoder/Decoder
         h = self.encoder(x)
-        x_rec = self.decocer(h)
+        x_rec = self.decoder(h)
         l_rec = self.recon_loss(x, x_rec)
         self.cleargrads()
         l_rec.backward()
@@ -75,7 +75,7 @@ class Experiment000(object):
         # Discriminator
         h = Variable(h.data)  # disconnect
         xp = cuda.get_array_module(x)
-        z = Variable(cuda.to_cpu(xp.random.rand(x.shape[0], self.dim), self.device))
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
         x_gen = self.generator(h, z)
         d_x_gen = self.discriminator(x_gen)
         d_x_real = self.discriminator(x)
@@ -86,7 +86,7 @@ class Experiment000(object):
         
         # Generator
         xp = cuda.get_array_module(x)
-        z = Variable(cuda.to_cpu(xp.random.rand(x.shape[0], self.dim), self.device))
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
         x_gen = self.generator(h, z)
         d_x_gen = self.discriminator(x_gen)
         h_gen = self.encoder(x_gen)

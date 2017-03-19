@@ -20,8 +20,9 @@ class ConvUnit(Chain):
             conv=L.Convolution2D(imap, omap, ksize=k, stride=s, pad=p, ),
             bn=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
         )
-
-    def __call__(h, test=False):
+        self.act = act
+        
+    def __call__(self, h, test=False):
         h = self.conv(h)
         h = self.bn(h, test)
         h = self.act(h)
@@ -30,11 +31,12 @@ class ConvUnit(Chain):
 class DeconvUnit(Chain):
     def __init__(self, imap, omap, k=4, s=2, p=1, act=F.relu):
         super(DeconvUnit, self).__init__(
-            deconv=L.Deconvolution2D(imap, omap, ksize=4, stride=2, pad=1, ),
+            deconv=L.Deconvolution2D(imap, omap, ksize=k, stride=s, pad=p, ),
             bn=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
         )
-
-    def __call__(h, test=False):
+        self.act = act
+        
+    def __call__(self, h, test=False):
         h = self.deconv(h)
         h = self.bn(h, test)
         h = self.act(h)
@@ -48,7 +50,7 @@ class Encoder(Chain):
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
         )
         
-    def __call__(x, test=False):
+    def __call__(self, x, test=False):
         h = self.convunit0(x, test)
         h = self.convunit1(h, test)
         return h
@@ -62,8 +64,8 @@ class Decoder(Chain):
         )
         self.act= act
 
-    def __call__(x, test=False):
-        h = self.convunit0(x, test)
+    def __call__(self, x, test=False):
+        h = self.deconvunit0(x, test)
         h = self.deconv(h)
         h = F.tanh(h)
         return h
@@ -80,10 +82,10 @@ class Generator0(Chain):
         self.h = h
         self.w = w
         
-    def __call__(z, test=False):
+    def __call__(self, z, test=False):
         h = self.linear(z)
         h = self.bn(h, test)
-        h = F.reshape(h, (self.omap, self.h, self.w))
+        h = F.reshape(h, (h.shape[0], self.omap, self.h, self.w))
         h = self.act(h)
         return h
 
@@ -98,13 +100,13 @@ class Generator(Chain):
         )
         self.act= act
 
-    def __call__(h, z, test=False):
+    def __call__(self, h, z, test=False):
         hz = self.generator0(z, test)
         h = F.concat((h, hz))
         h = self.deconvunit0(h, test)
         h = self.deconvunit1(h, test)
         h = self.deconv(h)
-        h = F.act(h)
+        h = F.tanh(h)
         return h
 
 class Discriminator(Chain):
@@ -112,16 +114,16 @@ class Discriminator(Chain):
     def __init__(self, device=None, act=F.relu):
         super(Discriminator, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
-            convunit1=ConvUnit(1, 128, k=4, s=2, p=1, act=act),
+            convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
             linear=L.Linear(128, 10), 
         )
         self.act= act
 
-    def __call__(x, test=False):
+    def __call__(self, x, test=False):
         h = self.convunit0(x, test)
         h = self.convunit1(h, test)
         h = F.average_pooling_2d(h, (7, 7))
-        h = linear(h)
+        h = self.linear(h)
         h = F.sigmoid(h)
         return h
     
