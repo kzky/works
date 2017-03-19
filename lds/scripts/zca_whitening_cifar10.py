@@ -29,11 +29,10 @@ def main():
     # ZCA Whitening
     eps = 1e-12
     sqlam = np.sqrt(lam + eps)
-    Uzca = np.dot(U/sqlam[np.newaxis, :], U.T)
-    Z = np.dot(X, Uzca.T)
+    W_zca = np.dot(U/sqlam[np.newaxis, :], U.T)
 
     # Save
-    np.save(fpath_out, {"Z": Z})
+    np.save(fpath_out, {"W_zca": W_zca})
 
 
 if __name__ == '__main__':
