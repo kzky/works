@@ -605,9 +605,9 @@ class Experiment009(Experiment006):
 
         # frobenious conv loss
         l_fc_l = reduce(lambda x, y: x + y, 
-                        [self.fc_loss(h) for h in self.ae.encoder.hiddens] \
+                        [self.fc_loss(h) for h in self.ae.encoder.hiddens]) \
                         + reduce(lambda x, y: x + y, 
-                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens]
+                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens])
         l_fc_l = self.lambda_ * l_fc_l
 
         # loss for labeled samples
@@ -634,9 +634,9 @@ class Experiment009(Experiment006):
 
         # frobenious conv loss
         l_fc_u = reduce(lambda x, y: x + y, 
-                        [self.fc_loss(h) for h in self.ae.encoder.hiddens] \
+                        [self.fc_loss(h) for h in self.ae.encoder.hiddens]) \
                         + reduce(lambda x, y: x + y, 
-                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens]
+                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens])
         l_fc_u = self.lambda_ * l_fc_u
 
         # loss for unlabeled samples
