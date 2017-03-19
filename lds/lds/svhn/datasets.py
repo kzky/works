@@ -141,7 +141,8 @@ class SVHNDataReader(object):
             # Rotation
             n = np.random.choice(np.arange(-15, 15))
             M = cv2.getRotationMatrix2D((32/2, 32/2), n, 1)
-            dst = cv2.warpAffine(img, M, (32, 32))
+            dst = cv2.warpAffine(img.transpose(1, 2, 0), M, (32, 32))
+            imgs_[i] = dst.transpose(2, 0, 1)
         return imgs_
 
 class Separator(object):
