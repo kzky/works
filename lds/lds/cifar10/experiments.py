@@ -565,7 +565,7 @@ class Experiment009(Experiment006):
             act=act, 
         )
         # Frobenious Conv Loss
-        self.fc_loss = FrobeniousConvLoss()
+        self.fc_loss = FrobeniousConvLoss(self.device)
         
         # Model
         from lds.cifar10.cnn_model_004 import AutoEncoderWithMLP
