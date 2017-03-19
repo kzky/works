@@ -9,7 +9,7 @@ def main():
 
     # input/output paths
     fpath_inp = os.path.join(home, "datasets/cifar10/cifar-10.npz")
-    fpath_out = os.path.join(home, "datasets/cifar10/zca_components.npz") # Z; ZCA whitening matrix saved
+    fpath_out = os.path.join(home, "datasets/cifar10/zca_components") # Z; ZCA whitening matrix saved
 
     # Pre setting
     X = np.load(fpath_inp)["train_x"]  # n x d matrix of cifar 10 training samples
