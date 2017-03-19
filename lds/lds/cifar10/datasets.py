@@ -142,7 +142,7 @@ class Cifar10DataReader(object):
 
     def _transform(self, imgs):
         imgs_ = np.zeros_like(imgs)
-        for i, img in enumerate(imags):
+        for i, img in enumerate(imgs):
             # random flip
             if np.random.randint(2):
                 imgs_[i] = img[i, :, :, ::-1]
