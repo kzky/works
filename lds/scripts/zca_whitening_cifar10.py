@@ -2,6 +2,7 @@ import cv2
 import scipy
 import numpy as np
 import os
+import time
 
 def main():
     home = os.environ.get("HOME")
@@ -20,7 +21,10 @@ def main():
     
     # Eigen value decomposition
     C = np.dot(X.T, X) / N
+    st = time.time()
     U, lam, V = np.linalg.svd(C)
+    et = time.time() - st
+    print("ElapsedTime:{}[s]".format(et))
     
     # ZCA Whitening
     eps = 1e-12
