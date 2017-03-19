@@ -99,8 +99,8 @@ class DeconvUnit(Chain):
 
     def __init__(self, maps, act=F.relu):
         super(DeconvUnit, self).__init__(
-            deconv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
-            bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
+            deconv0=L.Convolution2D(maps, maps/2, 3, stride=1, pad=1),
+            bn0=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
@@ -114,9 +114,9 @@ class DeconvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(DeconvUnitPoolFinetune, self).__init__(
             deconv_unit=DeconvUnit(maps, act),
-            deconv_pool=L.Deconvolution2D(maps, maps, 4, stride=2, pad=1),
-            bn_pool=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
-            deconv=L.Deconvolution2D(maps, maps/2, 3, stride=1, pad=1),
+            deconv_pool=L.Deconvolution2D(maps/2, maps/2, 4, stride=2, pad=1),
+            bn_pool=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
+            deconv=L.Deconvolution2D(maps/2, maps/2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
