@@ -373,3 +373,94 @@ class Experiment006(Experiment005):
         self.optimizer.use_cleargrads()
 
         self.lambda_ = 1.0
+
+class Experiment007(Experiment006):
+    """Regularize with reconstruction between all hiddens except for one after 
+    max_pooling and with Entropy Regularization on at the last using model 003 
+    (one linear).  
+
+    Regularize all hiddens with LDS loss
+
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment007, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        # Model
+        from lds.cifar10.cnn_model_004 import AutoEncoderWithMLP
+        self.ae = AutoEncoderWithMLP(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+        self.lambda_ = 1.0
+        
+    def train(self, x_l, y_l, x_u):
+        # Labeled samples
+        h = self.ae.encoder(x_l)
+        y = self.ae.mlp(h,)
+        x_rec = self.ae.decoder(h)
+
+        # cronss entropy loss
+        l_ce_l = 0
+        l_ce_l += F.softmax_cross_entropy(y, y_l)
+
+        # negative entropy loss
+        l_ne_l = 0
+        l_ne_l += self.ne_loss(y) \
+                  + reduce(lambda x, y: x + y, 
+                           [self.ne_loss(h) for h in self.ae.encoder.hiddens]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self.ne_loss(h) for h in self.ae.decoder.hiddens])
+        l_ne_l = self.lambda_ * l_ne_l
+
+        # reconstruction loss
+        l_rec_l = 0
+        l_rec_l += self.recon_loss(x_l, x_rec) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                self.ae.encoder.hiddens,
+                                self.ae.decoder.hiddens[::-1])])
+        l_rec_l = self.lambda_ * l_rec_l
+
+        # loss for labeled samples
+        loss_l = l_ce_l + l_ne_l + l_rec_l
+
+        # Unlabeled samples
+        h = self.ae.encoder(x_u)
+        y = self.ae.mlp(h)
+        x_rec = self.ae.decoder(h)
+
+        # negative entropy loss
+        l_ne_u = 0
+        l_ne_u += self.ne_loss(y) \
+                  + reduce(lambda x, y: x + y, 
+                           [self.ne_loss(h) for h in self.ae.encoder.hiddens]) \
+                           + reduce(lambda x, y: x + y, 
+                                    [self.ne_loss(h) for h in self.ae.decoder.hiddens])
+        l_ne_u = self.lambda_ * l_ne_u
+
+        # reconstruction loss
+        l_rec_u = 0
+        l_rec_u += self.recon_loss(x_u, x_rec) \
+                   + reduce(lambda x, y: x + y,
+                            [self.recon_loss(x, y) for x, y in zip(
+                                self.ae.encoder.hiddens,
+                                self.ae.decoder.hiddens[::-1])])
+        l_rec_u = self.lambda_ * l_rec_u
+
+        # loss for unlabeled samples
+        loss_u = l_ne_u + l_rec_u
+
+        loss = loss_l + loss_u
+
+        # Backward and Update
+        self.ae.cleargrads()
+        loss.backward()
+        self.optimizer.update()
