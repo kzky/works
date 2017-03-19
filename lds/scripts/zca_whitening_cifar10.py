@@ -32,7 +32,7 @@ def main():
     W_zca = np.dot(U/sqlam[np.newaxis, :], U.T)
 
     # Save
-    np.save(fpath_out, **{"W_zca": W_zca, "X_mean": X_mean})
+    np.savez(fpath_out, **{"W_zca": W_zca, "X_mean": X_mean})
 
 
 if __name__ == '__main__':
