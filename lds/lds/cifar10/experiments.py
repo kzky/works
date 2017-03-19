@@ -243,7 +243,7 @@ class Experiment003(Experiment000):
         self.optimizer.use_cleargrads()
         
 class Experiment004(Experiment000):
-    """Regularize with reconstruction and with Entropy Regularization on at the last. Same as mnist.experiment033
+    """Regularize with reconstruction and with Entropy Regularization on at the last using model 002 (many linear)
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
@@ -327,7 +327,7 @@ class Experiment004(Experiment000):
         self.optimizer.update()
         
 class Experiment005(Experiment004):
-    """Regularize with reconstruction and with Entropy Regularization on at the last. 
+    """Regularize with reconstruction and with Entropy Regularization on at the last using model 003 (one linear). 
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
@@ -339,6 +339,31 @@ class Experiment005(Experiment004):
         
         # Model
         from lds.cifar10.cnn_model_003 import AutoEncoderWithMLP
+        self.ae = AutoEncoderWithMLP(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+        self.lambda_ = 1.0
+
+class Experiment006(Experiment005):
+    """Regularize with reconstruction between all hiddens except for one after 
+    max_pooling and with Entropy Regularization on at the last using model 003 
+    (one linear). 
+
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment006, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        # Model
+        from lds.cifar10.cnn_model_004 import AutoEncoderWithMLP
         self.ae = AutoEncoderWithMLP(act)
         self.ae.to_gpu(device) if self.device else None
 
