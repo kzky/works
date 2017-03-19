@@ -170,7 +170,7 @@ class FrobeniousConvLoss(object):
         # (b, c, h, w) -> (b, h, w, c) -> (b*h*w, c) -> (b*h*w, b*h*w)
         h = F.transpose(h, (0, 2, 3, 1))
         shape = h.shape
-        h = F.reshape(h, (np.prod(shape[0:3]), np.shape[3]))
+        h = F.reshape(h, (np.prod(shape[0:3]), shape[3]))
         A = F.linear(h, h)
         
         # Compute square of Frobenius norm 
