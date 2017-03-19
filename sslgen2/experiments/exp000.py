@@ -1,6 +1,6 @@
-from sslgen2.experiments import Experiment000
+from sslgen2.mnist.experiments import Experiment000
 from sslgen2.utils import to_device
-from sslgen2.datasets import MNISTDataReader, Separator
+from sslgen2.mnist.datasets import MNISTDataReader, Separator
 import numpy as np
 import os
 import numpy as np
@@ -38,7 +38,7 @@ def main():
     data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls,
-                                  da=True
+                                  da=True,
                                   shape=True)
     exp = Experiment000(
         device,
