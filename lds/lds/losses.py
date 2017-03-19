@@ -158,3 +158,32 @@ class JensenShannonDivergenceLoss(Chain):
 
         return (kl0 + kl1) / 2
 
+class FrobeniousConvLoss(object):
+
+    def __init__(self, ):
+        super(FrobeniousConvLoss, self).__init__()
+
+    def __call__(self, h):
+        if len(h.shape) != 4:
+            return 0
+        
+        # (b, c, h, w) -> (b, h, w, c) -> (b*h*w, c) -> (b*h*w, b*h*w)
+        h = F.transpose(h, (0, 2, 3, 1))
+        shape = h.shape
+        h = F.reshape(h, (np.prod(shape[0:3]), np.shape[3]))
+        A = F.linear(h, h)
+        
+        # Compute square of Frobenius norm 
+        xp = cuda.get_array_module(h.data)
+        I = xp.identity(h.shape[0])
+        h = F.sum(F.squere(A - I)) / np.prod(shape)
+
+        return h
+        
+        
+        
+        
+
+        
+        
+    
