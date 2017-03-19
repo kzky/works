@@ -15,7 +15,7 @@ import time
 from sslgen2.utils import to_device
 
 class ConvUnit(Chain):
-    def __init__(imap, omap, k=4, s=2, p=1, act=F.relu):
+    def __init__(self, imap, omap, k=4, s=2, p=1, act=F.relu):
         super(ConvUnit, self).__init__(
             conv=L.Convolution2D(imap, omap, ksize=k, stride=s, pad=p, ),
             bn=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
@@ -28,7 +28,7 @@ class ConvUnit(Chain):
         return h
 
 class DeconvUnit(Chain):
-    def __init__(imap, omap, k=4, s=2, p=1, act=F.relu):
+    def __init__(self, imap, omap, k=4, s=2, p=1, act=F.relu):
         super(DeconvUnit, self).__init__(
             deconv=L.Deconvolution2D(imap, omap, ksize=4, stride=2, pad=1, ),
             bn=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
@@ -42,7 +42,7 @@ class DeconvUnit(Chain):
         
 class Encoder(Chain):
 
-    def __init__(device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
@@ -55,7 +55,7 @@ class Encoder(Chain):
 
 class Decoder(Chain):
 
-    def __init__(device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
             deconvunit0=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
@@ -70,7 +70,7 @@ class Decoder(Chain):
 
 class Generator0(Chain):
 
-    def __init__(omap, h, w, dim=100, device=None, act=F.relu,):
+    def __init__(self, omap, h, w, dim=100, device=None, act=F.relu,):
         super(Generator0, self).__init__(
             linear=L.Linear(dim, omap*h*w),
             bn=L.BatchNormalization(omap*h*w, use_cudnn=True)
@@ -89,7 +89,7 @@ class Generator0(Chain):
 
 class Generator(Chain):
 
-    def __init__(device=None, act=F.relu ,dim=100):
+    def __init__(self, device=None, act=F.relu ,dim=100):
         super(Generator, self).__init__(
             generator0=Generator0(128, 7, 7, dim=dim, device=device, act=act),
             deconvunit0=DeconvUnit(256, 128, k=1, s=1, p=0, act=act),
@@ -109,7 +109,7 @@ class Generator(Chain):
 
 class Discriminator(Chain):
 
-    def __init__(device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu):
         super(Discriminator, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(1, 128, k=4, s=2, p=1, act=act),
