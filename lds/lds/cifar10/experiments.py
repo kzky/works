@@ -118,7 +118,7 @@ class Experiment000(object):
 
 
 class Experiment001(Experiment000):
-    """Regularize hiddnes of decoders with LDS.
+    """Regularize output with LDS loss
 
     Using max pooling in Encoder and deconvolution instead of unpooling in 
     Decoder, and regularize NOT between maxpooing and upsample 
@@ -189,7 +189,7 @@ class Experiment001(Experiment000):
         self.optimizer.update()
     
 class Experiment002(Experiment001):
-    """Regularize hiddnes of decoders with LDS.
+    """Regularize output with LDS loss
 
     Using max pooling in Encoder and deconvolution instead of unpooling in 
     Decoder, and regularize NOT between maxpooing and upsample 
