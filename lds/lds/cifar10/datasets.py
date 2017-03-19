@@ -141,6 +141,13 @@ class Cifar10DataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
+        imgs_ = np.zeros_like(imgs)
+        for i, img in enumerate(imags):
+            # random flip
+            if np.random.randint(2):
+                imgs_[i] = img[i, :, :, ::-1]
+            else:
+                imgs_[i] = img[i]
         return imgs
 
 class Separator(object):
