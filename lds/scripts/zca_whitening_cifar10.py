@@ -29,7 +29,7 @@ def main():
     # ZCA Whitening
     eps = 1e-12
     sqlam = np.sqrt(lam + eps)
-    Uzca = np.dot(U/sqlam[np.newais, :], U.T)
+    Uzca = np.dot(U/sqlam[np.newaxis, :], U.T)
     Z = np.dot(X, Uzca.T)
 
     # Save
