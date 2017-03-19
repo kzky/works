@@ -12,8 +12,7 @@ import chainer.links as L
 from collections import OrderedDict
 import logging
 import time
-from utils import to_device
-from chainer_fix import BatchNormalization
+from sslgen2.utils import to_device
 
 class ConvUnit(Chain):
     def __init__(imap, omap, k=4, s=2, p=1, act=F.relu):

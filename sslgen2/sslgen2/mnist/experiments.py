@@ -16,7 +16,6 @@ import cv2
 import shutil
 import csv
 from sslgen2.utils import to_device
-from sslgen2.chainer_fix import BatchNormalization
 from sslgen2.losses import ReconstructionLoss, LSGANLoss
 from sklearn.metrics import confusion_matrix
 
