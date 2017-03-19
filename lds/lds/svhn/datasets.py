@@ -136,8 +136,13 @@ class SVHNDataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
-        #TODO
-        return imgs
+        imgs_ = np.zeros_like(imgs)
+        for i, img in enumerate(imgs):
+            # Rotation
+            n = np.random.choice(np.arange(-15, 15))
+            M = cv2.getRotationMatrix2D((32/2, 32/2), n, 1)
+            dst = cv2.warpAffine(img.reshape(32, 32), M, (32, 32))
+        return imgs_
 
 class Separator(object):
     """Seprate the original samples to labeled samples and unlabeled samples.
