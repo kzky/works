@@ -54,7 +54,7 @@ class Cifar10DataReader(object):
 
         self._n_l_train_data = len(self.l_train_data["train_x"])
         self._n_u_train_data = len(self.u_train_data["train_x"])
-        self._n_test_data = len(self.test_data["train_x"])
+        self._n_test_data = len(self.test_data["test_x"])
         self._n_cls = n_cls
         self._da = da
         self._shape = shape
