@@ -14,12 +14,13 @@ class Cifar10DataReader(object):
             "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/cifar-10.npz", 
             test_path=\
             "/home/kzk/.chainer/dataset/pfnet/chainer/cifar10/cifar-10.npz",
+            zca_path=None,
             batch_size=64,
             n_cls=10,
             da=False,
             shape=False,
     ):
-            
+        # Load dataset
         self.l_train_data = dict(np.load(l_train_path))
         _u_train_data = np.load(u_train_path)
         self.u_train_data = {
@@ -29,6 +30,23 @@ class Cifar10DataReader(object):
         self.test_data = {
             "train_x": _test_data["test_x"], 
             "train_y": _test_data["test_y"]}
+
+        # ZCA Whitening
+        if zca_path is not None:
+            zca_comp = np.load(zca_path)
+            X_mean = zca_comp["X_mean"]
+            W_zca = zca_comp["W_zca"]
+            
+            self.l_train_data = {
+                "train_x": np.dot(self.l_train_data["train_x"] - X_mean, W_zca.T),
+                "train_y": self.l_train_data["train_y"]}
+            self.u_train_data = {
+                "train_x":np.dot(self.u_train_data["train_x"] - X_mean, W_zca.T), 
+                "train_y":self.u_train_data["train_y"]}
+            _test_data = np.load(test_path)
+            self.test_data = {
+                "train_x": np.dot(self.test_data["test_x"] - X_mean, W_zca.T), 
+                "train_y": self.test_data["test_y"]}
 
         self._batch_size = batch_size
         self._next_position_l_train = 0
@@ -68,7 +86,7 @@ class Cifar10DataReader(object):
         end = self._next_position_l_train+self._batch_size
         batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.l_train_data["train_y"][beg:end]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
         if self._da:
             batch_data_x = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
@@ -102,7 +120,7 @@ class Cifar10DataReader(object):
         end = self._next_position_u_train+self._batch_size
         batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.u_train_data["train_y"][beg:end]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
         if self._da:
             batch_data_x = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
@@ -134,7 +152,7 @@ class Cifar10DataReader(object):
         # Read data
         batch_data_x_ = self.test_data["train_x"]
         batch_data_y_ = self.test_data["train_y"]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         batch_data_x = self.reshape(batch_data_x)
