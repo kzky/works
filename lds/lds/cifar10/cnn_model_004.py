@@ -34,7 +34,7 @@ class ConvUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(ConvUnitPoolFinetune, self).__init__(
             conv_unit=ConvUnit(maps, act),
-            conv=L.Convolution2D(maps, maps*2, 3, stride=1, pad=0),
+            conv=L.Convolution2D(maps, maps*2, 1, stride=1, pad=0),
             bn=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
         )
         self.act = act
