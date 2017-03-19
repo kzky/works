@@ -28,8 +28,8 @@ class Cifar10DataReader(object):
             "train_y":_u_train_data["train_y"]}
         _test_data = np.load(test_path)
         self.test_data = {
-            "train_x": _test_data["test_x"], 
-            "train_y": _test_data["test_y"]}
+            "test_x": _test_data["test_x"], 
+            "test_y": _test_data["test_y"]}
 
         # ZCA Whitening
         if zca_path is not None:
@@ -45,8 +45,8 @@ class Cifar10DataReader(object):
                 "train_y":self.u_train_data["train_y"]}
             _test_data = np.load(test_path)
             self.test_data = {
-                "train_x": np.dot(self.test_data["test_x"] - X_mean, W_zca.T), 
-                "train_y": self.test_data["test_y"]}
+                "test_x": np.dot(self.test_data["test_x"] - X_mean, W_zca.T), 
+                "test_y": self.test_data["test_y"]}
 
         self._batch_size = batch_size
         self._next_position_l_train = 0
