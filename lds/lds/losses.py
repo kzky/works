@@ -175,10 +175,10 @@ class FrobeniousConvLoss(object):
         
         # Compute square of Frobenius norm 
         xp = cuda.get_array_module(h.data)
-        I = xp.identity(h.shape[0])
-        h = F.sum(F.squere(A - I)) / np.prod(shape)
+        I_ = xp.identity(h.shape[0])
+        l = F.sum(F.squere(A - I_)) / np.prod(shape)
 
-        return h
+        return l
         
         
         
