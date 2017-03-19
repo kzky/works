@@ -150,8 +150,8 @@ class Cifar10DataReader(object):
         """
 
         # Read data
-        batch_data_x_ = self.test_data["train_x"]
-        batch_data_y_ = self.test_data["train_y"]
+        batch_data_x_ = self.test_data["test_x"]
+        batch_data_y_ = self.test_data["test_y"]
         batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
