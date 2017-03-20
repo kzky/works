@@ -96,47 +96,49 @@ class Experiment000(object):
 
     def test(self, x_l, y_l, epoch):
         """generate samples, then save"""
-        x_gen = self.generate(x_l, test)
+        x_gen = self.generate(x_l, test=True)
         self.save(x_gen, epoch)
 
-        d_x_gen = self.discriminator(x_gen, test)
-        return d_x_gen
+        d_x_gen = self.discriminator(x_gen, test=True)
+        loss = self.lsgan_loss(d_x_gen)
+        return loss
         
     def generate(self, x_l, test):
         h = self.encoder(x_l, test)
-        xp = cuda.get_array_module(x)
-        z = Variable(cuda.to_cpu(xp.random.rand(x.shape[0], self.dim), self.device))
+        xp = cuda.get_array_module(x_l)
+        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
         x_gen = self.generator(h, z, test)
         return x_gen
 
     def save(self, x_gen, epoch):
         # Create dir path
         dpath = "./images_{:05d}".format(epoch)
-        if os.path.exist(dpath):
-            os.removedirs(dpath)
-            os.makedir(dpath)
+        if os.path.exists(dpath):
+            shutil.rmtree(dpath)
+            os.makedirs(dpath)
         else:
-            os.makedir(dpath)
+            os.makedirs(dpath)
 
         # Save
         imgs = cuda.to_cpu(x_gen.data)
+        imgs = 127.5 * imgs + 127.5
         for i, img in enumerate(imgs):
-            fpath = os.path.join(dpath, "_{:05d}".format(i))
-            cv2.imwrite(fpath, img)
+            fpath = os.path.join(dpath, "_{:05d}.png".format(i))
+            cv2.imwrite(fpath, np.squeeze(img))
 
     def serialize(self, epoch):
         # Create dir path
         dpath = "./model_{:05d}".format(epoch)
-        if os.path.exist(dpath):
-            os.removedirs(dpath)
-            os.makedir(dpath)
+        if os.path.exists(dpath):
+            shutil.rmtree(dpath)
+            os.makedirs(dpath)
         else:
-            os.makedir(dpath)
+            os.makedirs(dpath)
 
         # Serialize
-        fpath = os.path.join(fpath, "encoder")
+        fpath = os.path.join(dpath, "encoder.h5py")
         serializers.save_hdf5(fpath, self.encoder)
-        fpath = os.path.join(fpath, "decoder")
+        fpath = os.path.join(dpath, "decoder.h5py")
         serializers.save_hdf5(fpath, self.generator)
         
     def cleargrads(self, ):
