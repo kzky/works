@@ -234,3 +234,18 @@ class Experiment001(Experiment000):
         self.decoder.cleargrads()
         self.generator0.cleargrads()
         self.discriminator.cleargrads()
+
+    def serialize(self, epoch):
+        # Create dir path
+        dpath = "./model_{:05d}".format(epoch)
+        if os.path.exists(dpath):
+            shutil.rmtree(dpath)
+            os.makedirs(dpath)
+        else:
+            os.makedirs(dpath)
+
+        # Serialize
+        fpath = os.path.join(dpath, "encoder.h5py")
+        serializers.save_hdf5(fpath, self.encoder)
+        fpath = os.path.join(dpath, "decoder.h5py")
+        serializers.save_hdf5(fpath, self.generator0)
