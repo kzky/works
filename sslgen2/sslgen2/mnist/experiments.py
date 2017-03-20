@@ -249,3 +249,54 @@ class Experiment001(Experiment000):
         serializers.save_hdf5(fpath, self.encoder)
         fpath = os.path.join(dpath, "decoder.h5py")
         serializers.save_hdf5(fpath, self.generator0)
+
+class Experiment002(Experiment001):
+    """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
+
+    Decoder and Genrator shares parameters.
+    Update Generator0 and Decoder when training generator.
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
+        super(Experiment002, self).__init__(
+            device, learning_rate, act, dim
+        )
+
+        
+    def train(self, x):
+        # Encoder/Decoder
+        h = self.encoder(x)
+        x_rec = self.decoder(h)
+        l_rec = self.recon_loss(x, x_rec)
+        self.cleargrads()
+        l_rec.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+
+        # Discriminator
+        h = Variable(h.data)  # disconnect
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.decoder(self.generator0(z))
+        d_x_gen = self.discriminator(x_gen)
+        d_x_real = self.discriminator(x)
+        l_dis = self.lsgan_loss(d_x_gen, d_x_real)
+        self.cleargrads()
+        l_dis.backward()
+        self.optimizer_dis.update()
+        
+        # Generator
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.decoder(self.generator0(z))
+        d_x_gen = self.discriminator(x_gen)
+        h_gen = self.encoder(x_gen)
+        l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
+        self.cleargrads()
+        self.optimizer_gen.update()
+        self.optimizer_dec.update()
+        
+    def generate(self, x_l, test):
+        xp = cuda.get_array_module(x_l)
+        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.decoder(self.generator0(z, test))
+        return x_gen
