@@ -169,7 +169,7 @@ class Experiment001(Experiment000):
             import Encoder, Decoder, Generator0, Discriminator
         self.encoder = Encoder(device, act)
         self.decoder = Decoder(device, act)
-        self.generator0 = Generator0(device, act ,dim)
+        self.generator0 = Generator0(dim, device, act)
         self.discriminator = Discriminator(device, act)
 
         self.encoder.to_gpu(device) if self.device else None
