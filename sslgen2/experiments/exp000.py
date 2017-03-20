@@ -65,11 +65,11 @@ def main():
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                       for x in data_reader.get_l_train_batch()]
-            d_x_gen = exp.test(x_l, y_l, epoch)
+            loss_d_x_gen = exp.test(x_l, y_l, epoch)
             msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
-                d_x_gen.data)
+                loss_d_x_gen.data)
             print(msg)
             exp.save_model(epoch)
             
