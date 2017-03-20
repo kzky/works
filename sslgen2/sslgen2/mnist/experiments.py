@@ -257,9 +257,45 @@ class Experiment002(Experiment001):
     Update Generator0 and Decoder when training generator.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
-        super(Experiment002, self).__init__(
-            device, learning_rate, act, dim
-        )
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.dim = dim
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.lsgan_loss = LSGANLoss()
+
+        # Model
+        from sslgen2.mnist.cnn_model_001 \
+            import Encoder, Decoder, Generator0, Discriminator
+        self.encoder = Encoder(device, act)
+        self.decoder = Decoder(device, act)
+        self.generator0 = Generator0(dim, device, act)
+        self.discriminator = Discriminator(device, act)
+
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.generator0.to_gpu(device) if self.device else None
+        self.discriminator.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen0 = optimizers.Adam(learning_rate)
+        self.optimizer_gen0.setup(self.generator0)
+        self.optimizer_gen0.use_cleargrads()
+        self.optimizer_gen1 = optimizers.Adam(learning_rate)
+        self.optimizer_gen1.setup(self.decoder)
+        self.optimizer_gen1.use_cleargrads()
+        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis.setup(self.discriminator)
+        self.optimizer_dis.use_cleargrads()
 
         
     def train(self, x):
@@ -292,8 +328,8 @@ class Experiment002(Experiment001):
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
         self.cleargrads()
-        self.optimizer_gen.update()
-        self.optimizer_dec.update()
+        self.optimizer_gen0.update()
+        self.optimizer_gen1.update()
         
     def generate(self, x_l, test):
         xp = cuda.get_array_module(x_l)
