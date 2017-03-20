@@ -71,7 +71,7 @@ def main():
                 time.time() - st, 
                 d_x_gen.data)
             print(msg)
-            exp.save_model(epoch)
+            exp.serialize(epoch)
             
             st = time.time()
             epoch +=1
