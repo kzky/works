@@ -205,7 +205,7 @@ class Experiment001(Experiment000):
         h = Variable(h.data)  # disconnect
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z))
         d_x_gen = self.discriminator(x_gen)
         d_x_real = self.discriminator(x)
         l_dis = self.lsgan_loss(d_x_gen, d_x_real)
@@ -216,7 +216,7 @@ class Experiment001(Experiment000):
         # Generator
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z))
         d_x_gen = self.discriminator(x_gen)
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
@@ -228,3 +228,9 @@ class Experiment001(Experiment000):
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
         x_gen = self.decoder(self.generator0(z, test))
         return x_gen
+
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
+        self.generator0.cleargrads()
+        self.discriminator.cleargrads()
