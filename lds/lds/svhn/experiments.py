@@ -206,6 +206,7 @@ class Experiment001(Experiment000):
 class Experiment002(Experiment001):
     """Regularize with reconstruction and with Entropy Regularization on at the last. Same as mnist.experiment033
 
+    Regularize all hiddens of MLP with LDS loss
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment002, self).__init__(
