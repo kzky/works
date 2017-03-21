@@ -97,7 +97,7 @@ class Experiment000(object):
     def test(self, x_l, y_l, epoch):
         """generate samples, then save"""
         x_gen = self.generate(x_l, test=True)
-        self.save(x_gen, epoch)
+        self.save(x_l, x_gen, epoch)
 
         d_x_gen = self.discriminator(x_gen, test=True)
         loss = self.lsgan_loss(d_x_gen)
@@ -110,20 +110,39 @@ class Experiment000(object):
         x_gen = self.generator(h, z, test)
         return x_gen
 
-    def save(self, x_gen, epoch):
-        # Create dir path
-        dpath = "./images_{:05d}".format(epoch)
-        if os.path.exists(dpath):
-            shutil.rmtree(dpath)
-            os.makedirs(dpath)
+    def save(self, x_l, x_gen, epoch):
+        # Create dir path for genenrated images
+        dpath_gen = os.path.join(os.path.basename(__file__),
+                                 "gen", 
+                                 "images_{:05d}".format(epoch))
+        if os.path.exists(dpath_gen):
+            shutil.rmtree(dpath_gen)
+            os.makedirs(dpath_gen)
         else:
-            os.makedirs(dpath)
+            os.makedirs(dpath_gen)
 
-        # Save
+        # Create dir path for real images
+        dpath_real = os.path.join(os.path.basename(__file__),
+                                 "real", 
+                                 "images_{:05d}".format(epoch))
+        if os.path.exists(dpath_real):
+            shutil.rmtree(dpath_real)
+            os.makedirs(dpath_real)
+        else:
+            os.makedirs(dpath_real)
+
+        # Save labeled images
+        imgs = cuda.to_cpu(x_l.data)
+        imgs = 127.5 * imgs + 127.5
+        for i, img in enumerate(imgs):
+            fpath = os.path.join(dpath_real, "{:05d}.png".format(i))
+            cv2.imwrite(fpath, np.squeeze(img))
+
+        # Save generated images
         imgs = cuda.to_cpu(x_gen.data)
         imgs = 127.5 * imgs + 127.5
         for i, img in enumerate(imgs):
-            fpath = os.path.join(dpath, "_{:05d}.png".format(i))
+            fpath = os.path.join(dpath_gen, "{:05d}.png".format(i))
             cv2.imwrite(fpath, np.squeeze(img))
 
     def serialize(self, epoch):
@@ -418,7 +437,7 @@ class Experiment003(Experiment000):
     def test(self, x_l, y_l, epoch):
         """generate samples, then save"""
         x_gen = self.generate(x_l, test=True)
-        self.save(x_gen, epoch)
+        self.save(x_l, x_gen, epoch)
         h = self.encoder(x_l, test=True)
         d_x_gen = self.discriminator(x_gen, h,  test=True)
         loss = self.lsgan_loss(d_x_gen)
