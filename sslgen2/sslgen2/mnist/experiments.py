@@ -459,6 +459,9 @@ class Experiment004(Experiment003):
         self.optimizer_dec = optimizers.Adam(learning_rate)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen.setup(self.generator)
+        self.optimizer_gen.use_cleargrads()
         self.optimizer_dis = optimizers.Adam(learning_rate)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
@@ -573,5 +576,5 @@ class Experiment005(Experiment003):
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
         self.cleargrads()
-        self.optimizer_gen.update()
+        self.optimizer_dec.update()
         
