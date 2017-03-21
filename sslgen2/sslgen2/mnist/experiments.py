@@ -610,13 +610,79 @@ class Experiment005(Experiment003):
 class Experiment006(Experiment005):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
-    - Feature matching is taken between convolution ouputs.
     - Discriminator is conditioned on hidden feature of x_real. 
     - Decoder and Generator shares parameters.
     - Decoder and Generator shares optimizer.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
-        pass
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.dim = dim
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.lsgan_loss = LSGANLoss()
+
+        # Model
+        from sslgen2.mnist.cnn_model_003 \
+            import Encoder, Decoder, Discriminator
+        self.encoder = Encoder(device, act)
+        self.decoder = Decoder(device, act)
+        self.generator = self.decoder
+        self.discriminator = Discriminator(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.discriminator.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis.setup(self.discriminator)
+        self.optimizer_dis.use_cleargrads()
+
+    def train(self, x):
+        # Encoder/Decoder
+        h = self.encoder(x)
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_rec = self.decoder(h, z)
+        l_rec = self.recon_loss(x, x_rec)
+        self.cleargrads()
+        l_rec.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+
+        # Discriminator
+        h = Variable(h.data)  # disconnect
+        h.unchain_backward()
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.generator(h, z)
+        d_x_gen = self.discriminator(x_gen, h)
+        d_x_real = self.discriminator(x, h)
+        l_dis = self.lsgan_loss(d_x_gen, d_x_real)
+        self.cleargrads()
+        l_dis.backward()
+        self.optimizer_dis.update()
+        
+        # Generator
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.generator(h, z)
+        d_x_gen = self.discriminator(x_gen, h)
+        h_gen = self.encoder(x_gen)
+        l_gen = self.lsgan_loss(d_x_gen)
+        self.cleargrads()
+        l_gen.backward()
+        self.optimizer_dec.update()
+
 
 class Experiment007(Experiment000):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
