@@ -49,16 +49,16 @@ class Experiment000(object):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -199,16 +199,16 @@ class Experiment001(Experiment000):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator0)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -306,19 +306,19 @@ class Experiment002(Experiment001):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen0 = optimizers.Adam(learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen0.setup(self.generator0)
         self.optimizer_gen0.use_cleargrads()
-        self.optimizer_gen1 = optimizers.Adam(learning_rate)
+        self.optimizer_gen1 = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen1.setup(self.decoder)
         self.optimizer_gen1.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -394,16 +394,16 @@ class Experiment003(Experiment000):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -480,16 +480,16 @@ class Experiment004(Experiment003):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -561,13 +561,13 @@ class Experiment005(Experiment003):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -637,13 +637,13 @@ class Experiment006(Experiment005):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -713,16 +713,16 @@ class Experiment007(Experiment000):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -789,16 +789,16 @@ class Experiment008(Experiment003):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -876,16 +876,16 @@ class Experiment009(Experiment001):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator0)
         self.optimizer_gen.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
@@ -982,19 +982,19 @@ class Experiment010(Experiment002):
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
-        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen0 = optimizers.Adam(learning_rate)
+        self.optimizer_gen0 = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen0.setup(self.generator0)
         self.optimizer_gen0.use_cleargrads()
-        self.optimizer_gen1 = optimizers.Adam(learning_rate)
+        self.optimizer_gen1 = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen1.setup(self.decoder)
         self.optimizer_gen1.use_cleargrads()
-        self.optimizer_dis = optimizers.Adam(learning_rate)
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
