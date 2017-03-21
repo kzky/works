@@ -417,3 +417,12 @@ class Experiment003(Experiment000):
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
         self.cleargrads()
         self.optimizer_gen.update()
+
+    def test(self, x_l, y_l, epoch):
+        """generate samples, then save"""
+        x_gen = self.generate(x_l, test=True)
+        self.save(x_gen, epoch)
+        h = self.encoder(x_l, test=True)
+        d_x_gen = self.discriminator(x_gen, h,  test=True)
+        loss = self.lsgan_loss(d_x_gen)
+        return loss
