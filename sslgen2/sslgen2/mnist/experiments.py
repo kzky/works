@@ -149,6 +149,8 @@ class Experiment000(object):
 
 class Experiment001(Experiment000):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
+    
+    Feature matching is taken between convolution ouputs.
 
     Decoder and Genrator shares parameters.
     Update Generator0 only when training generator, i.e., not train Decoder.
@@ -252,7 +254,9 @@ class Experiment001(Experiment000):
 
 class Experiment002(Experiment001):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
-
+    
+    Feature matching is taken between convolution ouputs.
+    
     Decoder and Genrator shares parameters.
     Update Generator0 and Decoder when training generator.
     """
