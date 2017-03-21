@@ -176,7 +176,7 @@ class FrobeniousConvLoss(object):
         s = 0
         xp = cuda.get_array_module(h.data)
         I_ = xp.identity(n)
-        l_ = to_device(l_, device)
+        I_ = Variable(to_device(I_, device))
         for h_ in h:
             s += F.sum(F.square(F.linear(h_, h_) - I_))
         l = s / (b * n * c)
