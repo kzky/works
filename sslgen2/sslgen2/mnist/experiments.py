@@ -427,7 +427,7 @@ class Experiment003(Experiment000):
         loss = self.lsgan_loss(d_x_gen)
         return loss
 
-class Experiment004(Experiment000):
+class Experiment004(Experiment003):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
     Feature matching is taken between convolution ouputs.
