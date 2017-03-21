@@ -70,6 +70,25 @@ class Decoder(Chain):
         h = F.tanh(h)
         return h
 
+class Generator0(Chain):
+
+    def __init__(self, omap, h, w, dim=100, device=None, act=F.relu,):
+        super(Generator0, self).__init__(
+            linear=L.Linear(dim, omap*h*w),
+            bn=L.BatchNormalization(omap*h*w, use_cudnn=True)
+        )
+        self.act = act
+        self.omap = omap
+        self.h = h
+        self.w = w
+        
+    def __call__(self, z, test=False):
+        h = self.linear(z)
+        h = self.bn(h, test)
+        h = F.reshape(h, (h.shape[0], self.omap, self.h, self.w))
+        h = self.act(h)
+        return h
+
 class Generator(Chain):
 
     def __init__(self, device=None, act=F.relu ,dim=100):
