@@ -555,7 +555,9 @@ class Experiment008(Experiment007):
 class Experiment009(Experiment006):
     """Regularize with reconstruction between all hiddens except for one after 
     max_pooling and with Entropy Regularization on at the last using cnn model 
-    003 (one linear). 
+    003 (one linear) and using Frobineus Conv Loss.
+
+    NOTE: Frobineus Conv Loss take too long time, so GIVE UP to use this.
 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
@@ -649,7 +651,7 @@ class Experiment009(Experiment006):
         loss.backward()
         self.optimizer.update()
 
-class Experiment010(Experiment009):
+class Experiment010(Experiment006):
     """Regularize with reconstruction between all hiddens except for one after 
     max_pooling and with Entropy Regularization on at the last using cnn model 
     003 (one linear).
@@ -702,19 +704,12 @@ class Experiment010(Experiment009):
                                 self.ae.decoder.hiddens[::-1])])
         l_rec_l = self.lambda_ * l_rec_l
 
-        # frobenious conv loss
-        l_fc_l = reduce(lambda x, y: x + y, 
-                        [self.fc_loss(h) for h in self.ae.encoder.hiddens]) \
-                        + reduce(lambda x, y: x + y, 
-                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens])
-        l_fc_l = self.lambda_ * l_fc_l
-
         # loss for labeled samples
-        loss_l = l_ce_l + l_ne_l + l_rec_l + l_fc_l
+        loss_l = l_ce_l + l_ne_l + l_rec_l
 
         # Backward and Update
         self.ae.cleargrads()
-        loss.backward()
+        loss_l.backward()
         self.optimizer.update()
 
     def train_with_unlabeled(self, x_u):
@@ -736,20 +731,11 @@ class Experiment010(Experiment009):
                                 self.ae.decoder.hiddens[::-1])])
         l_rec_u = self.lambda_ * l_rec_u
 
-        # frobenious conv loss
-        l_fc_u = reduce(lambda x, y: x + y, 
-                        [self.fc_loss(h) for h in self.ae.encoder.hiddens]) \
-                        + reduce(lambda x, y: x + y, 
-                                 [self.fc_loss(h) for h in self.ae.decoder.hiddens])
-        l_fc_u = self.lambda_ * l_fc_u
-
         # loss for unlabeled samples
-        loss_u = l_ne_u + l_rec_u + l_fc_u
-
-        loss = loss_l + loss_u
+        loss_u = l_ne_u + l_rec_u
 
         # Backward and Update
         self.ae.cleargrads()
-        loss.backward()
+        loss_u.backward()
         self.optimizer.update()
         
