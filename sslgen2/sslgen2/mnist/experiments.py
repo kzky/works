@@ -171,7 +171,7 @@ class Experiment001(Experiment000):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
     
     - Feature matching is taken between convolution ouputs.
-    - Decoder and Genrator shares parameters.
+    - Decoder and Generator shares parameters.
     - Update Generator0 only when training generator, i.e., not train Decoder.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
@@ -276,7 +276,7 @@ class Experiment002(Experiment001):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
     
     - Feature matching is taken between convolution ouputs.
-    - Decoder and Genrator shares parameters.
+    - Decoder and Generator shares parameters.
     - Update Generator0 and Decoder when training generator.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
@@ -452,8 +452,8 @@ class Experiment004(Experiment003):
 
     - Feature matching is taken between convolution ouputs.
     - Discriminator is conditioned on hidden feature of x_real.
-    - Decoder and Genrator shares parameters.
-    - Decoder and Genrator does not share optimizer.
+    - Decoder and Generator shares parameters.
+    - Decoder and Generator does not share optimizer.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -533,8 +533,8 @@ class Experiment005(Experiment003):
 
     - Feature matching is taken between convolution ouputs.
     - Discriminator is conditioned on hidden feature of x_real. 
-    - Decoder and Genrator shares parameters.
-    - Decoder and Genrator shares optimizer.
+    - Decoder and Generator shares parameters.
+    - Decoder and Generator shares optimizer.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -610,8 +610,8 @@ class Experiment006(Experiment005):
 
     - Feature matching is taken between convolution ouputs.
     - Discriminator is conditioned on hidden feature of x_real. 
-    - Decoder and Genrator shares parameters.
-    - Decoder and Genrator shares optimizer.
+    - Decoder and Generator shares parameters.
+    - Decoder and Generator shares optimizer.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         pass
