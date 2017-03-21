@@ -116,7 +116,7 @@ class Discriminator(Chain):
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
             conv_finetune=L.Convolution2D(256, 128, kernel=1, stride=2, pad=0),
-            bn_finetune=L.BatchNormalization(128, decay=0.9, use_cudnn=True)
+            bn_finetune=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             linear=L.Linear(128, 1), 
         )
         self.act= act
