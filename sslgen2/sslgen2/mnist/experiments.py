@@ -95,10 +95,10 @@ class Experiment000(object):
         l_gen.backward()
         self.optimizer_gen.update()
 
-    def test(self, x_l, y_l, epoch):
+    def test(self, x_l, y_l, epoch, filename):
         """generate samples, then save"""
         x_gen = self.generate(x_l, test=True)
-        self.save(x_l, x_gen, epoch)
+        self.save(x_l, x_gen, epoch, filename)
 
         d_x_gen = self.discriminator(x_gen, test=True)
         loss = self.lsgan_loss(d_x_gen)
@@ -111,9 +111,9 @@ class Experiment000(object):
         x_gen = self.generator(h, z, test)
         return x_gen
 
-    def save(self, x_l, x_gen, epoch):
+    def save(self, x_l, x_gen, epoch, filename):
         # Create dir path for genenrated images
-        dpath_gen = os.path.join(os.path.basename(__file__),
+        dpath_gen = os.path.join(filename,
                                  "gen", 
                                  "images_{:05d}".format(epoch))
         if os.path.exists(dpath_gen):
@@ -123,7 +123,7 @@ class Experiment000(object):
             os.makedirs(dpath_gen)
 
         # Create dir path for real images
-        dpath_real = os.path.join(os.path.basename(__file__),
+        dpath_real = os.path.join(filename,
                                  "real", 
                                  "images_{:05d}".format(epoch))
         if os.path.exists(dpath_real):
@@ -146,9 +146,9 @@ class Experiment000(object):
             fpath = os.path.join(dpath_gen, "{:05d}.png".format(i))
             cv2.imwrite(fpath, np.squeeze(img))
 
-    def serialize(self, epoch):
+    def serialize(self, epoch, filename):
         # Create dir path
-        dpath = "./model_{:05d}".format(epoch)
+        dpath = os.path.join(filename, "./model_{:05d}".format(epoch))
         if os.path.exists(dpath):
             shutil.rmtree(dpath)
             os.makedirs(dpath)
@@ -438,10 +438,10 @@ class Experiment003(Experiment000):
         l_gen.backward()
         self.optimizer_gen.update()
 
-    def test(self, x_l, y_l, epoch):
+    def test(self, x_l, y_l, epoch, filename):
         """generate samples, then save"""
         x_gen = self.generate(x_l, test=True)
-        self.save(x_l, x_gen, epoch)
+        self.save(x_l, x_gen, epoch, filename)
         h = self.encoder(x_l, test=True)
         d_x_gen = self.discriminator(x_gen, h,  test=True)
         loss = self.lsgan_loss(d_x_gen)

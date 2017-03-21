@@ -51,6 +51,7 @@ def main():
     print("# Training loop")
     epoch = 1
     st = time.time()
+    filename, _ = os.path.splitext(os.path.basename(__file__))
     for i in range(n_iter):
         # Get data
         x_u, _ = [Variable(to_device(x, device)) \
@@ -64,13 +65,13 @@ def main():
             # Get data
             x_l, y_l = [Variable(to_device(x, device)) \
                       for x in data_reader.get_l_train_batch()]
-            loss_d_x_gen = exp.test(x_l, y_l, epoch)
+            loss_d_x_gen = exp.test(x_l, y_l, epoch, filename)
             msg = "Epoch:{},ElapsedTime:{},Loss:{}".format(
                 epoch, 
                 time.time() - st, 
                 loss_d_x_gen.data)
             print(msg)
-            exp.serialize(epoch)
+            exp.serialize(epoch, filename)
             
             st = time.time()
             epoch +=1
