@@ -22,7 +22,7 @@ from sklearn.metrics import confusion_matrix
 class Experiment000(object):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
-    Feature matching is taken between convolution ouputs.
+    - Feature matching is taken between convolution ouputs.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -150,10 +150,9 @@ class Experiment000(object):
 class Experiment001(Experiment000):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
     
-    Feature matching is taken between convolution ouputs.
-
-    Decoder and Genrator shares parameters.
-    Update Generator0 only when training generator, i.e., not train Decoder.
+    - Feature matching is taken between convolution ouputs.
+    - Decoder and Genrator shares parameters.
+    - Update Generator0 only when training generator, i.e., not train Decoder.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -255,10 +254,9 @@ class Experiment001(Experiment000):
 class Experiment002(Experiment001):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
     
-    Feature matching is taken between convolution ouputs.
-    
-    Decoder and Genrator shares parameters.
-    Update Generator0 and Decoder when training generator.
+    - Feature matching is taken between convolution ouputs.
+    - Decoder and Genrator shares parameters.
+    - Update Generator0 and Decoder when training generator.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -344,9 +342,8 @@ class Experiment002(Experiment001):
 class Experiment003(Experiment000):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
-    Feature matching is taken between convolution ouputs.
-
-    Discriminator is conditioned on hidden feature of x_real. 
+    - Feature matching is taken between convolution ouputs.
+    - Discriminator is conditioned on hidden feature of x_real. 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -430,9 +427,8 @@ class Experiment003(Experiment000):
 class Experiment004(Experiment003):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
-    Feature matching is taken between convolution ouputs.
-
-    Discriminator is conditioned on hidden feature of x_real. 
+    - Feature matching is taken between convolution ouputs.
+    - Discriminator is conditioned on hidden feature of x_real. 
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
         # Settings
@@ -501,4 +497,4 @@ class Experiment004(Experiment003):
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
         self.cleargrads()
-        self.optimizer_dec.update()
+        self.optimizer_gen.update()
