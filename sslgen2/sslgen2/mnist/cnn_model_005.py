@@ -107,7 +107,7 @@ class Discriminator(Chain):
         h = self.convunit1(h, test)
         h_feat = F.average_pooling_2d(h_feat, (7, 7))
         h = F.average_pooling_2d(h, (7, 7))
-        h = F.concat((h, h_feat)
+        h = F.concat((h, h_feat))
         h = self.linear(h)
         #h = F.sigmoid(h)
         return h
