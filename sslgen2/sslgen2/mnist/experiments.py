@@ -622,7 +622,7 @@ class Experiment005(Experiment003):
         # Generator
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator(h, z)
+        x_gen = self.generator(h, hz)
         d_x_gen = self.discriminator(x_gen, h)
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
