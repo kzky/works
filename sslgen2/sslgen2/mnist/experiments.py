@@ -1081,3 +1081,90 @@ class Experiment010(Experiment002):
         x_gen = self.decoder(self.generator0(z, test), test)
         return x_gen
     
+
+class Experiment011(Experiment008):
+    """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
+
+    - Discriminator is conditioned on hidden feature of x_real averaged over 
+    spatial size
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.dim = dim
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.lsgan_loss = LSGANLoss()
+
+        # Model
+        from sslgen2.mnist.cnn_model_002 \
+            import Encoder, Decoder, Generator, Discriminator
+        self.encoder = Encoder(device, act)
+        self.decoder = Decoder(device, act)
+        self.generator = Generator(device, act ,dim)
+        self.discriminator = Discriminator(device, act)
+
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        self.generator.to_gpu(device) if self.device else None
+        self.discriminator.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate, beta1=0.5)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
+        self.optimizer_gen.setup(self.generator)
+        self.optimizer_gen.use_cleargrads()
+        self.optimizer_dis = optimizers.Adam(learning_rate, beta1=0.5)
+        self.optimizer_dis.setup(self.discriminator)
+        self.optimizer_dis.use_cleargrads()
+
+    def train(self, x):
+        # Encoder/Decoder
+        h = self.encoder(x)
+        x_rec = self.decoder(h)
+        l_rec = self.recon_loss(x, x_rec)
+        self.cleargrads()
+        l_rec.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+
+        # Discriminator
+        h = Variable(h.data)  # disconnect
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.generator(h, z)
+        d_x_gen = self.discriminator(x_gen, h)
+        d_x_real = self.discriminator(x, h)
+        l_dis = self.lsgan_loss(d_x_gen, d_x_real)
+        self.cleargrads()
+        l_dis.backward()
+        self.optimizer_dis.update()
+        
+        # Generator
+        xp = cuda.get_array_module(x)
+        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        x_gen = self.generator(h, z)
+        d_x_gen = self.discriminator(x_gen, h)
+        h_gen = self.encoder(x_gen)
+        l_gen = self.lsgan_loss(d_x_gen)
+        self.cleargrads()
+        l_gen.backward()
+        self.optimizer_gen.update()
+
+    def test(self, x_l, y_l, epoch, filename):
+        """generate samples, then save"""
+        x_gen = self.generate(x_l, test=True)
+        self.save(x_l, x_gen, epoch, filename)
+        h = self.encoder(x_l, test=True)
+        d_x_gen = self.discriminator(x_gen, h,  test=True)
+        loss = self.lsgan_loss(d_x_gen)
+        return loss
+    
