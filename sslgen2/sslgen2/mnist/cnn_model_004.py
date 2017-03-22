@@ -48,7 +48,7 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            linear=L.Linear(128, 128),
+            linear=L.Linear(128*7*7, 128),
             bn=L.BatchNormalization(128, decay=0.9)
         )
         
@@ -63,8 +63,8 @@ class Decoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
-            linear=L.Linear(128, 128),
-            bn=L.BatchNormalization(128, decay=0.9)
+            linear=L.Linear(128, 128*7*7),
+            bn=L.BatchNormalization(128*7*7, decay=0.9)
             deconvunit0=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
         )
