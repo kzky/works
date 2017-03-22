@@ -1252,3 +1252,11 @@ class Experiment012(Experiment005):
         l_gen.backward()
         self.optimizer_dec.update()
         self.optimizer_gen.update()
+
+    def generate(self, x_l, test):
+        h = self.encoder(x_l, test)
+        xp = cuda.get_array_module(x_l)
+        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
+        hz = self.generator0(z, h, test)
+        x_gen = self.generator(hz, test)
+        return x_gen
