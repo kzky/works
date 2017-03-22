@@ -63,9 +63,6 @@ class Generator0(Chain):
             bn=L.BatchNormalization(128*7*7, use_cudnn=True)
         )
         self.act = act
-        self.omap = omap
-        self.h = h
-        self.w = w
         
     def __call__(self, z, test=False):
         h = self.linear(z)
