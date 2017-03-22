@@ -108,7 +108,7 @@ class Experiment000(object):
         h = self.encoder(x_l, test)
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator(h, z, test)
+        x_gen = self.generator(h, hz, test)
         return x_gen
 
     def save(self, x_l, x_gen, epoch, filename):
