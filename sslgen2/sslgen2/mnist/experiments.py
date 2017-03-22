@@ -108,7 +108,7 @@ class Experiment000(object):
         h = self.encoder(x_l, test)
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator(h, hz, test)
+        x_gen = self.generator(h, z, test)
         return x_gen
 
     def save(self, x_l, x_gen, epoch, filename):
@@ -622,6 +622,7 @@ class Experiment005(Experiment003):
         # Generator
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
+        hz = self.generator0(z)
         x_gen = self.generator(h, hz)
         d_x_gen = self.discriminator(x_gen, h)
         h_gen = self.encoder(x_gen)
@@ -630,6 +631,7 @@ class Experiment005(Experiment003):
         l_gen.backward()
         self.optimizer_dec.update()
         self.optimizer_gen.update()
+
 
 class Experiment006(Experiment005):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
