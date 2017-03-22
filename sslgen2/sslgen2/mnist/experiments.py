@@ -660,7 +660,7 @@ class Experiment006(Experiment005):
 
         # Model
         from sslgen2.mnist.cnn_model_003 \
-            import Encoder, Decoder, Discriminator
+            import Encoder, Decoder, Discriminator, Generator0
         self.encoder = Encoder(device, act)
         self.decoder = Decoder(device, act)
         self.generator0 = Generator0(dim, device, act)
