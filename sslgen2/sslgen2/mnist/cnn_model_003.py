@@ -57,10 +57,10 @@ class Encoder(Chain):
 
 class Generator0(Chain):
 
-    def __init__(self, omap, h, w, dim=100, device=None, act=F.relu,):
+    def __init__(self, dim=100, device=None, act=F.relu,):
         super(Generator0, self).__init__(
-            linear=L.Linear(dim, omap*h*w),
-            bn=L.BatchNormalization(omap*h*w, use_cudnn=True)
+            linear=L.Linear(dim, 128*7*7),
+            bn=L.BatchNormalization(128*7*7, use_cudnn=True)
         )
         self.act = act
         self.omap = omap
@@ -78,15 +78,13 @@ class Generator(Chain):
 
     def __init__(self, device=None, act=F.relu ,dim=100):
         super(Generator, self).__init__(
-            generator0=Generator0(128, 7, 7, dim=dim, device=device, act=act),
             deconvunit0=DeconvUnit(256, 128, k=1, s=1, p=0, act=act),
             deconvunit1=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1),
         )
         self.act= act
 
-    def __call__(self, h, z, test=False):
-        hz = self.generator0(z, test)
+    def __call__(self, h, hz, test=False):
         h = F.concat((h, hz))
         h = self.deconvunit0(h, test)
         h = self.deconvunit1(h, test)

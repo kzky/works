@@ -248,7 +248,7 @@ class Experiment001(Experiment000):
     def generate(self, x_l, test):
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z, test), test)
         return x_gen
 
     def cleargrads(self, ):
@@ -360,7 +360,7 @@ class Experiment002(Experiment001):
     def generate(self, x_l, test):
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z, test), test)
         return x_gen
 
 class Experiment003(Experiment000):
@@ -470,9 +470,10 @@ class Experiment004(Experiment003):
 
         # Model
         from sslgen2.mnist.cnn_model_003 \
-            import Encoder, Decoder, Discriminator
+            import Encoder, Decoder, Discriminator ,Generator0
         self.encoder = Encoder(device, act)
         self.decoder = Decoder(device, act)
+        self.generator0 = Generator0(dim, device, act)
         self.generator = self.decoder
         self.discriminator = Discriminator(device, act)
         self.encoder.to_gpu(device) if self.device else None
@@ -486,6 +487,9 @@ class Experiment004(Experiment003):
         self.optimizer_dec = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
+        self.optimizer_gen0 = optimizers.Adam(learning_rate, beta1=0.5)
+        self.optimizer_gen0.setup(self.generator0)
+        self.optimizer_gen0.use_cleargrads()
         self.optimizer_gen = optimizers.Adam(learning_rate, beta1=0.5)
         self.optimizer_gen.setup(self.generator)
         self.optimizer_gen.use_cleargrads()
@@ -499,7 +503,8 @@ class Experiment004(Experiment003):
         h = self.encoder(x)
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_rec = self.decoder(h, z)
+        hz = self.generator0(z)
+        x_rec = self.decoder(h, hz)
         l_rec = self.recon_loss(x, x_rec)
         self.cleargrads()
         l_rec.backward()
@@ -511,7 +516,8 @@ class Experiment004(Experiment003):
         h.unchain_backward()
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator(h, z)
+        hz = self.generator0(z)
+        x_gen = self.generator(h, hz)
         d_x_gen = self.discriminator(x_gen, h)
         d_x_real = self.discriminator(x, h)
         l_dis = self.lsgan_loss(d_x_gen, d_x_real)
@@ -522,13 +528,21 @@ class Experiment004(Experiment003):
         # Generator
         xp = cuda.get_array_module(x)
         z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator(h, z)
+        hz = self.generator0(z)
+        x_gen = self.generator(h, hz)
         d_x_gen = self.discriminator(x_gen, h)
         h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
         self.cleargrads()
         l_gen.backward()
         self.optimizer_gen.update()
+
+    def generate(self, x_l, test):
+        xp = cuda.get_array_module(x_l)
+        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
+        h = self.encoder(x_l)
+        x_gen = self.decoder(h, self.generator0(z, test), test)
+        return x_gen
 
 class Experiment005(Experiment003):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
@@ -925,7 +939,7 @@ class Experiment009(Experiment001):
     def generate(self, x_l, test):
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z, test), test)
         return x_gen
 
     def cleargrads(self, ):
@@ -1036,6 +1050,6 @@ class Experiment010(Experiment002):
     def generate(self, x_l, test):
         xp = cuda.get_array_module(x_l)
         z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.decoder(self.generator0(z, test))
+        x_gen = self.decoder(self.generator0(z, test), test)
         return x_gen
     
