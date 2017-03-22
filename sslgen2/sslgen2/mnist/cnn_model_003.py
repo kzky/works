@@ -67,7 +67,7 @@ class Generator0(Chain):
     def __call__(self, z, test=False):
         h = self.linear(z)
         h = self.bn(h, test)
-        h = F.reshape(h, (h.shape[0], self.omap, self.h, self.w))
+        h = F.reshape(h, (h.shape[0], 128, 7, 7))
         h = self.act(h)
         return h
 
