@@ -632,6 +632,13 @@ class Experiment005(Experiment003):
         self.optimizer_dec.update()
         self.optimizer_gen.update()
 
+    def generate(self, x_l, test):
+        h = self.encoder(x_l, test)
+        xp = cuda.get_array_module(x_l)
+        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
+        hz = self.generator0(z, test)
+        x_gen = self.generator(h, hz, test)
+        return x_gen
 
 class Experiment006(Experiment005):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
