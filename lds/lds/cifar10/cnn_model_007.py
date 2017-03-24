@@ -165,7 +165,7 @@ class Decoder(Chain):
             block2=DeconvResUnitPoolFinetune(128, act),
             block3=DeconvResUnitPoolFinetune(64, act),
             block4=DeconvResUnitPoolFinetune(32, act),
-            deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
+            deconv=L.Deconvolution2D(16, 3, 3, stride=1, pad=1),
         )
                 
         self.act = act
