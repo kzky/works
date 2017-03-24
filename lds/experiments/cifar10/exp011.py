@@ -1,4 +1,4 @@
-from lds.cifar10.experiments import Experiment011
+lds from.cifar10.experiments import Experiment011
 from lds.utils import to_device
 from lds.cifar10.datasets import Cifar10DataReader, Separator
 import numpy as np
@@ -17,7 +17,6 @@ def main():
     n_l_train_data = 4000
     n_train_data = 50000
     n_cls = 10
-    iter_epoch_labeled = n_l_train_data / batch_size
 
     learning_rate = 1. * 1e-3
     n_epoch = 50
@@ -34,13 +33,15 @@ def main():
     l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
     u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    zca_path = os.path.join(home, "datasets/cifar10/zca_components.npz")
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
-                                  batch_size=batch_size,
-                                  n_cls=n_cls,
-                                  da=True,
-                                  shape=True)
+                                    zca_path=zca_path, 
+                                    batch_size=batch_size,
+                                    n_cls=n_cls,
+                                    da=True,
+                                    shape=True)
     exp = Experiment011(
         device,
         learning_rate,
@@ -53,18 +54,14 @@ def main():
     st = time.time()
     acc_prev = 0.
     for i in range(n_iter):
-
-        # Train with labeled samples
-        for j in range(iter_epoch_labeled):
-            x_l, y_l = [Variable(to_device(x, device)) \
+        # Get data
+        x_l, y_l = [Variable(to_device(x, device)) \
                         for x in data_reader.get_l_train_batch()]
-            exp.train_with_labeled(x_l, y_l)
-
-        # Train with unlabeled samples
         x_u, _ = [Variable(to_device(x, device)) \
                       for x in data_reader.get_u_train_batch()]
 
-        exp.train_with_unlabeled(x_u)
+        # Train
+        exp.train(x_l, y_l, x_u)
         
         # Eval
         if (i+1) % iter_epoch == 0:
