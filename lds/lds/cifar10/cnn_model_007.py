@@ -67,7 +67,7 @@ class Encoder(Chain):
             block1=ConvResUnitPoolFinetune(32, act),
             block2=ConvResUnitPoolFinetune(64, act),
             block3=ConvResUnitPoolFinetune(128, act),
-            block4=ConvResUnitPoolFinetune(128, act),
+            block4=ConvResUnitPoolFinetune(256, act),
         )
 
         self.act = act
@@ -91,14 +91,14 @@ class Encoder(Chain):
         self.hiddens.append(h)
         h = self.block3(h, self.hiddens, test)
         self.hiddens.append(h)
-        h = self.block3(h, self.hiddens, test)
+        h = self.block4(h, self.hiddens, test)
         
         return h
 
 class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
-            linear0=L.Linear(128*4*4, 10),
+            linear0=L.Linear(256, 10),
             #bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
         )
         self.act = act
