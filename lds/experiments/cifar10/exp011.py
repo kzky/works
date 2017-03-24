@@ -1,4 +1,4 @@
-lds from.cifar10.experiments import Experiment011
+from.cifar10.experiments import Experiment011
 from lds.utils import to_device
 from lds.cifar10.datasets import Cifar10DataReader, Separator
 import numpy as np
@@ -33,7 +33,7 @@ def main():
     l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
     u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
-    zca_path = os.path.join(home, "datasets/cifar10/zca_components.npz")
+    zca_path = None #os.path.join(home, "datasets/cifar10/zca_components.npz")
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
