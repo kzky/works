@@ -165,9 +165,16 @@ class Cifar10DataReader(object):
         for i, img in enumerate(imgs):
             # random flip
             if np.random.randint(2):
-                imgs_[i] = img[:, :, ::-1]
+                img_ = img[:, :, ::-1]
             else:
-                imgs_[i] = img
+                img_ = img
+
+            # rotation
+            n = np.random.choice(np.arange(-15, 15))
+            M = cv2.getRotationMatrix2D((32/2, 32/2), n, 1)
+            dst = cv2.warpAffine(img_.transpose(1, 2, 0), M, (32, 32))
+            imgs_[i] = dst.transpose(2, 0, 1)
+
         imgs_ = imgs_.reshape(bs, 3072)
         return imgs_
 

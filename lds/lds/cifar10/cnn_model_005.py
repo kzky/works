@@ -15,32 +15,37 @@ import time
 from lds.utils import to_device
 from lds.chainer_fix import BatchNormalization
 
-class ConvUnit(Chain):
+class ConvResUnit(Chain):
     def __init__(self, maps, act=F.relu):
-        super(ConvUnit, self).__init__(
+        super(ConvResUnit, self).__init__(
             conv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
+            conv1=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
+            bn1=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
-    def __call__(self, h, hiddens, test=False):
-        h = self.conv0(h)
+    def __call__(self, x, hiddens, test=False):
+        h = self.conv0(x)
         h = self.bn0(h, test)
         h = self.act(h)
-
+        h = self.conv1(h) + x
+        h = self.bn1(h, test)
+        h = self.act(h)
         return h
 
-class ConvUnitPoolFinetune(Chain):
+class ConvResUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
-        super(ConvUnitPoolFinetune, self).__init__(
-            conv_unit=ConvUnit(maps, act),
-            conv=L.Convolution2D(maps, maps*2, 3, stride=1, pad=1),
+        super(ConvResUnitPoolFinetune, self).__init__(
+            conv_unit=ConvResUnit(maps, act),
+            conv=L.Convolution2D(maps, maps*2, 1, stride=1, pad=0),
             bn=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
         )
         self.act = act
     
     def __call__(self, h, hiddens, test=False):
         h = self.conv_unit(h, hiddens, test)
+        hiddens.append(h)
         h = F.max_pooling_2d(h, (2, 2))
         h = self.conv(h)
         h = self.bn(h, test)
@@ -54,9 +59,9 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             conv0=L.Convolution2D(3, 32, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            block0=ConvUnitPoolFinetune(32, act),
-            block1=ConvUnitPoolFinetune(64, act),
-            block2=ConvUnitPoolFinetune(128, act),
+            block0=ConvResUnitPoolFinetune(32, act),
+            block1=ConvResUnitPoolFinetune(64, act),
+            block2=ConvResUnitPoolFinetune(128, act),
         )
 
         self.act = act
@@ -83,57 +88,44 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
-            linear0=L.Linear(256*4*4, 128),
-            linear1=L.Linear(128, 64),
-            linear2=L.Linear(64, 32),
-            linear3=L.Linear(32, 10),
-            bn_linear0=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
-            bn_linear1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
-            bn_linear2=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
+            linear0=L.Linear(256*4*4, 10),
+            #bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
         )
         self.act = act
-        self.hiddens = []
 
     def __call__(self, h, test=False):
-        self.hiddens = []
-        
+        #h = F.average_pooling_2d(h, (4, 4))
+        #h = self.bn0(h, test)
         h = self.linear0(h)
-        h = self.bn_linear0(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-        h = self.linear1(h)
-        h = self.bn_linear1(h, test)
-        h = self.act(h)
-        self.hiddens.append(h)
-        h = self.linear2(h)
-        h = self.act(h)
-        h = self.bn_linear2(h, test)
-        self.hiddens.append(h)
-        h = self.linear3(h)
         return h
     
-class DeconvUnit(Chain):
+class DeconvResUnit(Chain):
 
     def __init__(self, maps, act=F.relu):
-        super(DeconvUnit, self).__init__(
-            deconv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
-            bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
+        super(DeconvResUnit, self).__init__(
+            deconv0=L.Convolution2D(maps, maps/2, 3, stride=1, pad=1),
+            bn0=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
+            deconv1=L.Convolution2D(maps, maps/2, 3, stride=1, pad=1),
+            bn1=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
-    def __call__(self, h, hiddens, test=False):
-        h = self.deconv0(h)
+    def __call__(self, x, hiddens, test=False):
+        h = self.deconv0(x)
         h = self.bn0(h, test)
+        h = self.act(h)
+        h = self.deconv1(h) + x
+        h = self.bn1(h, test)
         h = self.act(h)
         return h
 
-class DeconvUnitPoolFinetune(Chain):
+class DeconvResUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
-        super(DeconvUnitPoolFinetune, self).__init__(
-            deconv_unit=DeconvUnit(maps, act),
-            deconv_pool=L.Deconvolution2D(maps, maps, 4, stride=2, pad=1),
-            bn_pool=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
-            deconv=L.Deconvolution2D(maps, maps/2, 3, stride=1, pad=1),
+        super(DeconvResUnitPoolFinetune, self).__init__(
+            deconv_unit=DeconvResUnit(maps, act),
+            deconv_pool=L.Deconvolution2D(maps/2, maps/2, 4, stride=2, pad=1),
+            bn_pool=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
+            deconv=L.Deconvolution2D(maps/2, maps/2, 1, stride=1, pad=0),
             bn=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -143,6 +135,7 @@ class DeconvUnitPoolFinetune(Chain):
         h = self.deconv_pool(h)
         h = self.bn_pool(h, test)
         h = self.act(h)  # pooling is not actual pooling, so take activation here.
+        hiddens.append(h)
         h = self.deconv(h)
         h = self.bn(h, test)
         h = self.act(h)
@@ -153,9 +146,9 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            block0=DeconvUnitPoolFinetune(256, act),
-            block1=DeconvUnitPoolFinetune(128, act),
-            block2=DeconvUnitPoolFinetune(64, act),
+            block0=DeconvResUnitPoolFinetune(256, act),
+            block1=DeconvResUnitPoolFinetune(128, act),
+            block2=DeconvResUnitPoolFinetune(64, act),
             deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
         )
                 

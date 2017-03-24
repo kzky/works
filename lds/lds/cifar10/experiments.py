@@ -739,3 +739,27 @@ class Experiment010(Experiment006):
         loss_u.backward()
         self.optimizer.update()
         
+class Experiment001(Experiment006):
+    """Regularize with reconstruction between all hiddens except for one after 
+    max_pooling and with Entropy Regularization on at the last using cnn model 
+    003 (one linear). 
+
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
+        super(Experiment011, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act, 
+        )
+        
+        # Model
+        from lds.cifar10.cnn_model_005 import AutoEncoderWithMLP
+        self.ae = AutoEncoderWithMLP(act)
+        self.ae.to_gpu(device) if self.device else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.ae)
+        self.optimizer.use_cleargrads()
+
+        self.lambda_ = 1.0
