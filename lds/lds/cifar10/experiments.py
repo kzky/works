@@ -751,7 +751,7 @@ class Experiment011(Experiment006):
             learning_rate=learning_rate,
             act=act, 
         )
-        import AutoEncoderWithMLP
+        from lds.cifar10.cnn_model_005 import AutoEncoderWithMLP
         self.ae = AutoEncoderWithMLP(act)
         self.ae.to_gpu(device) if self.device else None
 
