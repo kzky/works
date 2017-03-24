@@ -61,13 +61,12 @@ class Encoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            conv0=L.Convolution2D(3, 8, 3, stride=1, pad=1),
-            bn0=L.BatchNormalization(8, decay=0.9, use_cudnn=True),
-            block0=ConvResUnitPoolFinetune(8, act),
-            block1=ConvResUnitPoolFinetune(16, act),
-            block2=ConvResUnitPoolFinetune(32, act),
-            block3=ConvResUnitPoolFinetune(64, act),
-            block4=ConvResUnitPoolFinetune(128, act),
+            conv0=L.Convolution2D(3, 16, 3, stride=1, pad=1),
+            bn0=L.BatchNormalization(16, decay=0.9, use_cudnn=True),
+            block0=ConvResUnitPoolFinetune(16, act),
+            block1=ConvResUnitPoolFinetune(32, act),
+            block2=ConvResUnitPoolFinetune(64, act),
+            block3=ConvResUnitPoolFinetune(128, act),
         )
 
         self.act = act
@@ -90,15 +89,13 @@ class Encoder(Chain):
         h = self.block2(h, self.hiddens, test)
         self.hiddens.append(h)
         h = self.block3(h, self.hiddens, test)
-        self.hiddens.append(h)
-        h = self.block4(h, self.hiddens, test)
         
         return h
 
 class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
-            linear0=L.Linear(256*4*4, 10),
+            linear0=L.Linear(128*1*1, 10),
             #bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -164,7 +161,6 @@ class Decoder(Chain):
             block1=DeconvResUnitPoolFinetune(128, act),
             block2=DeconvResUnitPoolFinetune(64, act),
             block3=DeconvResUnitPoolFinetune(32, act),
-            block4=DeconvResUnitPoolFinetune(16, act),
             deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
         )
                 
@@ -181,8 +177,6 @@ class Decoder(Chain):
         h = self.block2(h, self.hiddens, test)
         self.hiddens.append(h)
         h = self.block3(h, self.hiddens, test)
-        self.hiddens.append(h)
-        h = self.block4(h, self.hiddens, test)
         self.hiddens.append(h)
 
         h = self.deconv(h)
