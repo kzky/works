@@ -61,13 +61,13 @@ class Encoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Encoder, self).__init__(
-            conv0=L.Convolution2D(3, 32, 3, stride=1, pad=1),
-            bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            block0=ConvResUnitPoolFinetune(64, act),
-            block1=ConvResUnitPoolFinetune(64, act),
-            block2=ConvResUnitPoolFinetune(64, act),
+            conv0=L.Convolution2D(3, 8, 3, stride=1, pad=1),
+            bn0=L.BatchNormalization(8, decay=0.9, use_cudnn=True),
+            block0=ConvResUnitPoolFinetune(8, act),
+            block1=ConvResUnitPoolFinetune(16, act),
+            block2=ConvResUnitPoolFinetune(32, act),
             block3=ConvResUnitPoolFinetune(64, act),
-            block4=ConvResUnitPoolFinetune(64, act),
+            block4=ConvResUnitPoolFinetune(128, act),
         )
 
         self.act = act
@@ -160,11 +160,11 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            block0=DeconvResUnitPoolFinetune(64, act),
-            block1=DeconvResUnitPoolFinetune(64, act),
+            block0=DeconvResUnitPoolFinetune(256, act),
+            block1=DeconvResUnitPoolFinetune(128, act),
             block2=DeconvResUnitPoolFinetune(64, act),
-            block3=DeconvResUnitPoolFinetune(64, act),
-            block4=DeconvResUnitPoolFinetune(64, act),
+            block3=DeconvResUnitPoolFinetune(32, act),
+            block4=DeconvResUnitPoolFinetune(16, act),
             deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
         )
                 
