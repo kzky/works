@@ -98,7 +98,7 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, act=F.relu):
         super(MLP, self).__init__(
-            linear0=L.Linear(256, 10),
+            linear0=L.Linear(512, 10),
             #bn0=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -160,11 +160,11 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            block0=DeconvResUnitPoolFinetune(256, act),
-            block1=DeconvResUnitPoolFinetune(128, act),
-            block2=DeconvResUnitPoolFinetune(64, act),
-            block3=DeconvResUnitPoolFinetune(32, act),
-            block4=DeconvResUnitPoolFinetune(16, act),
+            block0=DeconvResUnitPoolFinetune(512, act),
+            block1=DeconvResUnitPoolFinetune(256, act),
+            block2=DeconvResUnitPoolFinetune(128, act),
+            block3=DeconvResUnitPoolFinetune(64, act),
+            block4=DeconvResUnitPoolFinetune(32, act),
             deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
         )
                 
