@@ -38,14 +38,13 @@ class ConvResUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(ConvResUnitPoolFinetune, self).__init__(
             conv_unit=ConvResUnit(maps, act),
-            conv=L.Convolution2D(maps, maps*2, 1, stride=1, pad=0),
+            conv=L.Convolution2D(maps, maps*2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps*2, decay=0.9, use_cudnn=True),
         )
         self.act = act
     
     def __call__(self, h, hiddens, test=False):
         h = self.conv_unit(h, hiddens, test)
-        hiddens.append(h)
         h = F.max_pooling_2d(h, (2, 2))
         h = self.conv(h)
         h = self.bn(h, test)
@@ -103,10 +102,10 @@ class DeconvResUnit(Chain):
 
     def __init__(self, maps, act=F.relu):
         super(DeconvResUnit, self).__init__(
-            deconv0=L.Convolution2D(maps, maps/2, 3, stride=1, pad=1),
-            bn0=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
-            deconv1=L.Convolution2D(maps, maps/2, 3, stride=1, pad=1),
-            bn1=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
+            deconv0=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
+            bn0=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
+            deconv1=L.Convolution2D(maps, maps, 3, stride=1, pad=1),
+            bn1=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
@@ -123,9 +122,9 @@ class DeconvResUnitPoolFinetune(Chain):
     def __init__(self, maps, act):
         super(DeconvResUnitPoolFinetune, self).__init__(
             deconv_unit=DeconvResUnit(maps, act),
-            deconv_pool=L.Deconvolution2D(maps/2, maps/2, 4, stride=2, pad=1),
-            bn_pool=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
-            deconv=L.Deconvolution2D(maps/2, maps/2, 1, stride=1, pad=0),
+            deconv_pool=L.Deconvolution2D(maps, maps, 4, stride=2, pad=1),
+            bn_pool=L.BatchNormalization(maps, decay=0.9, use_cudnn=True),
+            deconv=L.Deconvolution2D(maps, maps/2, 3, stride=1, pad=1),
             bn=L.BatchNormalization(maps/2, decay=0.9, use_cudnn=True),
         )
         self.act = act
@@ -135,7 +134,6 @@ class DeconvResUnitPoolFinetune(Chain):
         h = self.deconv_pool(h)
         h = self.bn_pool(h, test)
         h = self.act(h)  # pooling is not actual pooling, so take activation here.
-        hiddens.append(h)
         h = self.deconv(h)
         h = self.bn(h, test)
         h = self.act(h)

@@ -740,10 +740,10 @@ class Experiment010(Experiment006):
         self.optimizer.update()
         
 class Experiment011(Experiment006):
-    """Regularize with reconstruction between all hiddens except for one after 
-    max_pooling and with Entropy Regularization on at the last using cnn model 
-    003 (one linear) and with ResUnit.
-
+    """
+    Using max pooling in Encoder and deconvolution instead of unpooling in 
+    Decoder, and regularize NOT between maxpooing and upsample 
+    deconvolution.
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, lr_decay=False):
         super(Experiment011, self).__init__(
@@ -751,7 +751,7 @@ class Experiment011(Experiment006):
             learning_rate=learning_rate,
             act=act, 
         )
-        from lds.cifar10.cnn_model_005 import AutoEncoderWithMLP
+        import AutoEncoderWithMLP
         self.ae = AutoEncoderWithMLP(act)
         self.ae.to_gpu(device) if self.device else None
 
