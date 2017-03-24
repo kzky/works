@@ -31,11 +31,9 @@ class ConvResUnit(Chain):
         h = self.conv0(x)
         h = self.bn0(h, test)
         h = self.act(h)
-        hiddens.append(h)
         h = self.conv1(h)
         h = self.bn1(h, test)
         h = self.act(h)
-        hiddens.append(h)
         h = self.conv2(h) + x
         h = self.bn2(h, test)
         h = self.act(h)
@@ -65,9 +63,11 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             conv0=L.Convolution2D(3, 32, 3, stride=1, pad=1),
             bn0=L.BatchNormalization(32, decay=0.9, use_cudnn=True),
-            block0=ConvResUnitPoolFinetune(32, act),
+            block0=ConvResUnitPoolFinetune(64, act),
             block1=ConvResUnitPoolFinetune(64, act),
-            block2=ConvResUnitPoolFinetune(128, act),
+            block2=ConvResUnitPoolFinetune(64, act),
+            block3=ConvResUnitPoolFinetune(64, act),
+            block4=ConvResUnitPoolFinetune(64, act),
         )
 
         self.act = act
@@ -88,6 +88,10 @@ class Encoder(Chain):
         h = self.block1(h, self.hiddens, test)
         self.hiddens.append(h)
         h = self.block2(h, self.hiddens, test)
+        self.hiddens.append(h)
+        h = self.block3(h, self.hiddens, test)
+        self.hiddens.append(h)
+        h = self.block4(h, self.hiddens, test)
         
         return h
 
@@ -122,11 +126,9 @@ class DeconvResUnit(Chain):
         h = self.deconv0(x)
         h = self.bn0(h, test)
         h = self.act(h)
-        hiddens.append(h)
         h = self.deconv1(h)
         h = self.bn1(h, test)
         h = self.act(h)
-        hiddens.append(h)
         h = self.deconv2(h) + x
         h = self.bn2(h, test)
         h = self.act(h)
@@ -158,9 +160,11 @@ class Decoder(Chain):
     """
     def __init__(self, act=F.relu):
         super(Decoder, self).__init__(
-            block0=DeconvResUnitPoolFinetune(256, act),
-            block1=DeconvResUnitPoolFinetune(128, act),
+            block0=DeconvResUnitPoolFinetune(64, act),
+            block1=DeconvResUnitPoolFinetune(64, act),
             block2=DeconvResUnitPoolFinetune(64, act),
+            block3=DeconvResUnitPoolFinetune(64, act),
+            block4=DeconvResUnitPoolFinetune(64, act),
             deconv=L.Deconvolution2D(32, 3, 3, stride=1, pad=1),
         )
                 
@@ -172,11 +176,13 @@ class Decoder(Chain):
 
         h = self.block0(h, self.hiddens, test)
         self.hiddens.append(h)
-
         h = self.block1(h, self.hiddens, test)
         self.hiddens.append(h)
-
         h = self.block2(h, self.hiddens, test)
+        self.hiddens.append(h)
+        h = self.block3(h, self.hiddens, test)
+        self.hiddens.append(h)
+        h = self.block4(h, self.hiddens, test)
         self.hiddens.append(h)
 
         h = self.deconv(h)
