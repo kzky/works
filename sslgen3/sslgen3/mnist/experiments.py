@@ -118,8 +118,8 @@ class Experiment000(object):
         self.optimizer_dec.update()
 
     def test(self, x_l, y_l):
-        h = self.ae.encoder(x_l, test=True)
-        y = self.ae.mlp(h, test=True)
+        h = self.encoder(x_l, test=True)
+        y = self.mlp(h, test=True)
         acc = F.accuracy(y, y_l)
         return acc
         
