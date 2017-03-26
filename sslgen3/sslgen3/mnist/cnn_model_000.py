@@ -49,6 +49,7 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
+            linear=L.Linear(128*7*7, 10)
         )
         self.hiddens = []
         self.act = act
@@ -58,32 +59,31 @@ class Encoder(Chain):
         h = self.convunit0(x, test)
         self.hiddens.append(h)
         h = self.convunit1(h, test)
-        return h
-
-class MLP(Chain):
-    def __init__(self, device=None, act=F.relu):
-        super(MLP, self).__init__(
-            linear=L.Linear(128, 10)
-        )
-
-    def __call__(self, h, test=False):
-        h = F.average_pooling_2d(h, (7, 7))
+        self.hiddens.append(h)
         y = self.linear(h)
         return y
-        
+
 class Decoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
+            linear=L.Linear(10, 128*7*7),
+            bn=L.BatchNormalization(128*7*7, decay=0.9),
             deconvunit0=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
         )
         self.act= act
         self.hiddens = []
 
-    def __call__(self, x, test=False):
+    def __call__(self, y, test=False):
         self.hiddens = []
-        h = self.deconvunit0(x, test)
+        h = self.linear(y)
+        h = self.bn(h)
+        h = reshape(h, (h.shape[0], 128, 7, 7))
+        h = self.act(h)
+        self.hiddens.append(h)
+        
+        h = self.deconvunit0(h, test)
         self.hiddens.append(h)
         h = self.deconv(h)
         h = F.tanh(h)
