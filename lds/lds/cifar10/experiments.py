@@ -874,8 +874,8 @@ class Experiment014(Experiment005):
         y_0 = self.ae.mlp(h,)
         l_lc_l = 0
         l_lc_l += F.mean_squared_error(y_0, y)
-        
-        
+
+        loss = l_ce_l + l_lc_l
         return loss
     
     def _compute_l_loss(self, x_l, y_l, x_u, label_only=False):
