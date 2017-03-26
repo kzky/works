@@ -33,7 +33,6 @@ def main():
     l_train_path = os.path.join(home, "datasets/svhn/l_train.mat")
     u_train_path = os.path.join(home, "datasets/svhn/u_train.mat")
     test_path = os.path.join(home, "datasets/svhn/test.mat")
-
     # DataReader, Model, Optimizer, Losses
     data_reader = SVHNDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
