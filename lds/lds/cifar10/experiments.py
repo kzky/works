@@ -861,7 +861,7 @@ class Experiment014(Experiment005):
         bs = shape[0]
         d = np.prod(shape[1:])
         noise = F.reshape(F.normalize(F.reshape(x_l_grad, (bs, d))), shape)
-        x_l_noise = x_l + noise * 0.03
+        x_l_noise = x_l + noise * 0.1
 
         # label confidence loss
         h = self.ae.encoder(x_l)
@@ -872,7 +872,7 @@ class Experiment014(Experiment005):
         l_lc_l = 0
         l_lc_l += F.mean_squared_error(y_0, y)
 
-        loss = l_lc_l
+        loss = l_lc_l * self.lambda_
         return loss
     
     def _compute_l_loss(self, x_l, y_l, x_u, label_only=False):
