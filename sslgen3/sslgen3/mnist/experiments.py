@@ -37,7 +37,7 @@ class Experiment000(object):
 
         # Model
         from sslgen3.mnist.cnn_model_000 \
-            import Encoder, MLP, Decoder, Generator0, Discriminator,
+            import Encoder, MLP, Decoder, Generator0, Discriminator
         self.encoder = Encoder(device, act)
         self.mlp = MLP(device, act)
         self.decoder = Decoder(device, act)
@@ -78,7 +78,8 @@ class Experiment000(object):
         l_rec = self.recon_loss(x, x_rec) \
                 + reduce(lambda x, y: x+y, 
                          [self.recon_loss(x, y) \
-                          for x, y in zip(self.encoder.hiddens, self.decoder.hiddens)])
+                          for x, y in zip(self.encoder.hiddens,
+                                          self.decoder.hiddens[::-1])])
         l = l_rec
         if y is not None:
             y_pred = self.mlp(h)

@@ -12,7 +12,7 @@ import chainer.links as L
 from collections import OrderedDict
 import logging
 import time
-from sslgen2.utils import to_device
+from sslgen3.utils import to_device
 
 class ConvUnit(Chain):
     def __init__(self, imap, omap, k=4, s=2, p=1, act=F.relu):
@@ -58,7 +58,6 @@ class Encoder(Chain):
         h = self.convunit0(x, test)
         self.hiddens.append(h)
         h = self.convunit1(h, test)
-        self.hiddens.append(h)
         return h
 
 class MLP(Chain):
@@ -87,7 +86,6 @@ class Decoder(Chain):
         h = self.deconvunit0(x, test)
         self.hiddens.append(h)
         h = self.deconv(h)
-        self.hiddens.append(h)
         h = F.tanh(h)
         return h
 
