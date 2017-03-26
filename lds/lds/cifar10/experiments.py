@@ -859,7 +859,7 @@ class Experiment014(Experiment005):
         bs = shape[0]
         d = np.prod(shape[1:])
         noise = F.reshape(F.normalize(F.reshape(x_l_grad, (bs, d))), shape)
-        x_l_noise += noise * 0.01
+        x_l_noise = x_l + noise * 0.01
 
         # Labeled samples
         h = self.ae.encoder(x_l_noise)
