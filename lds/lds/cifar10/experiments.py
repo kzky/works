@@ -845,29 +845,23 @@ class Experiment014(Experiment005):
         loss.backward()
         self.optimizer.update()
 
-        # Noisy labeled samples
-        loss_l = self._compute_l_loss_with_noise(x_l, y_l, x_u)
+        # Noisy samples
+        loss_l = self._compute_loss_with_noise(x_l, y_l, x_u)
+        loss_u = self._compute_loss_with_noise(x_u, y_l, x_u)
+        loss = loss_l + loss_u
 
         self.ae.cleargrads()
-        loss_l.backward()
+        loss.backward()
         self.optimizer.update()
 
-    def _compute_l_loss_with_noise(self, x_l, y_l, x_u):
+    def _compute_loss_with_noise(self, x_l, y_l, x_u):
         x_l_0 = x_l
         x_l_grad = Variable(x_l.grad)
         shape = x_l_grad.shape
         bs = shape[0]
         d = np.prod(shape[1:])
         noise = F.reshape(F.normalize(F.reshape(x_l_grad, (bs, d))), shape)
-        x_l_noise = x_l + noise * 0.01
-
-        # Labeled samples
-        h = self.ae.encoder(x_l_noise)
-        y = self.ae.mlp(h,)
-
-        # cronss entropy loss
-        l_ce_l = 0
-        l_ce_l += F.softmax_cross_entropy(y, y_l)
+        x_l_noise = x_l + noise * 0.03
 
         # label confidence loss
         h = self.ae.encoder(x_l_0)
@@ -875,7 +869,7 @@ class Experiment014(Experiment005):
         l_lc_l = 0
         l_lc_l += F.mean_squared_error(y_0, y)
 
-        loss = l_ce_l + l_lc_l
+        loss = l_lc_l
         return loss
     
     def _compute_l_loss(self, x_l, y_l, x_u, label_only=False):
