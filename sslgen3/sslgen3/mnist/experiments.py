@@ -76,9 +76,9 @@ class Experiment000(object):
         h = self.encoder(x)
         x_rec = self.decoder(h)
         l_rec = self.recon_loss(x, x_rec) \
-                + reduce(lambda x, y: x+y, 
-                         [self.recon_loss(x, y) \
-                          for x, y in zip(self.encoder.hiddens,
+                + reduce(lambda x_, y_: x_ + y_, 
+                         [self.recon_loss(x_, y_) \
+                          for x_, y_ in zip(self.encoder.hiddens,
                                           self.decoder.hiddens[::-1])])
         l = l_rec
         if y is not None:
@@ -111,10 +111,9 @@ class Experiment000(object):
         x_gen = self.decoder(hz)
         d_x_gen = self.discriminator(x_gen)
         h_gen = self.encoder(x_gen)
-        l_gen = self.lsgan_loss(d_x_gen) + self.recon_loss(h, h_gen)
+        l_gen = self.lsgan_loss(d_x_gen)
         self.cleargrads()
         l_gen.backward()
-        l_dec.backward()
         self.optimizer_gen.update()
         self.optimizer_dec.update()
         
@@ -189,6 +188,6 @@ class Experiment000(object):
         self.encoder.cleargrads()
         self.mlp.cleargrads()
         self.decoder.cleargrads()
-        self.generator.cleargrads()
+        self.generator0.cleargrads()
         self.discriminator.cleargrads()
         
