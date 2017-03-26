@@ -80,7 +80,7 @@ def main():
                 acc_mean)
             print(msg)
             if acc_prev > acc_mean:
-                exp.lambda_ *= 0.5
+                exp.lambda_ *= 1.5
                 print("lambda decay")
             acc_prev = acc_mean
 
