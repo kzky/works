@@ -854,7 +854,10 @@ class Experiment014(Experiment005):
 
     def _compute_l_loss_with_noise(self, x_l, y_l, x_u):
         x_l_grad = Variable(x_l.grad)
-        noise = F.normalize(x_l_grad)
+        shape = x_l_grad.shape
+        bs = shape[0]
+        d = np.prod(shape[1:])
+        noise = F.reshape(F.normalize(F.reshape(x_l_grad, (bs, d))), shape)
         x_l += noise * 0.01
 
         l_loss = self._compute_l_loss(x_l, y_l, x_u)
