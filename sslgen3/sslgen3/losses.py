@@ -12,6 +12,22 @@ import logging
 import time
 from utils import to_device
 
+class EntropyRegularizationLoss(Chain):
+
+    def __init__(self, test=False):
+        super(EntropyRegularization, self).__init__()
+        self.loss = None
+        
+    def __call__(self, y, ):
+        bs = y.data.shape[0]
+        d = np.prod(y.data.shape[1:])
+
+        y_normalized = F.softmax(y)
+        y_log_softmax = F.log_softmax(y)
+        self.loss = - F.sum(y_normalized * y_log_softmax) / bs / d
+
+        return self.loss
+
 class ReconstructionLoss(Chain):
 
     def __init__(self,

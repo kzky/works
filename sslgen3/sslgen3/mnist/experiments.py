@@ -16,7 +16,7 @@ import cv2
 import shutil
 import csv
 from sslgen3.utils import to_device
-from sslgen3.losses import ReconstructionLoss, LSGANLoss
+from sslgen3.losses import ReconstructionLoss, LSGANLoss, EntropyRegularization
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
@@ -34,6 +34,7 @@ class Experiment000(object):
         # Losses
         self.recon_loss = ReconstructionLoss()
         self.lsgan_loss = LSGANLoss()
+        self.er_loss = EntropyRegularization()
 
         # Model
         from sslgen3.mnist.cnn_model_000 \
@@ -80,13 +81,15 @@ class Experiment000(object):
                          [self.recon_loss(x_, y_) \
                           for x_, y_ in zip(self.encoder.hiddens,
                                           self.decoder.hiddens[::-1])])
-        l = l_rec
+        loss = l_rec
+        y_pred = self.mlp(h)
+        l_er = self.er_loss(y)
+        loss += l_er
         if y is not None:
-            y_pred = self.mlp(h)
             l_ce = F.softmax_cross_entropy(y_pred, y)
-            l += l_ce
+            loss += l_ce
         self.cleargrads()
-        l.backward()
+        loss.backward()
         self.optimizer_enc.update()
         self.optimizer_mlp.update()
         self.optimizer_dec.update()
