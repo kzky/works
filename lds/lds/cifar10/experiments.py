@@ -864,6 +864,9 @@ class Experiment014(Experiment005):
         x_l_noise = x_l + noise * 0.03
 
         # label confidence loss
+        h = self.ae.encoder(x_l)
+        y = self.ae.mlp(h,)
+
         h = self.ae.encoder(x_l_0)
         y_0 = self.ae.mlp(h,)
         l_lc_l = 0
