@@ -838,8 +838,8 @@ class Experiment014(Experiment005):
     def train(self, x_l, y_l, x_u):
         # Labeled and unlabeled samples
         loss_l = self._compute_l_loss(x_l, y_l, x_u)
-        loss_u = self._compute_u_loss(x_l, y_l, x_u)
-        loss = loss_l + loss_u
+        #loss_u = self._compute_u_loss(x_l, y_l, x_u)
+        loss = loss_l #+ loss_u
 
         self.ae.cleargrads()
         loss.backward()
@@ -847,8 +847,8 @@ class Experiment014(Experiment005):
 
         # Noisy samples
         loss_l = self._compute_loss_with_noise(x_l, y_l, x_u)
-        loss_u = self._compute_loss_with_noise(x_u, y_l, x_u)
-        loss = loss_l + loss_u
+        #loss_u = self._compute_loss_with_noise(x_u, y_l, x_u)
+        loss = loss_l #+ loss_u
 
         self.ae.cleargrads()
         loss.backward()
@@ -885,25 +885,25 @@ class Experiment014(Experiment005):
         l_ce_l = 0
         l_ce_l += F.softmax_cross_entropy(y, y_l)
 
-        # negative entropy loss
-        l_ne_l = 0
-        l_ne_l += self.ne_loss(y)
-        l_ne_l = self.lambda_ * l_ne_l
+        ## negative entropy loss
+        #l_ne_l = 0
+        #l_ne_l += self.ne_loss(y)
+        #l_ne_l = self.lambda_ * l_ne_l
 
-        # reconstruction loss
-        l_rec_l = 0
-        l_rec_l += self.recon_loss(x_l, x_rec) \
-                   + reduce(lambda x, y: x + y,
-                            [self.recon_loss(x, y) for x, y in zip(
-                                self.ae.encoder.hiddens,
-                                self.ae.decoder.hiddens[::-1])])
-        l_rec_l = self.lambda_ * l_rec_l
+        ## reconstruction loss
+        #l_rec_l = 0
+        #l_rec_l += self.recon_loss(x_l, x_rec) \
+        #           + reduce(lambda x, y: x + y,
+        #                    [self.recon_loss(x, y) for x, y in zip(
+        #                        self.ae.encoder.hiddens,
+        #                        self.ae.decoder.hiddens[::-1])])
+        #l_rec_l = self.lambda_ * l_rec_l
 
         # loss for labeled samples
         if label_only:
             return l_ce_l
 
-        loss_l = l_ce_l + l_ne_l + l_rec_l
+        loss_l = l_ce_l #+ l_ne_l + l_rec_l
         return loss_l
 
     def _compute_u_loss(self, x_l, y_l, x_u):
