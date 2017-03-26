@@ -116,73 +116,12 @@ class Experiment000(object):
         l_gen.backward()
         self.optimizer_gen.update()
         self.optimizer_dec.update()
-        
 
-    def test(self, x_l, y_l, epoch, filename):
-        """generate samples, then save"""
-        x_gen = self.generate(x_l, test=True)
-        self.save(x_l, x_gen, epoch, filename)
-
-        d_x_gen = self.discriminator(x_gen, test=True)
-        loss = self.lsgan_loss(d_x_gen)
-        return loss
-        
-    def generate(self, x_l, test):
-        h = self.encoder(x_l, test)
-        xp = cuda.get_array_module(x_l)
-        z = Variable(cuda.to_gpu(xp.random.rand(x_l.shape[0], self.dim).astype(xp.float32), self.device))
-        x_gen = self.generator0(h, z, test)
-        return x_gen
-
-    def save(self, x_l, x_gen, epoch, filename):
-        # Create dir path for genenrated images
-        dpath_gen = os.path.join(filename,
-                                 "gen", 
-                                 "images_{:05d}".format(epoch))
-        if os.path.exists(dpath_gen):
-            shutil.rmtree(dpath_gen)
-            os.makedirs(dpath_gen)
-        else:
-            os.makedirs(dpath_gen)
-
-        # Create dir path for real images
-        dpath_real = os.path.join(filename,
-                                 "real", 
-                                 "images_{:05d}".format(epoch))
-        if os.path.exists(dpath_real):
-            shutil.rmtree(dpath_real)
-            os.makedirs(dpath_real)
-        else:
-            os.makedirs(dpath_real)
-
-        # Save labeled images
-        imgs = cuda.to_cpu(x_l.data)
-        imgs = 127.5 * imgs + 127.5
-        for i, img in enumerate(imgs):
-            fpath = os.path.join(dpath_real, "{:05d}.png".format(i))
-            cv2.imwrite(fpath, np.squeeze(img))
-
-        # Save generated images
-        imgs = cuda.to_cpu(x_gen.data)
-        imgs = 127.5 * imgs + 127.5
-        for i, img in enumerate(imgs):
-            fpath = os.path.join(dpath_gen, "{:05d}.png".format(i))
-            cv2.imwrite(fpath, np.squeeze(img))
-
-    def serialize(self, epoch, filename):
-        # Create dir path
-        dpath = os.path.join(filename, "./model_{:05d}".format(epoch))
-        if os.path.exists(dpath):
-            shutil.rmtree(dpath)
-            os.makedirs(dpath)
-        else:
-            os.makedirs(dpath)
-
-        # Serialize
-        fpath = os.path.join(dpath, "encoder.h5py")
-        serializers.save_hdf5(fpath, self.encoder)
-        fpath = os.path.join(dpath, "generator.h5py")
-        serializers.save_hdf5(fpath, self.generator)
+    def test(self, x_l, y_l):
+        h = self.ae.encoder(x_l, test=True)
+        y = self.ae.mlp(h, test=True)
+        acc = F.accuracy(y, y_l)
+        return acc
         
     def cleargrads(self, ):
         self.encoder.cleargrads()
