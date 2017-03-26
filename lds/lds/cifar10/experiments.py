@@ -860,10 +860,10 @@ class Experiment014(Experiment005):
         noise = F.reshape(F.normalize(F.reshape(x_l_grad, (bs, d))), shape)
         x_l += noise * 0.01
 
-        l_loss = self._compute_l_loss(x_l, y_l, x_u)
+        l_loss = self._compute_l_loss(x_l, y_l, x_u, label_only=True)
         return l_loss
         
-    def _compute_l_loss(self, x_l, y_l, x_u):
+    def _compute_l_loss(self, x_l, y_l, x_u, label_only=False):
         # Labeled samples
         h = self.ae.encoder(x_l)
         y = self.ae.mlp(h,)
@@ -888,6 +888,9 @@ class Experiment014(Experiment005):
         l_rec_l = self.lambda_ * l_rec_l
 
         # loss for labeled samples
+        if label_only:
+            return l_ce_l
+
         loss_l = l_ce_l + l_ne_l + l_rec_l
         return loss_l
 
