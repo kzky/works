@@ -837,8 +837,8 @@ class Experiment014(Experiment005):
 
     def train(self, x_l, y_l, x_u):
         # Labeled and unlabeled samples
-        l_loss = self._compute_l_loss(x_l, y_l, x_u)
-        u_loss = self._compute_u_loss(x_l, y_l, x_u)
+        loss_l = self._compute_l_loss(x_l, y_l, x_u)
+        loss_u = self._compute_u_loss(x_l, y_l, x_u)
         loss = loss_l + loss_u
 
         self.ae.cleargrads()
@@ -846,10 +846,10 @@ class Experiment014(Experiment005):
         self.optimizer.update()
 
         # Noisy labeled samples
-        l_loss = self._compute_l_loss_with_noise(x_l, y_l, x_u)
+        loss_l = self._compute_l_loss_with_noise(x_l, y_l, x_u)
 
         self.ae.cleargrads()
-        l_loss.backward()
+        loss_l.backward()
         self.optimizer.update()
 
     def _compute_l_loss_with_noise(self, x_l, y_l, x_u):
