@@ -15,7 +15,7 @@ from utils import to_device
 class EntropyRegularizationLoss(Chain):
 
     def __init__(self, test=False):
-        super(EntropyRegularization, self).__init__()
+        super(EntropyRegularizationLoss, self).__init__()
         self.loss = None
         
     def __call__(self, y, ):
