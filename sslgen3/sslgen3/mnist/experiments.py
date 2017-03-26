@@ -110,7 +110,6 @@ class Experiment000(object):
         hz = self.generator0(z)
         x_gen = self.decoder(hz)
         d_x_gen = self.discriminator(x_gen)
-        h_gen = self.encoder(x_gen)
         l_gen = self.lsgan_loss(d_x_gen)
         self.cleargrads()
         l_gen.backward()
