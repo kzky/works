@@ -44,6 +44,7 @@ def main():
         device,
         learning_rate,
         act,
+        n_cls,
         )
 
     # Training loop
