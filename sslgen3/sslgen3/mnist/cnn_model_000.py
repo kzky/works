@@ -96,7 +96,7 @@ class Discriminator(Chain):
         super(Discriminator, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            linear=L.Linear(128+n_cls, 1), 
+            linear=L.Linear(128*7*7 + n_cls, 1), 
         )
         self.act= act
 
