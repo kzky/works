@@ -28,7 +28,6 @@ class Experiment000(object):
         self.device = device
         self.act = act
         self.learning_rate = learning_rate
-        self.dim = dim
 
         # Losses
         self.recon_loss = ReconstructionLoss()
