@@ -76,10 +76,11 @@ class Experiment000(object):
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
         x_rec = self.decoder(h)
-        loss += recon_loss(x, x_rec) \  # RC loss
+        loss += recon_loss(x, x_rec) \
                 + reduce(lambda u, v: u + v,
                          [self.recon_loss(u, v) \
-                          for u, v in zip(self.encoder.hiddens, self.decoder.hiddens[::-1])])
+                          for u, v in zip(self.encoder.hiddens,
+                                          self.decoder.hiddens[::-1])])  # RC loss
 
         # Discriminator/Generator
         d_fake = self.discriminator(x_rec, y_pred)
