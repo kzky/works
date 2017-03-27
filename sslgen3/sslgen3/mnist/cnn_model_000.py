@@ -49,17 +49,25 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            linear=L.Linear(128*7*7, 10)
         )
         self.hiddens = []
         self.act = act
         
     def __call__(self, x, test=False):
         self.hiddens = []
+
         h = self.convunit0(x, test)
         self.hiddens.append(h)
         h = self.convunit1(h, test)
-        self.hiddens.append(h)
+        return h
+
+class MLP(Chain):
+    def __init__(self, device=None, act=F.relu):
+        super(MLP, self).__init__(
+            linear=L.Linear(128, 10)
+        )
+
+    def __call__(self, h):
         y = self.linear(h)
         return y
 
@@ -67,8 +75,6 @@ class Decoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
-            linear=L.Linear(10, 128*7*7),
-            bn=L.BatchNormalization(128*7*7, decay=0.9),
             deconvunit0=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
         )
@@ -77,49 +83,29 @@ class Decoder(Chain):
 
     def __call__(self, y, test=False):
         self.hiddens = []
-        h = self.linear(y)
-        h = self.bn(h)
-        h = reshape(h, (h.shape[0], 128, 7, 7))
-        h = self.act(h)
-        self.hiddens.append(h)
-        
+
         h = self.deconvunit0(h, test)
         self.hiddens.append(h)
         h = self.deconv(h)
         h = F.tanh(h)
         return h
 
-class Generator0(Chain):
-
-    def __init__(self, device=None, act=F.relu, dim=100, ):
-        super(Generator0, self).__init__(
-            linear=L.Linear(dim, 128*7*7),
-            bn=L.BatchNormalization(128*7*7, use_cudnn=True)
-        )
-        self.act = act
-        
-    def __call__(self, z, test=False):
-        h = self.linear(z)
-        h = self.bn(h, test)
-        h = self.act(h)
-        h = F.reshape(h, (h.shape[0], 128, 7, 7))
-        return h
-
 class Discriminator(Chain):
 
-    def __init__(self, device=None, act=F.relu):
+    def __init__(self, device=None, act=F.relu, n_cls=10):
         super(Discriminator, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            linear=L.Linear(128, 1), 
+            linear=L.Linear(128+n_cls, 1), 
         )
         self.act= act
 
-    def __call__(self, x, test=False):
+    def __call__(self, x, y, test=False):
         h = self.convunit0(x, test)
         h = self.convunit1(h, test)
-        h = F.average_pooling_2d(h, (7, 7))
+        shape = h.shape
+        h = F.reshape(h, (shape[0], np.prod(shape[1:])))
         h = self.linear(h)
-        #h = F.sigmoid(h)
+        h = F.sigmoid(h)
         return h
     

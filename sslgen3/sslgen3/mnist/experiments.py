@@ -16,15 +16,14 @@ import cv2
 import shutil
 import csv
 from sslgen3.utils import to_device
-from sslgen3.losses import ReconstructionLoss, LSGANLoss, EntropyRegularizationLoss
+from sslgen3.losses import ReconstructionLoss, GANLoss, EntropyRegularizationLoss
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
     """Enc-Dec, Enc-Gen-Enc, Enc-Gen-Dis.
 
-    - Feature matching is taken between convolution ouputs.
     """
-    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, dim=100):
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
         self.device = device
         self.act = act
@@ -33,93 +32,75 @@ class Experiment000(object):
 
         # Losses
         self.recon_loss = ReconstructionLoss()
-        self.lsgan_loss = LSGANLoss()
+        self.gan_loss = GANLoss()
         self.er_loss = EntropyRegularizationLoss()
 
         # Model
         from sslgen3.mnist.cnn_model_000 \
-            import Encoder, Decoder, Generator0, Discriminator
+            import Encoder, MLP, Decoder, Discriminator
         self.encoder = Encoder(device, act)
+        self.mlp = MLP(device, act)
         self.decoder = Decoder(device, act)
-        self.generator0 = Generator0(device, act ,dim)
-        self.discriminator = Discriminator(device, act)
-
+        self.discriminator = Discriminator(device, act, n_cls)
         self.encoder.to_gpu(device) if self.device else None
+        self.mlp.to_gpu(device) if self.device else None
         self.decoder.to_gpu(device) if self.device else None
-        self.generator0.to_gpu(device) if self.device else None
         self.discriminator.to_gpu(device) if self.device else None
         
         # Optimizer
         self.optimizer_enc = optimizers.Adam(learning_rate)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
+        self.optimizer_mlp = optimizers.Adam(learning_rate)
+        self.optimizer_mlp.setup(self.encoder)
+        self.optimizer_mlp.use_cleargrads()
         self.optimizer_dec = optimizers.Adam(learning_rate)
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
-        self.optimizer_gen = optimizers.Adam(learning_rate)
-        self.optimizer_gen.setup(self.generator0)
-        self.optimizer_gen.use_cleargrads()
         self.optimizer_dis = optimizers.Adam(learning_rate)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
 
-    def train(self, x_l, y_l, x_u):
-        self._train(x_l, y_l)
-        self._train(x_u)
+    def train(self, x_l, y, x_u):
+        self._train(x_l, y) 
+        self._train(x_u, y, y)
 
-    def _train(self, x, y=None):
+    def _train(self, x, y, y_0=None):
         # Encoder/Decoder
-        y = self.encoder(x)
-        x_rec = self.decoder(y)
-        l_rec = self.recon_loss(x, x_rec) \
-                + reduce(lambda x_, y_: x_ + y_, 
-                         [self.recon_loss(x_, y_) \
-                          for x_, y_ in zip(self.encoder.hiddens,
-                                          self.decoder.hiddens[::-1])])
-        loss = l_rec
-        l_er = self.er_loss(y_pred)
-        loss += l_er
-        if y is not None:
-            l_ce = F.softmax_cross_entropy(y_pred, y)
-            loss += l_ce
+        h = self.encoder(x)
+        y_pred = self.mlp(h)
+
+        loss = 0
+        loss += self.er_loss(y_pred)   # ER loss
+        if y_0 is not None:
+            loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
+
+        x_rec = self.decoder(h)
+        loss += recon_loss(x, x_rec) \  # RC loss
+                + reduce(lambda u, v: u + v,
+                         [self.recon_loss(u, v) \
+                          for u, v in zip(self.encoder.hiddens, self.decoder.hiddens[::-1])])
+
+        # Discriminator/Generator
+        d_fake = self.discriminator(x_rec, y_pred)
+        d_real = self.discriminator(x, y)
+        loss += self.gan_loss(d_fake)  + self.gan_loss(d_fake, d_real)  # Gen loss
+
         self.cleargrads()
         loss.backward()
-        self.optimizer_enc.update()
-        self.optimizer_dec.update()
+        self.encoder.update()
+        self.decoder.update()
+        self.mlp.update()
+        self.discriminator.update()
 
-        # Discriminator
-        h = Variable(h.data)  # disconnect
-        xp = cuda.get_array_module(x)
-        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        hz = self.generator0(z)
-        x_gen = self.decoder(hz)
-        d_x_gen = self.discriminator(x_gen)
-        d_x_real = self.discriminator(x)
-        l_dis = self.lsgan_loss(d_x_gen, d_x_real)
-        self.cleargrads()
-        l_dis.backward()
-        self.optimizer_dis.update()
-        
-        # Generator
-        xp = cuda.get_array_module(x)
-        z = Variable(cuda.to_gpu(xp.random.rand(x.shape[0], self.dim).astype(xp.float32), self.device))
-        hz = self.generator0(z)
-        x_gen = self.decoder(hz)
-        d_x_gen = self.discriminator(x_gen)
-        l_gen = self.lsgan_loss(d_x_gen)
-        self.cleargrads()
-        l_gen.backward()
-        self.optimizer_gen.update()
-        self.optimizer_dec.update()
-
-    def test(self, x_l, y_l):
-        y = self.encoder(x_l, test=True)
-        acc = F.accuracy(y, y_l)
+    def test(self, x, y):
+        y_pred = self.encoder(x, test=True)
+        acc = F.accuracy(y_pred, y)
         return acc
         
     def cleargrads(self, ):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
-        self.generator0.cleargrads()
+        self.mlp.cleargrads()
         self.discriminator.cleargrads()
         
