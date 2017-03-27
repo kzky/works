@@ -64,7 +64,7 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, device=None, act=F.relu):
         super(MLP, self).__init__(
-            linear=L.Linear(128, 10)
+            linear=L.Linear(128*7*7, 10)
         )
 
     def __call__(self, h):
@@ -81,7 +81,7 @@ class Decoder(Chain):
         self.act= act
         self.hiddens = []
 
-    def __call__(self, y, test=False):
+    def __call__(self, h, test=False):
         self.hiddens = []
 
         h = self.deconvunit0(h, test)
@@ -105,6 +105,7 @@ class Discriminator(Chain):
         h = self.convunit1(h, test)
         shape = h.shape
         h = F.reshape(h, (shape[0], np.prod(shape[1:])))
+        h = F.concat((h, y))
         h = self.linear(h)
         h = F.sigmoid(h)
         return h

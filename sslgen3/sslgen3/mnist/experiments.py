@@ -28,6 +28,7 @@ class Experiment000(object):
         self.device = device
         self.act = act
         self.learning_rate = learning_rate
+        self.n_cls = n_cls
 
         # Losses
         self.recon_loss = ReconstructionLoss()
@@ -75,7 +76,7 @@ class Experiment000(object):
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
         x_rec = self.decoder(h)
-        loss += recon_loss(x, x_rec) \
+        loss += self.recon_loss(x, x_rec) \
                 + reduce(lambda u, v: u + v,
                          [self.recon_loss(u, v) \
                           for u, v in zip(self.encoder.hiddens,
@@ -83,15 +84,16 @@ class Experiment000(object):
 
         # Discriminator/Generator
         d_fake = self.discriminator(x_rec, y_pred)
+        y = self.onehot(y)
         d_real = self.discriminator(x, y)
-        loss += self.gan_loss(d_fake)  + self.gan_loss(d_fake, d_real)  # Gen loss
+        loss += self.gan_loss(d_fake) + self.gan_loss(d_fake, d_real)  # Gen loss
 
         self.cleargrads()
         loss.backward()
-        self.encoder.update()
-        self.decoder.update()
-        self.mlp.update()
-        self.discriminator.update()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+        self.optimizer_mlp.update()
+        self.optimizer_dis.update()
 
     def test(self, x, y):
         y_pred = self.encoder(x, test=True)
@@ -103,4 +105,12 @@ class Experiment000(object):
         self.decoder.cleargrads()
         self.mlp.cleargrads()
         self.discriminator.cleargrads()
+        
+    def onehot(self, y):
+        y = cuda.to_cpu(y.data)
+        h = np.zeros((y.shape[0], self.n_cls))
+        h[np.arange(len(y)), y] = 1
+        h = h.astype(np.float32)
+        y = cuda.to_gpu(h, self.device)
+        return Variable(y)
         
