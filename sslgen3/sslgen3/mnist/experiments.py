@@ -52,7 +52,7 @@ class Experiment000(object):
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
         self.optimizer_mlp = optimizers.Adam(learning_rate)
-        self.optimizer_mlp.setup(self.encoder)
+        self.optimizer_mlp.setup(self.mlp)
         self.optimizer_mlp.use_cleargrads()
         self.optimizer_dec = optimizers.Adam(learning_rate)
         self.optimizer_dec.setup(self.decoder)
@@ -96,7 +96,8 @@ class Experiment000(object):
         self.optimizer_dis.update()
 
     def test(self, x, y):
-        y_pred = self.encoder(x, test=True)
+        h = self.encoder(x, test=True)
+        y_pred = self.mlp(h)
         acc = F.accuracy(y_pred, y)
         return acc
         

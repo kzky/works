@@ -77,9 +77,6 @@ def main():
                 time.time() - st, 
                 np.mean(accs))
             print(msg)
-            if acc_prev > accs[-1]:
-                exp.lambda_ *= 0.5
-                print("lambda decay")
             acc_prev = accs[-1]
 
             st = time.time()
