@@ -47,7 +47,7 @@ class Encoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Encoder, self).__init__(
-            convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
+            convunit0=ConvUnit(3, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
             convunit2=ConvUnit(128, 256, k=4, s=2, p=1, act=act),
         )
@@ -80,7 +80,7 @@ class Decoder(Chain):
         super(Decoder, self).__init__(
             deconvunit0=DeconvUnit(256, 128, k=4, s=2, p=1, act=act),
             deconvunit1=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
-            deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
+            deconv=L.Deconvolution2D(64, 3, ksize=4, stride=2, pad=1, ),
         )
         self.act= act
         self.hiddens = []
@@ -100,7 +100,7 @@ class Discriminator(Chain):
 
     def __init__(self, device=None, act=F.relu, n_cls=10):
         super(Discriminator, self).__init__(
-            convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
+            convunit0=ConvUnit(3, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
             convunit2=ConvUnit(128, 256, k=4, s=2, p=1, act=act),
             linear=L.Linear(256*7*7 + n_cls, 1), 
