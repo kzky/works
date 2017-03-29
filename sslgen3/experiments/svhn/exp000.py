@@ -1,6 +1,6 @@
 from sslgen3.svhn.experiments import Experiment000
 from sslgen3.utils import to_device
-from sslgen3.svhn.datasets import SvhnDataReader, Separator
+from sslgen3.svhn.datasets import SVHNDataReader, Separator
 import numpy as np
 import os
 import numpy as np
@@ -35,7 +35,7 @@ def main():
     test_path = os.path.join(home, "datasets/svhn/cifar-10.npz")
 
     # DataReader, Model, Optimizer, Losses
-    data_reader = SvhnDataReader(l_train_path, u_train_path, test_path,
+    data_reader = SVHNDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls,
                                   da=True,
