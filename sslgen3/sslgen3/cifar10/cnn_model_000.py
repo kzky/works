@@ -67,7 +67,7 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, device=None, act=F.relu):
         super(MLP, self).__init__(
-            linear=L.Linear(256*7*7, 10)
+            linear=L.Linear(256*4*4, 10)
         )
 
     def __call__(self, h):
@@ -103,7 +103,7 @@ class Discriminator(Chain):
             convunit0=ConvUnit(3, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
             convunit2=ConvUnit(128, 256, k=4, s=2, p=1, act=act),
-            linear=L.Linear(256*7*7 + n_cls, 1), 
+            linear=L.Linear(256*4*4 + n_cls, 1), 
         )
         self.act= act
 
