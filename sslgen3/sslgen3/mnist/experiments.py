@@ -16,7 +16,7 @@ import cv2
 import shutil
 import csv
 from sslgen3.utils import to_device
-from sslgen3.losses import ReconstructionLoss, GANLoss, EntropyRegularizationLoss
+from sslgen3.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizationLoss
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
@@ -62,10 +62,12 @@ class Experiment000(object):
         self.optimizer_dis.use_cleargrads()
 
     def train(self, x_l, y, x_u):
-        self._train(x_l, y) 
-        self._train(x_u, y, y)
-
-    def _train(self, x, y, y_0=None):
+        self._train(x_l, (x_l, y), y)
+        self._train(x_u, (x_l, y))
+        
+    def _train(self, x, xy, y_0=None):
+        x_, y_ = xy
+        
         # Encoder/Decoder
         h = self.encoder(x)
         y_pred = self.mlp(h)
@@ -81,19 +83,33 @@ class Experiment000(object):
                          [self.recon_loss(u, v) \
                           for u, v in zip(self.encoder.hiddens,
                                           self.decoder.hiddens[::-1])])  # RC loss
-
-        # Discriminator/Generator
-        d_fake = self.discriminator(x_rec, y_pred)
-        y = self.onehot(y)
-        d_real = self.discriminator(x, y)
-        loss += self.gan_loss(d_fake) + self.gan_loss(d_fake, d_real)  # Gen loss
-
         self.cleargrads()
         loss.backward()
         self.optimizer_enc.update()
         self.optimizer_dec.update()
         self.optimizer_mlp.update()
+
+        # Discriminator
+        x_rec = self.decoder(h)
+        y_pred = self.mlp(h)
+        d_fake = self.discriminator(x_rec, y_pred)
+        y = self.onehot(y_)
+        d_real = self.discriminator(x_, y)
+        loss = self.gan_loss(d_fake, d_real)
+        self.cleargrads()
+        loss.backward()
         self.optimizer_dis.update()
+
+        # Generator
+        x_rec = self.decoder(h)
+        y_pred = self.mlp(h)
+        d_fake = self.discriminator(x_rec, y_pred)
+        loss = self.gan_loss(d_fake)
+        self.cleargrads()
+        loss.backward()
+        self.optimizer_dec.update()
+        #self.optimizer_mlp.update()
+        #self.optimizer_enc.update()
 
     def test(self, x, y):
         h = self.encoder(x, test=True)

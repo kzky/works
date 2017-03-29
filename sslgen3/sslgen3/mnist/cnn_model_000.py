@@ -57,8 +57,10 @@ class Encoder(Chain):
         self.hiddens = []
 
         h = self.convunit0(x, test)
+        #h = F.dropout(h, train=not test)
         self.hiddens.append(h)
         h = self.convunit1(h, test)
+        #h = F.dropout(h, train=not test)
         return h
 
 class MLP(Chain):
