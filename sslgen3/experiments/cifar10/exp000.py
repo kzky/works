@@ -26,13 +26,13 @@ def main():
 
     # Separate dataset
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "datasets/cifar10/train.npz")
+    fpath = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
-    l_train_path = os.path.join(home, "datasets/cifar10/l_train.npz")
-    u_train_path = os.path.join(home, "datasets/cifar10/train.npz")
-    test_path = os.path.join(home, "datasets/cifar10/test.npz")
+    l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
+    u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
