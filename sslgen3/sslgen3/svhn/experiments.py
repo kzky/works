@@ -36,7 +36,7 @@ class Experiment000(object):
         self.er_loss = EntropyRegularizationLoss()
 
         # Model
-        from sslgen3.cifar10.cnn_model_000 \
+        from sslgen3.svhn.cnn_model_000 \
             import Encoder, MLP, Decoder, Discriminator
         self.encoder = Encoder(device, act)
         self.mlp = MLP(device, act)

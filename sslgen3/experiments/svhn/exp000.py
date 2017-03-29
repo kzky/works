@@ -1,6 +1,6 @@
-from sslgen3.cifar10.experiments import Experiment000
+from sslgen3.svhn.experiments import Experiment000
 from sslgen3.utils import to_device
-from sslgen3.cifar10.datasets import Cifar10DataReader, Separator
+from sslgen3.svhn.datasets import SvhnDataReader, Separator
 import numpy as np
 import os
 import numpy as np
@@ -26,16 +26,16 @@ def main():
 
     # Separate dataset
     home = os.environ.get("HOME")
-    fpath = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    fpath = os.path.join(home, "datasets/svhn/cifar-10.npz")
     separator = Separator(n_l_train_data)
     separator.separate_then_save(fpath)
 
-    l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
-    u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
-    test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    l_train_path = os.path.join(home, "datasets/svhn/l_cifar-10.npz")
+    u_train_path = os.path.join(home, "datasets/svhn/cifar-10.npz")
+    test_path = os.path.join(home, "datasets/svhn/cifar-10.npz")
 
     # DataReader, Model, Optimizer, Losses
-    data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
+    data_reader = SvhnDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls,
                                   da=True,
