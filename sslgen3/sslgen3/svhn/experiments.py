@@ -90,6 +90,7 @@ class Experiment000(object):
         self.optimizer_mlp.update()
 
         # Discriminator
+        h = Variable(h.data)
         x_rec = self.decoder(h)
         y_pred = self.mlp(h)
         d_fake = self.discriminator(x_rec, y_pred)
