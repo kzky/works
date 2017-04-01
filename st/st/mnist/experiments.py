@@ -41,6 +41,12 @@ class Experiment000(object):
         self.model = Model(device, act)
         self.model.to_gpu(device) if device is not None else None
 
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()        
+
     def train(self, x_l, y_l, x_u):
         self._train(x_l, y_l)
         self._train(x_l, None)
@@ -60,7 +66,9 @@ class Experiment000(object):
         loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
         loss += loss_rec
 
-        return loss
+        self.model.cleargrads()
+        loss.backward()
+        self.optimizer.update()
         
     def test(self, x, y):
         y_pred = self.model(x, test=True)
