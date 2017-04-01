@@ -51,7 +51,7 @@ class Encoder(Chain):
             convunit1=ConvUnit(64, 128, k=3, s=1, p=1, act=act),
             convunit2=ConvUnit(128, 256, k=3, s=1, p=1, act=act),
             linear0=L.Linear(256*4*4, 128),
-            bn0=L.BatchNormalization(128, decay=0.9, use_cudnn=True)
+            bn0=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
             linear1=L.Linear(128, 64),
             bn1=L.BatchNormalization(64, decay=0.9, use_cudnn=True)
         )
