@@ -1,4 +1,4 @@
-from sslgen3.svhn.experiments import Experiment001
+from sslgen3.svhn.experiments import Experiment002
 from sslgen3.utils import to_device
 from sslgen3.svhn.datasets import SVHNDataReader, Separator
 import numpy as np
@@ -40,7 +40,7 @@ def main():
                                   n_cls=n_cls,
                                   da=True,
                                   shape=True)
-    exp = Experiment001(
+    exp = Experiment002(
         device,
         learning_rate,
         act,
@@ -72,12 +72,16 @@ def main():
             for i in range(0, x_l.shape[0], bs):
                 accs.append(float(cuda.to_cpu(
                     exp.test(x_l[i:i+bs, ], y_l[i:i+bs, ]).data)))
+            acc_mean = np.mean(accs)
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                np.mean(accs))
+                acc_mean)
             print(msg)
-            acc_prev = accs[-1]
+            if acc_prev > acc_mean:
+                exp.lambda_ *= 0.8
+                print("lambda decay")
+            acc_prev = acc_mean
 
             st = time.time()
             epoch +=1

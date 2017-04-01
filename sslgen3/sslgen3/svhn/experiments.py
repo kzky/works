@@ -174,6 +174,8 @@ class Experiment001(Experiment000):
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
 
+        self.lambda_ = 1.
+
     def train(self, x_l, y, x_u):
         self._train(x_l, (x_l, y), y)
         self._train(x_u, (x_l, y))
@@ -186,7 +188,7 @@ class Experiment001(Experiment000):
         y_pred = self.mlp(h)
 
         loss = 0
-        loss += self.er_loss(y_pred)   # ER loss
+        loss += self.lambda_ * self.er_loss(y_pred)   # ER loss
         if y_0 is not None:
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
