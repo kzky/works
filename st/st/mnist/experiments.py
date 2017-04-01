@@ -30,17 +30,10 @@ class Experiment000(object):
         self.learning_rate = learning_rate
         self.n_cls = n_cls
 
-        # Losses
-        self.recon_loss = ReconstructionLoss()
-        self.gan_loss = GANLoss()
-        self.er_loss = EntropyRegularizationLoss()
-
-        from st.mnist.cnn_model_000 import Model
-
         # Model
+        from st.mnist.cnn_model_000 import Model
         self.model = Model(device, act)
         self.model.to_gpu(device) if device is not None else None
-
 
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
@@ -74,3 +67,25 @@ class Experiment000(object):
         y_pred = self.model(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
+
+class Experiment001(Experiment000):
+    """Enc-MLP-Dec-Dis
+
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Model
+        from st.mnist.cnn_model_001 import Model
+        self.model = Model(device, act)
+        self.model.to_gpu(device) if device is not None else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()        
+    
