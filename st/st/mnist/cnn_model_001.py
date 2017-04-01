@@ -62,9 +62,9 @@ class Model(Chain):
     def __init__(self, device=None, act=F.relu):
         super(Model, self).__init__(
             convunit=ConvUnit(1, 64, k=3, s=1, p=1, act=act),
-            resconvunit0=ResConvUnit(64, 64)
-            resconvunit1=ResConvUnit(64, 64)
-            linear=L.Linear(64*7*7, 10)
+            resconvunit0=ResConvUnit(64, 64),
+            resconvunit1=ResConvUnit(64, 64),
+            linear=L.Linear(64*7*7, 10),
         )
         self.act = act
         
