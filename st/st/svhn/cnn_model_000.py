@@ -61,14 +61,14 @@ class Model(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Model, self).__init__(
-            convunit=ConvUnit(3, 64, k=3, s=1, p=1, act=act),
-            resconvunit0=ResConvUnit(64, 64),
-            resconvunit1=ResConvUnit(64, 64),
-            resconvunit2=ResConvUnit(64, 64),
-            resconvunit3=ResConvUnit(64, 64),
-            resconvunit4=ResConvUnit(64, 64),
-            resconvunit5=ResConvUnit(64, 64),
-            linear=L.Linear(64*4*4, 10),
+            convunit=ConvUnit(3, 128, k=3, s=1, p=1, act=act),
+            resconvunit0=ResConvUnit(128, 128),
+            resconvunit1=ResConvUnit(128, 128),
+            resconvunit2=ResConvUnit(128, 128),
+            resconvunit3=ResConvUnit(128, 128),
+            resconvunit4=ResConvUnit(128, 128),
+            resconvunit5=ResConvUnit(128, 128),
+            linear=L.Linear(128*4*4, 10),
         )
         self.act = act
         self.hiddens = []
