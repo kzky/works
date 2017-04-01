@@ -30,6 +30,9 @@ class Experiment000(object):
         self.learning_rate = learning_rate
         self.n_cls = n_cls
 
+        # Loss
+        self.recon_loss = ReconstructionLoss()
+
         # Model
         from st.mnist.cnn_model_000 import Model
         self.model = Model(device, act)
@@ -78,6 +81,9 @@ class Experiment001(Experiment000):
         self.act = act
         self.learning_rate = learning_rate
         self.n_cls = n_cls
+
+        # Loss
+        self.recon_loss = ReconstructionLoss()
 
         # Model
         from st.mnist.cnn_model_001 import Model
