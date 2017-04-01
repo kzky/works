@@ -161,15 +161,16 @@ class Experiment003(Experiment002):
 
         # Cross Entropy Loss
         y_pred0 = self.model(x)
+        hiddens0 = self.model.hiddens
         if y is not None:
             loss_ce = F.softmax_cross_entropy(y_pred0, y)
             loss += loss_ce
 
         # Stochastic Regularization
         y_pred1 = self.model(x)
+        hiddens1 = self.model.hiddens
         loss_rec = reduce(lambda u, v: u+v,
-                          [self.recon_loss(u, v) for u, v in\
-                           zip(y_pred0.hiddens, y_pred1.hiddens)])
+                          [self.recon_loss(u, v) for u, v in zip(hiddens0, hiddens0)])
         loss += loss_rec
 
         # Entropy Regularization
