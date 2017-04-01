@@ -136,21 +136,56 @@ class Experiment002(Experiment001):
         self.model.cleargrads()
         loss.backward()
         self.optimizer.update()
-        
-    def test(self, x, y):
-        y_pred = self.model(x, test=True)
-        acc = F.accuracy(y_pred, y)
-        return acc
-
 
 class Experiment003(Experiment002):
     """
-    - Stochastic Regularization
-    - ResNet x N
+    - Stochastic Regularization without softmax
+    - ResNet x 2
     - Entropy Regularization
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         super(Experiment003, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act,
+            n_cls=n_cls
+        )
+        
+        # Loss
+        self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
+        
+    def _train(self, x, y=None):
+        loss = 0
+
+        # Cross Entropy Loss
+        y_pred0 = self.model(x)
+        if y is not None:
+            loss_ce = F.softmax_cross_entropy(y_pred0, y)
+            loss += loss_ce
+
+        # Stochastic Regularization
+        y_pred1 = self.model(x)
+        loss_rec = self.recon_loss(y_pred0, y_pred1)
+        loss += loss_rec
+
+        # Entropy Regularization
+        loss_er0 = self.er_loss(y_pred0)
+        loss_er1 = self.er_loss(y_pred1)
+        loss += loss_er0 + loss_er1
+
+        self.model.cleargrads()
+        loss.backward()
+        self.optimizer.update()
+
+class Experiment004(Experiment003):
+    """
+    - Stochastic Regularization b/w hiddens
+    - ResNet x N
+    - Entropy Regularization
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        super(Experiment004, self).__init__(
             device=device,
             learning_rate=learning_rate,
             act=act,
@@ -191,9 +226,3 @@ class Experiment003(Experiment002):
         self.model.cleargrads()
         loss.backward()
         self.optimizer.update()
-        
-    def test(self, x, y):
-        y_pred = self.model(x, test=True)
-        acc = F.accuracy(y_pred, y)
-        return acc
-    
