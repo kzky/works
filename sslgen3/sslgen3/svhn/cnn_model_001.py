@@ -50,8 +50,10 @@ class Encoder(Chain):
             convunit0=ConvUnit(3, 64, k=3, s=1, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=3, s=1, p=1, act=act),
             convunit2=ConvUnit(128, 256, k=3, s=1, p=1, act=act),
-            linear=L.Linear(256*4*4, 128),
-            bn=L.BatchNormalization(128, decay=0.9, use_cudnn=True)
+            linear0=L.Linear(256*4*4, 128),
+            bn0=L.BatchNormalization(128, decay=0.9, use_cudnn=True)
+            linear1=L.Linear(128, 64),
+            bn1=L.BatchNormalization(64, decay=0.9, use_cudnn=True)
         )
         self.hiddens = []
         self.act = act
@@ -68,14 +70,17 @@ class Encoder(Chain):
         h = self.convunit2(h, test)
         h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
-        h = self.linear(h)
-        h = self.bn(h, test)
+        h = self.linear0(h)
+        h = self.bn0(h, test)
+        h = self.linear1(h)
+        h = self.bn1(h, test)
+
         return h
 
 class MLP(Chain):
     def __init__(self, device=None, act=F.relu):
         super(MLP, self).__init__(
-            linear=L.Linear(128, 10)
+            linear=L.Linear(64, 10)
         )
 
     def __call__(self, h):
@@ -86,8 +91,10 @@ class Decoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
-            linear=L.Linear(128, 256*4*4),
-            bn=L.BatchNormalization(256*4*4, decay=0.9, use_cudnn=True),
+            linear0=L.Linear(64, 128),
+            bn0=L.BatchNormalization(128, decay=0.9, use_cudnn=True),
+            linear1=L.Linear(128, 256*4*4),
+            bn1=L.BatchNormalization(256*4*4, decay=0.9, use_cudnn=True),
             deconvunit0=DeconvUnit(256, 128, k=4, s=2, p=1, act=act),
             deconvunit1=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 3, ksize=4, stride=2, pad=1, ),
@@ -97,8 +104,12 @@ class Decoder(Chain):
 
     def __call__(self, h, test=False):
         self.hiddens = []
-        h = self.linear(h)
-        h = self.bn(h, test)
+        h = self.linear0(h)
+        h = self.bn0(h, test)
+        self.hiddens.append(h)
+        h = self.linear1(h)
+        h = self.bn1(h, test)
+        self.hiddens.append(h)
         h= F.reshape(h, (h.shape[0], 256, 4, 4))
         self.hiddens.append(h)
         h = self.deconvunit0(h, test)
