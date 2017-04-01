@@ -20,8 +20,8 @@ from st.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizat
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
-    """Enc-MLP-Dec-Dis
-
+    """
+    - Stochastic Regularization
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
@@ -71,8 +71,9 @@ class Experiment000(object):
         return acc
 
 class Experiment001(Experiment000):
-    """Enc-MLP-Dec-Dis
-
+    """
+    - Stochastic Regularization
+    - ResNet x 2
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
@@ -96,10 +97,10 @@ class Experiment001(Experiment000):
     
 
 class Experiment002(Experiment001):
-    """Enc-MLP-Dec-Dis
-
+    """
+    - Stochastic Regularization
+    - ResNet x 2
     - Entropy Regularization
-
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         super(Experiment002, self).__init__(
@@ -143,10 +144,10 @@ class Experiment002(Experiment001):
 
 
 class Experiment003(Experiment002):
-    """Enc-MLP-Dec-Dis
-
+    """
+    - Stochastic Regularization
+    - ResNet x N
     - Entropy Regularization
-
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         super(Experiment003, self).__init__(
@@ -155,7 +156,16 @@ class Experiment003(Experiment002):
             act=act,
             n_cls=n_cls
         )
-        
+        # Model
+        from st.mnist.cnn_model_002 import Model
+        self.model = Model(device, act)
+        self.model.to_gpu(device) if device is not None else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()        
+    
     def _train(self, x, y=None):
         loss = 0
 
