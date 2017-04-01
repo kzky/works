@@ -42,6 +42,26 @@ class ReconstructionLoss(Chain):
 
         return self.loss
 
+class InvariantReconstructionLoss(Chain):
+
+    def __init__(self,
+                     ):
+        super(InvariantReconstructionLoss, self).__init__()
+        self.loss = None
+        
+    def __call__(self, x_recon, x):
+        bs = x.shape[0]
+        d = np.prod(x.shape[1:])
+
+        if x.shape[1:] == 3:
+            h_recon = F.average_pooling_2d(x_recon, (2, 2))
+            h = F.average_pooling_2d(x, (2, 2))
+            self.loss = F.mean_squared_error(x_recon, x) / d
+        else:
+            self.loss = F.mean_squared_error(x_recon, x) / d
+
+        return self.loss
+
 class ReconstructionLoss1(Chain):
 
     def __init__(self,

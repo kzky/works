@@ -278,3 +278,23 @@ class Experiment002(Experiment000):
         self.optimizer_dis = optimizers.Adam(learning_rate)
         self.optimizer_dis.setup(self.discriminator)
         self.optimizer_dis.use_cleargrads()
+
+class Experiment003(Experiment002):
+    """Enc-MLP-Dec-Dis
+
+    - Encoder contains linear function
+    - Location-invariant Reconstruction
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        super(Experiment003, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act,
+            n_cls=n_cls,
+        )
+        
+        # Losses
+        self.recon_loss = InvariantReconstructionLoss()
+        self.gan_loss = GANLoss()
+        self.er_loss = EntropyRegularizationLoss()
+
