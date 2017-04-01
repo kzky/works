@@ -67,16 +67,20 @@ class Model(Chain):
             linear=L.Linear(64*7*7, 10),
         )
         self.act = act
+        self.hiddens = []
         
     def __call__(self, x, test=False):
+        self.hiddens = []
 
         h = self.convunit(x, test)
         h = F.dropout(h, train=not test)
 
         h = self.resconvunit0(h, test)
+        self.hiddens.append(h)
         h = F.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
         h = self.resconvunit1(h, test)
+        self.hiddens.append(h)
         h = F.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
 

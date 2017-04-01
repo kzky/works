@@ -98,6 +98,8 @@ class Experiment001(Experiment000):
 class Experiment002(Experiment001):
     """Enc-MLP-Dec-Dis
 
+    - Entropy Regularization
+
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         super(Experiment002, self).__init__(
@@ -138,3 +140,49 @@ class Experiment002(Experiment001):
         y_pred = self.model(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
+
+
+class Experiment003(Experiment002):
+    """Enc-MLP-Dec-Dis
+
+    - Entropy Regularization
+
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        super(Experiment003, self).__init__(
+            device=device,
+            learning_rate=learning_rate,
+            act=act,
+            n_cls=n_cls
+        )
+        
+    def _train(self, x, y=None):
+        loss = 0
+
+        # Cross Entropy Loss
+        y_pred0 = self.model(x)
+        if y is not None:
+            loss_ce = F.softmax_cross_entropy(y_pred0, y)
+            loss += loss_ce
+
+        # Stochastic Regularization
+        y_pred1 = self.model(x)
+        loss_rec = reduce(lambda u, v: u+v,
+                          [self.recon_loss(u, v) for u, v in\
+                           zip(y_pred0.hiddens, y_pred1.hiddens)]
+        loss += loss_rec
+
+        # Entropy Regularization
+        loss_er0 = self.er_loss(y_pred0)
+        loss_er1 = self.er_loss(y_pred1)
+        loss += loss_er0 + loss_er1
+
+        self.model.cleargrads()
+        loss.backward()
+        self.optimizer.update()
+        
+    def test(self, x, y):
+        y_pred = self.model(x, test=True)
+        acc = F.accuracy(y_pred, y)
+        return acc
+    
