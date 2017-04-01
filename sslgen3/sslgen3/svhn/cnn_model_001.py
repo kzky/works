@@ -60,13 +60,13 @@ class Encoder(Chain):
         self.hiddens = []
 
         h = self.convunit0(x, test)
-        h = self.max_pooling_2d(h, (2, 2))
+        h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.convunit1(h, test)
-        h = self.max_pooling_2d(h, (2, 2))
+        h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.convunit2(h, test)
-        h = self.max_pooling_2d(h, (2, 2))
+        h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.linear(h)
         h = self.bn(h, test)
