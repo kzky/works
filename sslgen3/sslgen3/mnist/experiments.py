@@ -134,6 +134,8 @@ class Experiment000(object):
 class Experiment001(object):
     """Enc-MLP-Dec-Dis
 
+    Enc-MLP is combined as one encoder.
+
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
