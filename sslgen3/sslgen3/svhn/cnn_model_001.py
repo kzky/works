@@ -87,7 +87,7 @@ class Decoder(Chain):
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
             linear=L.Linear(128, 256*4*4),
-            bn=L.BatchNormalization(256, decay=0.9, use_cudnn=True)
+            bn=L.BatchNormalization(256, decay=0.9, use_cudnn=True),
             deconvunit0=DeconvUnit(256, 128, k=4, s=2, p=1, act=act),
             deconvunit1=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 3, ksize=4, stride=2, pad=1, ),
