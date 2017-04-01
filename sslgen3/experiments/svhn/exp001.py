@@ -1,4 +1,4 @@
-from sslgen3.svhn.experiments import Experiment002
+from sslgen3.svhn.experiments import Experiment001
 from sslgen3.utils import to_device
 from sslgen3.svhn.datasets import SVHNDataReader, Separator
 import numpy as np
@@ -40,7 +40,7 @@ def main():
                                   n_cls=n_cls,
                                   da=True,
                                   shape=True)
-    exp = Experiment002(
+    exp = Experiment001(
         device,
         learning_rate,
         act,
