@@ -66,7 +66,9 @@ class Model(Chain):
             resconvunit1=ResConvUnit(64, 64),
             resconvunit2=ResConvUnit(64, 64),
             resconvunit3=ResConvUnit(64, 64),
-            linear=L.Linear(64*7*7, 10),
+            resconvunit4=ResConvUnit(64, 64),
+            resconvunit5=ResConvUnit(64, 64),
+            linear=L.Linear(64*4*4, 10),
         )
         self.act = act
         self.hiddens = []
@@ -93,6 +95,14 @@ class Model(Chain):
         h = F.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
 
+        h = self.resconvunit4(h, test)
+        self.hiddens.append(h)
+        h = F.dropout(h, train=not test)
+        h = self.resconvunit5(h, test)
+        self.hiddens.append(h)
+        h = F.max_pooling_2d(h, (2, 2))
+        h = F.dropout(h, train=not test)
+        
         h = self.linear(h)
         return h
 
