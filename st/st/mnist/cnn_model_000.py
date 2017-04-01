@@ -32,8 +32,8 @@ class Model(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Model, self).__init__(
-            convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
-            convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
+            convunit0=ConvUnit(1, 64, k=3, s=1, p=1, act=act),
+            convunit1=ConvUnit(64, 128, k=3, s=1, p=1, act=act),
             linear=L.Linear(128*7*7, 10)
         )
         self.hiddens = []
@@ -43,8 +43,10 @@ class Model(Chain):
         self.hiddens = []
 
         h = self.convunit0(x, test)
+        h = self.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
         h = self.convunit1(h, test)
+        h = self.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
         h = self.linear(h)
         return h
