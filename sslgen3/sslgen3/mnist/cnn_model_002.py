@@ -49,7 +49,8 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            linear=L.Linear(128*7*7, 64)
+            linear=L.Linear(128*7*7, 64),
+            bn=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
         )
         self.hiddens = []
         self.act = act
@@ -62,6 +63,7 @@ class Encoder(Chain):
         h = self.convunit1(h, test)
         self.hiddens.append(h)
         h = self.linear(h)
+        h = self.bn(h)
         return h
 
 class MLP(Chain):
@@ -79,6 +81,7 @@ class Decoder(Chain):
     def __init__(self, device=None, act=F.relu):
         super(Decoder, self).__init__(
             linear=L.Linear(64, 128*7*7),
+            bn=L.BatchNormalization(128*7*7, decay=0.9, use_cudnn=True),
             deconvunit0=DeconvUnit(128, 64, k=4, s=2, p=1, act=act),
             deconv=L.Deconvolution2D(64, 1, ksize=4, stride=2, pad=1, ),
         )
@@ -88,6 +91,8 @@ class Decoder(Chain):
     def __call__(self, h, test=False):
         self.hiddens = []
         h = self.linear(h)
+        h = self.bn(h)
+        h = F.reshape(h, (h.shape[0], 128, 7, 7))
         self.hiddens.append(h)
         h = self.deconvunit0(h, test)
         self.hiddens.append(h)
