@@ -63,6 +63,6 @@ class Experiment000(object):
         return loss
         
     def test(self, x, y):
-        y_pred = self.encoder(x, test=True)
+        y_pred = self.model(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
