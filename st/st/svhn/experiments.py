@@ -57,8 +57,6 @@ class Experiment000(object):
         if y is not None:
             loss_ce = F.softmax_cross_entropy(y_pred0, y)
             loss += loss_ce
-            loss_ce = F.softmax_cross_entropy(y_pred1, y)
-            loss += loss_ce
 
         # Stochastic Regularization
         loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
