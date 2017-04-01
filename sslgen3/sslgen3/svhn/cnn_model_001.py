@@ -75,7 +75,7 @@ class Encoder(Chain):
 class MLP(Chain):
     def __init__(self, device=None, act=F.relu):
         super(MLP, self).__init__(
-            linear=L.Linear(256*4*4, 10)
+            linear=L.Linear(128, 10)
         )
 
     def __call__(self, h):
