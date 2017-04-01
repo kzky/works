@@ -102,7 +102,7 @@ class Experiment002(Experiment001):
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         super(Experiment002, self).__init__(
             device=device,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
             act=act,
             n_cls=n_cls
         )
