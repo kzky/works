@@ -43,10 +43,10 @@ class Model(Chain):
         self.hiddens = []
 
         h = self.convunit0(x, test)
-        h = self.max_pooling_2d(h, (2, 2))
+        h = F.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
         h = self.convunit1(h, test)
-        h = self.max_pooling_2d(h, (2, 2))
+        h = F.max_pooling_2d(h, (2, 2))
         h = F.dropout(h, train=not test)
         h = self.linear(h)
         return h
