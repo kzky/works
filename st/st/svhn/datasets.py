@@ -67,8 +67,9 @@ class SVHNDataReader(object):
         batch_data_x_ = self.l_train_data["X"][beg:end, :]
         batch_data_y_ = self.l_train_data["y"][beg:end]
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
-        if self._da:
-            batch_data_x = self._transform(batch_data_x)
+
+        batch_data_x0 = self._transform(batch_data_x)
+        batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
@@ -82,7 +83,9 @@ class SVHNDataReader(object):
             self.l_train_data["X"] = self.l_train_data["X"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
 
-        return batch_data_x, batch_data_y
+        batch_data_x0 = self.reshape(batch_data_x0)
+        batch_data_x1 = self.reshape(batch_data_x1)
+        return batch_data_x0, batch_data_x1, batch_data_y
 
     def get_u_train_batch(self,):
         """Return next batch data.
@@ -100,8 +103,9 @@ class SVHNDataReader(object):
         batch_data_x_ = self.u_train_data["X"][beg:end, :]
         batch_data_y_ = self.u_train_data["y"][beg:end]
         batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
-        if self._da:
-            batch_data_x = self._transform(batch_data_x)
+
+        batch_data_x0 = self._transform(batch_data_x)
+        batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
@@ -115,7 +119,9 @@ class SVHNDataReader(object):
             self.u_train_data["X"] = self.u_train_data["X"][idx]
             self.u_train_data["y"] = self.u_train_data["y"][idx]
 
-        return batch_data_x, batch_data_y
+        batch_data_x0 = self.reshape(batch_data_x0)
+        batch_data_x1 = self.reshape(batch_data_x1)
+        return batch_data_x0, batch_data_x1, batch_data_y
 
     def get_test_batch(self,):
         """Return next batch data.
@@ -138,10 +144,18 @@ class SVHNDataReader(object):
     def _transform(self, imgs):
         imgs_ = np.zeros_like(imgs)
         for i, img in enumerate(imgs):
+            img_ = np.copy(img)
+            
             # Rotation
             n = np.random.choice(np.arange(-15, 15))
             M = cv2.getRotationMatrix2D((32/2, 32/2), n, 1)
-            dst = cv2.warpAffine(img.transpose(1, 2, 0), M, (32, 32))
+            dst = cv2.warpAffine(img_.transpose(1, 2, 0), M, (32, 32))
+
+            # translation
+            M = np.float32([[1,0,np.random.randint(-2, 2)],
+                            [0,1,np.random.randint(-2, 2)]])
+            dst = cv2.warpAffine(dst, M, (32, 32))
+
             imgs_[i] = dst.transpose(2, 0, 1)
         return imgs_
 

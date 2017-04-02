@@ -44,16 +44,16 @@ class Experiment000(object):
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()        
 
-    def train(self, x_l, y_l, x_u):
-        self._train(x_l, y_l)
-        self._train(x_l, None)
+    def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
+        self._train(x_l0, x_l1, y_l)
+        self._train(x_u0, x_u1, None)
 
-    def _train(self, x, y=None):
+    def _train(self, x0, x1, y=None):
         loss = 0
 
         # Cross Entropy Loss
-        y_pred0 = self.model(x)
-        y_pred1 = self.model(x)
+        y_pred0 = self.model(x0)
+        y_pred1 = self.model(x1)
         if y is not None:
             loss_ce = F.softmax_cross_entropy(y_pred0, y)
             loss += loss_ce
