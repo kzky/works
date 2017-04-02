@@ -45,9 +45,9 @@ class Experiment000(object):
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
 
-    def train(self, x_l0, x_l1, y_l, x_u):
+    def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         self._train(x_l0, x_l1, y_l)
-        self._train(x_l0, x_l1, None)
+        self._train(x_u0, x_u1, None)
 
     def _train(self, x0, x1, y=None):
         loss = 0

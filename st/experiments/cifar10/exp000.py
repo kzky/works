@@ -60,7 +60,7 @@ def main():
                          for x in data_reader.get_u_train_batch()]
 
         # Train
-        exp.train(x_l0, x_l1, y_l, x_u)
+        exp.train(x_l0, x_l1, y_l, x_u0, x_u1)
         
         # Eval
         if (i+1) % iter_epoch == 0:
