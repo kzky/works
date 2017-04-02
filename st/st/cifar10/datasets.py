@@ -87,8 +87,9 @@ class Cifar10DataReader(object):
         batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.l_train_data["train_y"][beg:end]
         batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
-        if self._da:
-            batch_data_x = self._transform(batch_data_x)
+
+        batch_data_x0 = self._transform(batch_data_x)
+        batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
@@ -102,8 +103,9 @@ class Cifar10DataReader(object):
             self.l_train_data["train_x"] = self.l_train_data["train_x"][idx]
             self.l_train_data["train_y"] = self.l_train_data["train_y"][idx]
 
-        batch_data_x = self.reshape(batch_data_x)
-        return batch_data_x, batch_data_y
+        batch_data_x0 = self.reshape(batch_data_x0)
+        batch_data_x1 = self.reshape(batch_data_x1)
+        return batch_data_x0, , batch_data_x1, batch_data_y
 
     def get_u_train_batch(self,):
         """Return next batch data.
@@ -121,8 +123,9 @@ class Cifar10DataReader(object):
         batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.u_train_data["train_y"][beg:end]
         batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
-        if self._da:
-            batch_data_x = self._transform(batch_data_x)
+
+        batch_data_x0 = self._transform(batch_data_x)
+        batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
@@ -136,8 +139,9 @@ class Cifar10DataReader(object):
             self.u_train_data["train_x"] = self.u_train_data["train_x"][idx]
             self.u_train_data["train_y"] = self.u_train_data["train_y"][idx]
  
-        batch_data_x = self.reshape(batch_data_x)
-        return batch_data_x, batch_data_y
+        batch_data_x0 = self.reshape(batch_data_x0)
+        batch_data_x1 = self.reshape(batch_data_x1)
+        return batch_data_x0, , batch_data_x1, batch_data_y
 
     def get_test_batch(self,):
         """Return next batch data.
@@ -165,9 +169,9 @@ class Cifar10DataReader(object):
         for i, img in enumerate(imgs):
             # random flip
             if np.random.randint(2):
-                img_ = img[:, :, ::-1]
+                img_[:] = img[:, :, ::-1]  # copy
             else:
-                img_ = img
+                img_[:] = img  # copy
 
             # rotation
             n = np.random.choice(np.arange(-15, 15))

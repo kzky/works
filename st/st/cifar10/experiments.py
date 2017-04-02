@@ -17,6 +17,7 @@ import shutil
 import csv
 from st.utils import to_device
 from st.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizationLoss
+from st.cifar10.datasets import Cifar10DataReader
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
@@ -42,18 +43,18 @@ class Experiment000(object):
         # Optimizer
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.setup(self.model)
-        self.optimizer.use_cleargrads()        
+        self.optimizer.use_cleargrads()
 
-    def train(self, x_l, y_l, x_u):
-        self._train(x_l, y_l)
-        self._train(x_l, None)
+    def train(self, x_l0, x_l1, y_l, x_u):
+        self._train(x_l0, x_l1, y_l)
+        self._train(x_l0, x_l1, None)
 
-    def _train(self, x, y=None):
+    def _train(self, x0, x1, y=None):
         loss = 0
 
         # Cross Entropy Loss
-        y_pred0 = self.model(x)
-        y_pred1 = self.model(x)
+        y_pred0 = self.model(x0)
+        y_pred1 = self.model(x1)
         if y is not None:
             loss_ce = F.softmax_cross_entropy(y_pred0, y)
             loss += loss_ce
