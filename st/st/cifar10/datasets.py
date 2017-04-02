@@ -169,9 +169,9 @@ class Cifar10DataReader(object):
         for i, img in enumerate(imgs):
             # random flip
             if np.random.randint(2):
-                img_[:] = img[:, :, ::-1]  # copy
+                img_ = np.copy(img[:, :, ::-1])
             else:
-                img_[:] = img  # copy
+                img_ = np.copy(img)
 
             # rotation
             n = np.random.choice(np.arange(-15, 15))
