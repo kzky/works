@@ -83,8 +83,6 @@ class SVHNDataReader(object):
             self.l_train_data["X"] = self.l_train_data["X"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
 
-        batch_data_x0 = self.reshape(batch_data_x0)
-        batch_data_x1 = self.reshape(batch_data_x1)
         return batch_data_x0, batch_data_x1, batch_data_y
 
     def get_u_train_batch(self,):
