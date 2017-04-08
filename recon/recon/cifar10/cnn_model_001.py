@@ -147,7 +147,7 @@ class Decoder(Chain):
             deconvunit2=DeconvUnit(64, 64, k=4, s=2, p=1, act=act),
             
             # Output
-            deconv=L.Deconvolution2D(64, 3, ksize=4, stride=2, pad=1, ),
+            conv=L.Convolution2d(64, 3, ksize=3, stride=1, pad=1, ),
         )
         self.act= act
         self.hiddens = []
@@ -177,6 +177,8 @@ class Decoder(Chain):
         self.hiddens.append(h)
         h = self.resconv5(h)
         self.hiddens.append(h)
+
+        h = self.conv(h)
 
         return h
 
