@@ -49,7 +49,7 @@ class Encoder(Chain):
         super(Encoder, self).__init__(
             convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
             convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
-            self.linear=L.Linear(128*7*7, 10)
+            linear=L.Linear(128*7*7, 10)
         )
         self.hiddens = []
         self.act = act
@@ -81,8 +81,8 @@ class Decoder(Chain):
         h = self.linear(h)
         h = self.bn(h)
         h = self.act(h)
-        self.hiddens.append(h)
         h = F.reshape(h, (h.shape[0], 128, 7, 7))
+        self.hiddens.append(h)
 
         h = self.deconvunit0(h, test)
         self.hiddens.append(h)
