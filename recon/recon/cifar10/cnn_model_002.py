@@ -28,7 +28,7 @@ class ConvUnit(Chain):
         h = self.act(h)
         return h
 
-class ResConvUnitDn(Chain):
+class ResConvUnit(Chain):
     def __init__(self, imap, omap, act=F.relu):
         super(ResConvUnit, self).__init__(
             conv0=L.Convolution2D(imap, omap/2, ksize=1, stride=1, pad=0, ),
