@@ -131,7 +131,7 @@ class Experiment001(Experiment000):
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
         
-class Experiment001(Experiment000):
+class Experiment002(Experiment000):
     """Enc-MLP-Dec
 
     - Encoder contains linear function
