@@ -82,3 +82,8 @@ class Experiment000(object):
         self.optimizer_enc.update()
         self.optimizer_dec.update()
         self.optimizer_mlp.update()
+
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
+        self.mlp.cleargrads()
