@@ -151,10 +151,10 @@ class DistanceLoss(Chain):
     def __call__(self, h):
         shape = h.shape
         h = F.reshape(h, (shape[0], np.prod(shape[1:])))
-        h = F.batch_l2_norm_squared(h) ** 2
+        h_norm = F.batch_l2_norm_squared(h) ** 2
         bs = shape[0]
-        h0 = F.broadcast_to(h, (bs, bs))
-        h1 = F.broadcast_to(F.transpose(h), (bs, bs))
+        h0 = F.broadcast_to(h_norm, (bs, bs))
+        h1 = F.broadcast_to(F.transpose(h_norm), (bs, bs))
         hh = F.linear(h, h)
         D = h0 + h1 - 2 * hh
         D = F.sum(D) / np.prod(h.shape)
