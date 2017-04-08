@@ -194,7 +194,6 @@ class Experiment003(Experiment000):
     """Enc-MLP-Dec
 
     - MeanDistanceLoss
-    - DistanceLoss
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
@@ -240,7 +239,6 @@ class Experiment003(Experiment000):
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
         loss += self.md_loss(self.encoder.hiddens[-1])  # MD loss
-        loss += self.d_loss(self.encoder.hiddens[-1])  # MD loss
 
         self.cleargrads()
         loss.backward()
@@ -251,3 +249,65 @@ class Experiment003(Experiment000):
         self.encoder.cleargrads()
         self.mlp.cleargrads()
 
+
+class Experiment004(Experiment003):
+    """Enc-MLP-Dec
+
+    - MeanDistanceLoss
+    - ResNet
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Losses
+        self.md_loss = MeanDistanceLoss()
+        self.er_loss = EntropyRegularizationLoss()
+        self.d_loss = DistanceLoss()
+
+        # Model
+        from recon.cifar10.cnn_model_001 import Encoder, MLP, Decoder
+        self.encoder = Encoder(device, act)
+        self.mlp = MLP(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.mlp.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_mlp = optimizers.Adam(learning_rate)
+        self.optimizer_mlp.setup(self.mlp)
+        self.optimizer_mlp.use_cleargrads()
+
+    def train(self, x_l, y, x_u):
+        self._train(x_l, (x_l, y), y)
+        self._train(x_u, (x_l, y))
+        
+    def _train(self, x, xy, y_0=None):
+        x_, y_ = xy
+        
+        # Encoder/Decoder
+        h = self.encoder(x)
+        y_pred = self.mlp(h)
+
+        loss = 0
+        loss += self.er_loss(y_pred)   # ER loss
+        if y_0 is not None:
+            loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
+
+        loss += self.md_loss(self.encoder.hiddens[-1])  # MD loss
+
+        self.cleargrads()
+        loss.backward()
+        self.optimizer_enc.update()
+        self.optimizer_mlp.update()
+        
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.mlp.cleargrads()
+
+        
