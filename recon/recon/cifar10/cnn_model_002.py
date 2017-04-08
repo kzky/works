@@ -148,13 +148,13 @@ class Decoder(Chain):
             deconvunit2=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
 
             # Concat
-            convconcat=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat0=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat1=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat2=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat3=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat4=L.Convolution2D(128, 128, 1, 1, 0),
-            convconcat5=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat0=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat1=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat2=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat3=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat4=L.Convolution2D(128, 64, 1, 1, 0),
+            convconcat5=L.Convolution2D(128, 64, 1, 1, 0),
             
             # Output
             conv=L.Convolution2D(64, 3, ksize=3, stride=1, pad=1, ),
