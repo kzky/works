@@ -94,7 +94,7 @@ class Experiment000(object):
         self.decoder.cleargrads()
         self.mlp.cleargrads()
 
-class Experiment002(Experiment001):
+class Experiment001(Experiment000):
     """Enc-MLP-Dec
 
     - Encoder contains linear function
