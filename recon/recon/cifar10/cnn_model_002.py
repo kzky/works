@@ -28,7 +28,7 @@ class ConvUnit(Chain):
         h = self.act(h)
         return h
 
-class ResConvUnit(Chain):
+class ResConvUnitDn(Chain):
     def __init__(self, imap, omap, act=F.relu):
         super(ResConvUnit, self).__init__(
             conv0=L.Convolution2D(imap, omap/2, ksize=1, stride=1, pad=0, ),
@@ -53,6 +53,7 @@ class ResConvUnit(Chain):
         h = h + x
         h = self.bn2(h, test)
         h = self.act(h)
+
         return h
 
 class DeconvUnit(Chain):
@@ -134,17 +135,26 @@ class Decoder(Chain):
             bn=L.BatchNormalization(64*4*4, decay=0.9, use_cudnn=True),
             
             # Resconv
-            resconv0=ResConvUnit(128, 64), 
-            resconv1=ResConvUnit(128, 64), 
-            resconv2=ResConvUnit(128, 64), 
-            resconv3=ResConvUnit(128, 64), 
-            resconv4=ResConvUnit(128, 64), 
-            resconv5=ResConvUnit(128, 64), 
+            resconv0=ResConvUnit(128, 128), 
+            resconv1=ResConvUnit(128, 128), 
+            resconv2=ResConvUnit(128, 128), 
+            resconv3=ResConvUnit(128, 128), 
+            resconv4=ResConvUnit(128, 128), 
+            resconv5=ResConvUnit(128, 128), 
 
             # Upsampling
             deconvunit0=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
             deconvunit1=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
             deconvunit2=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
+
+            # Concat
+            convconcat=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat0=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat1=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat2=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat3=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat4=L.Convolution2D(128, 128, 1, 1, 0),
+            convconcat5=L.Convolution2D(128, 128, 1, 1, 0),
             
             # Output
             conv=L.Convolution2D(64, 3, ksize=3, stride=1, pad=1, ),
@@ -157,24 +167,31 @@ class Decoder(Chain):
         h = self.bn(h)
         h = F.reshape(h, (h.shape[0], 64, 4, 4))
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat(h)
         
         h = self.deconvunit0(h)  # 4 -> 8
         h = self.resconv0(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat0(h)
         h = self.resconv1(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat1(h)
 
         h = self.deconvunit1(h)  # 8 -> 16
         h = self.resconv2(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat2(h)
         h = self.resconv3(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat3(h)
 
         h = self.deconvunit2(h)  # 16 -> 32
         h = self.resconv4(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat4(h)
         h = self.resconv5(h)
         h = F.concat((h, enc_hiddens.pop()))
+        h = convoncat5(h)
 
         h = self.conv(h)
 
