@@ -130,3 +130,18 @@ class LSGANLoss(Chain):
         else:
             loss = F.sum(F.square(d_x_gen - 1)) / bs_d_x_gen / 2
             return loss
+
+class MeanDistanceLoss(Chain):
+    def __init__(self, ):
+        super(MeanDistanceLoss, self).__init__(
+        )
+        
+    def __call__(self, h):
+        shape = h.shape
+        m = F.sum(h, axis=0) / shape[0]
+        M = F.broadcast_to(m .shape)
+        D = F.sum(h - m) / np.prod(shape[1:])
+        return D
+    
+    
+
