@@ -140,7 +140,7 @@ class MeanDistanceLoss(Chain):
         shape = h.shape
         m = F.sum(h, axis=0) / shape[0]
         M = F.broadcast_to(m, shape)
-        D = F.sum(h - M) / np.prod(shape[1:])
+        D = -F.sum(h - M) / np.prod(shape)
         return D
     
     
