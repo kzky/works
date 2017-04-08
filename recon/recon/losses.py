@@ -157,7 +157,7 @@ class DistanceLoss(Chain):
         h1 = F.broadcast_to(F.transpose(h_norm), (bs, bs))
         hh = F.linear(h, h)
         D = h0 + h1 - 2 * hh
-        D = F.sum(D) / np.prod(h.shape)
+        D = -F.sum(D) / np.prod(h.shape)
         
         return D
     
