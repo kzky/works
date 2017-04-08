@@ -143,5 +143,23 @@ class MeanDistanceLoss(Chain):
         D = -F.sum(h - M) / np.prod(shape)
         return D
     
+class DistanceLoss(Chain):
+    def __init__(self, ):
+        super(DistanceLoss, self).__init__(
+        )
+        
+    def __call__(self, h):
+        shape = h.shape
+        h = F.reshape(h, (shape[0], np.prod(shape[1:])))
+        h = F.batch_l2_norm_squared(h) ** 2
+        bs = shape[0]
+        h0 = F.broadcast_to(h, (bs, bs))
+        h1 = F.broadcast_to(F.transpose(h), (bs, bs))
+        hh = F.linear(h, h)
+        D = h0 + h1 - 2 * hh
+        D = F.sum(D) / np.prod(h.shape)
+        
+        return D
+    
     
 

@@ -16,7 +16,7 @@ import cv2
 import shutil
 import csv
 from recon.utils import to_device
-from recon.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizationLoss, InvariantReconstructionLoss, MeanDistanceLoss
+from recon.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizationLoss, InvariantReconstructionLoss, MeanDistanceLoss, DistanceLoss
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
@@ -194,6 +194,7 @@ class Experiment003(Experiment000):
     """Enc-MLP-Dec
 
     - MeanDistanceLoss
+    - DistanceLoss
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
@@ -205,6 +206,7 @@ class Experiment003(Experiment000):
         # Losses
         self.md_loss = MeanDistanceLoss()
         self.er_loss = EntropyRegularizationLoss()
+        self.d_loss = DistanceLoss()
 
         # Model
         from recon.cifar10.cnn_model_000 import Encoder, MLP, Decoder
@@ -238,6 +240,7 @@ class Experiment003(Experiment000):
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
         loss += self.md_loss(self.encoder.hiddens[-1])  # MD loss
+        loss += self.d_loss(self.encoder.hiddens[-1])  # MD loss
 
         self.cleargrads()
         loss.backward()
