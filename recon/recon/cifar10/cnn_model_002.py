@@ -143,9 +143,9 @@ class Decoder(Chain):
             resconv5=ResConvUnit(64, 64), 
 
             # Upsampling
-            deconvunit0=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
-            deconvunit1=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
-            deconvunit2=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
+            deconvunit0=DeconvUnit(64, 64, k=4, s=2, p=1, act=act),
+            deconvunit1=DeconvUnit(64, 64, k=4, s=2, p=1, act=act),
+            deconvunit2=DeconvUnit(64, 64, k=4, s=2, p=1, act=act),
 
             # Concat
             convconcat=L.Convolution2D(128, 64, 1, 1, 0),
