@@ -83,6 +83,12 @@ class Experiment000(object):
         self.optimizer_dec.update()
         self.optimizer_mlp.update()
 
+    def test(self, x, y):
+        h = self.encoder(x, test=True)
+        y_pred = self.mlp(h)
+        acc = F.accuracy(y_pred, y)
+        return acc
+
     def cleargrads(self, ):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
