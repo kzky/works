@@ -59,8 +59,8 @@ class Encoder(Chain):
 
     def __init__(self, device=None, act=F.relu):
         super(Encoder, self).__init__(
-            convunit0=ConvUnit(1, 64, k=4, s=2, p=1, act=act),
-            convunit1=ConvUnit(64, 128, k=4, s=2, p=1, act=act),
+            convunit0=ConvUnit(1, 64, k=3, s=1, p=1, act=act),
+            convunit1=ConvUnit(64, 128, k=3, s=1, p=1, act=act),
             linear=L.Linear(128*7*7, 64),
             bn=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
         )
@@ -71,8 +71,10 @@ class Encoder(Chain):
         self.hiddens = []
 
         h = self.convunit0(x, test)
+        h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.convunit1(h, test)
+        h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.linear(h)
         h = self.bn(h)
