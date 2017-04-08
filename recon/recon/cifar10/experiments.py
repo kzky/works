@@ -220,9 +220,6 @@ class Experiment003(Experiment000):
         self.optimizer_mlp = optimizers.Adam(learning_rate)
         self.optimizer_mlp.setup(self.mlp)
         self.optimizer_mlp.use_cleargrads()
-        self.optimizer_dec = optimizers.Adam(learning_rate)
-        self.optimizer_dec.setup(self.decoder)
-        self.optimizer_dec.use_cleargrads()
 
     def train(self, x_l, y, x_u):
         self._train(x_l, (x_l, y), y)
