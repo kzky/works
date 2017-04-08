@@ -160,22 +160,22 @@ class Decoder(Chain):
         h = F.reshape(h, (h.shape[0], 64, 4, 4))
         self.hiddens.append(h)
 
-        h = deconvunit0(h)  # 4 -> 8
-        h = resconv0(h)
+        h = self.deconvunit0(h)  # 4 -> 8
+        h = self.resconv0(h)
         self.hiddens.append(h)
-        h = resconv1(h)
-        self.hiddens.append(h)
-
-        h = deconvunit1(h)  # 8 -> 16
-        h = resconv2(h)
-        self.hiddens.append(h)
-        h = resconv3(h)
+        h = self.resconv1(h)
         self.hiddens.append(h)
 
-        h = deconvunit2(h)  # 16 -> 32
-        h = resconv4(h)
+        h = self.deconvunit1(h)  # 8 -> 16
+        h = self.resconv2(h)
         self.hiddens.append(h)
-        h = resconv5(h)
+        h = self.resconv3(h)
+        self.hiddens.append(h)
+
+        h = self.deconvunit2(h)  # 16 -> 32
+        h = self.resconv4(h)
+        self.hiddens.append(h)
+        h = self.resconv5(h)
         self.hiddens.append(h)
 
         return h
