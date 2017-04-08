@@ -244,3 +244,7 @@ class Experiment003(Experiment000):
         self.optimizer_enc.update()
         self.optimizer_mlp.update()
         
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.mlp.cleargrads()
+
