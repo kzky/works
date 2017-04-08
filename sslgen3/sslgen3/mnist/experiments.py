@@ -195,7 +195,6 @@ class Experiment001(object):
         loss.backward()
         self.optimizer_enc.update()
         self.optimizer_dec.update()
-        self.optimizer_mlp.update()
 
         # Discriminator
         x_rec = self.decoder(y_pred)
