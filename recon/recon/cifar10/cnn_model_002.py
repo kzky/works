@@ -135,12 +135,12 @@ class Decoder(Chain):
             bn=L.BatchNormalization(64*4*4, decay=0.9, use_cudnn=True),
             
             # Resconv
-            resconv0=ResConvUnit(128, 128), 
-            resconv1=ResConvUnit(128, 128), 
-            resconv2=ResConvUnit(128, 128), 
-            resconv3=ResConvUnit(128, 128), 
-            resconv4=ResConvUnit(128, 128), 
-            resconv5=ResConvUnit(128, 128), 
+            resconv0=ResConvUnit(64, 64), 
+            resconv1=ResConvUnit(64, 64), 
+            resconv2=ResConvUnit(64, 64), 
+            resconv3=ResConvUnit(64, 64), 
+            resconv4=ResConvUnit(64, 64), 
+            resconv5=ResConvUnit(64, 64), 
 
             # Upsampling
             deconvunit0=DeconvUnit(128, 128, k=4, s=2, p=1, act=act),
