@@ -28,6 +28,18 @@ class ConvUnit(Chain):
         h = self.act(h)
         return h
 
+class ResConvUnit(Chain):
+    def __init__(self, imap, omap, act=F.relu):
+        super(ResConvUnit, self).__init__(
+            conv0=L.Convolution2D(imap, omap, ksize=1, stride=1, pad=0, ),
+            bn0=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
+            conv1=L.Convolution2D(imap, omap, ksize=3, stride=1, pad=1, ),
+            bn1=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
+            conv2=L.Convolution2D(imap, omap, ksize=1, stride=1, pad=0, ),
+            bn2=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
+        )
+        self.act = act
+
 class DeconvUnit(Chain):
 
     def __init__(self, imap, omap, k=4, s=2, p=1, act=F.relu):
