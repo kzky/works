@@ -131,3 +131,62 @@ class Experiment001(Experiment000):
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
         
+class Experiment001(Experiment000):
+    """Enc-MLP-Dec
+
+    - Encoder contains linear function
+    - ResNet
+    - U-Net
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
+
+        # Model
+        from recon.cifar10.cnn_model_002 import Encoder, MLP, Decoder
+        self.encoder = Encoder(device, act)
+        self.mlp = MLP(device, act)
+        self.decoder = Decoder(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.mlp.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_mlp = optimizers.Adam(learning_rate)
+        self.optimizer_mlp.setup(self.mlp)
+        self.optimizer_mlp.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+
+    def _train(self, x, xy, y_0=None):
+        x_, y_ = xy
+        
+        # Encoder/Decoder
+        h = self.encoder(x)
+        y_pred = self.mlp(h)
+
+        loss = 0
+        loss += self.er_loss(y_pred)   # ER loss
+        if y_0 is not None:
+            loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
+
+        x_rec = self.decoder(h, hiddens)
+        loss += self.recon_loss(x, x_rec)
+
+        self.cleargrads()
+        loss.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+        self.optimizer_mlp.update()
+        
