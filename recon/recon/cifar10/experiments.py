@@ -22,7 +22,7 @@ from sklearn.metrics import confusion_matrix
 class Experiment000(object):
     """Enc-MLP-Dec
 
-    Encoder contains linear function
+    - Encoder contains linear function
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
         # Settings
@@ -93,3 +93,41 @@ class Experiment000(object):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
         self.mlp.cleargrads()
+
+class Experiment002(Experiment001):
+    """Enc-MLP-Dec
+
+    - Encoder contains linear function
+    - ResNet
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
+
+        # Model
+        from recon.cifar10.cnn_model_001 import Encoder, MLP, Decoder
+        self.encoder = Encoder(device, act)
+        self.mlp = MLP(device, act)
+        self.decoder = Decoder(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.mlp.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_mlp = optimizers.Adam(learning_rate)
+        self.optimizer_mlp.setup(self.mlp)
+        self.optimizer_mlp.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+        
