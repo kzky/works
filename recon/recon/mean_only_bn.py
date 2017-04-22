@@ -138,7 +138,7 @@ class BatchNormalization(link.Link):
             # Use running average statistics or fine-tuned statistics.
             mean = variable.Variable(self.avg_mean, volatile='auto')
             #var = variable.Variable(self.avg_var, volatile='auto')
-            self.one_var = variable.Variable(self.one_var, volatile='auto')
+            var = variable.Variable(self.one_var, volatile='auto')
             ret = batch_normalization.fixed_batch_normalization(
                 x, gamma, beta, mean, var, self.eps, self.use_cudnn)
         return ret
