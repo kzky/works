@@ -62,15 +62,15 @@ class Model(Chain):
         h = self.bn_conv0(self.act(self.conv0(x), 0.1), test)
         h = self.bn_conv1(self.act(self.conv1(h), 0.1), test)
         h = self.bn_conv2(self.act(self.conv2(h), 0.1), test)
-        h = self.max_pooling_2d(h, (2, 2))  # 32 -> 16
-        h = self.dropout(h, 0.5, not test)
+        h = F.max_pooling_2d(h, (2, 2))  # 32 -> 16
+        h = F.dropout(h, 0.5, not test)
         
         # (conv -> act -> bn) x 3 -> maxpool -> dropout
         h = self.bn_conv3(self.act(self.conv3(h), 0.1), test)
         h = self.bn_conv4(self.act(self.conv4(h), 0.1), test)
         h = self.bn_conv5(self.act(self.conv5(h), 0.1), test)
-        h = self.max_pooling_2d(h, (2, 2))  # 16 -> 8
-        h = self.dropout(h, 0.5, not test)
+        h = F.max_pooling_2d(h, (2, 2))  # 16 -> 8
+        h = F.dropout(h, 0.5, not test)
         
         # conv -> act -> bn -> (nin -> act -> bn) x 2
         h = self.bn_conv6(self.act(self.conv6(h), 0.1), test)  # 8 -> 7
