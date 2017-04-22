@@ -73,11 +73,11 @@ class Model(Chain):
         h = F.dropout(h, 0.5, not test)
         
         # conv -> act -> bn -> (nin -> act -> bn) x 2
-        h = self.bn_conv6(self.act(self.conv6(h), 0.1), test)  # 8 -> 7
+        h = self.bn_conv6(self.act(self.conv6(h), 0.1), test)
         h = self.bn_conv7(self.act(self.conv7(h), 0.1), test)
         h = self.bn_conv8(self.act(self.conv8(h), 0.1), test)
 
-        h = F.average_pooling_2d(h, (7, 7))
+        h = F.average_pooling_2d(h, (8, 8))
         h = self.linear(h)
         
         return h
