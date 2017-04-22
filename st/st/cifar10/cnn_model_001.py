@@ -51,7 +51,11 @@ class Model(Chain):
         self.act = F.leaky_relu
         
     def __call__(self, x, test=False):
-        #TODO: gaussian noise
+        # add gaussian noise
+        xp = cuda.get_array_module(x.data)
+        with cuda.get_device(self.device):
+            noise = xp.random.randn(x.shape) * 0.15
+            x.data += noise
         
         # (conv -> act -> bn) x 3 -> maxpool -> dropout
         h = self.bn_conv0(self.act(self.conv0(x), 0.1), test)
