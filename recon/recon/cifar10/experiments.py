@@ -366,6 +366,7 @@ class Experiment005(Experiment000):
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
         h = self.encoder(x, enc=True)
+        x_rec = self.decoder(h)
         loss += self.recon_loss(x, x_rec) \
                 + reduce(lambda u, v: u + v,
                          [self.recon_loss(u, v) \
