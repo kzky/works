@@ -19,12 +19,16 @@ class ConvUnit(Chain):
         super(ConvUnit, self).__init__(
             conv=L.Convolution2D(imap, omap, ksize=k, stride=s, pad=p, ),
             bn=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
+            bn_enc=L.BatchNormalization(omap, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
-    def __call__(self, h, test=False):
+    def __call__(self, h, enc=False, test=False):
         h = self.conv(h)
-        h = self.bn(h, test)
+        if not enc:
+            h = self.bn(h, test)
+        else:
+            h = self.bn_enc(h, test)
         h = self.act(h)
         return h
 
@@ -56,16 +60,16 @@ class Encoder(Chain):
         self.hiddens = []
         self.act = act
         
-    def __call__(self, x, test=False):
+    def __call__(self, x, enc=False, test=False):
         self.hiddens = []
 
-        h = self.convunit0(x, test)
+        h = self.convunit0(x, enc, test)
         h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
-        h = self.convunit1(h, test)
+        h = self.convunit1(h, enc, test)
         h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
-        h = self.convunit2(h, test)
+        h = self.convunit2(h, enc, test)
         h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.linear(h)
