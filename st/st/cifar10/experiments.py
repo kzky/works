@@ -71,3 +71,56 @@ class Experiment000(object):
         y_pred = self.model(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
+
+class Experiment001(object):
+    """
+    - Stochastic Regularization
+    - Net in tempens (conv -> nin -> linear)
+    - Mean-only BN
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Loss
+        self.recon_loss = ReconstructionLoss()
+
+        # Model
+        from st.svhn.cnn_model_000 import Model
+        self.model = Model(device, act)
+        self.model.to_gpu(device) if device is not None else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()
+
+    def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
+        self._train(x_l0, x_l1, y_l)
+        self._train(x_u0, x_u1, None)
+
+    def _train(self, x0, x1, y=None):
+        loss = 0
+
+        # Cross Entropy Loss
+        y_pred0 = self.model(x0)
+        y_pred1 = self.model(x1)
+        if y is not None:
+            loss_ce = F.softmax_cross_entropy(y_pred0, y)
+            loss += loss_ce
+
+        # Stochastic Regularization
+        loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
+        loss += loss_rec
+
+        self.model.cleargrads()
+        loss.backward()
+        self.optimizer.update()
+        
+    def test(self, x, y):
+        y_pred = self.model(x, test=True)
+        acc = F.accuracy(y_pred, y)
+        return acc
