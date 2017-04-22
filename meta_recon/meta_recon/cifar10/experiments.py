@@ -132,6 +132,8 @@ class Experiment000(object):
         self.update_parameter_by_meta_learner(loss)
 
     def update_parameter_by_meta_learner(self, recon_loss):
+        #TODO: Get parameters only, using slice?
+        #TODO: Unchain backward
         # Encoder
         for i in range(self.encoder.params()):
             xp = cuda.get_array_module(p.data)
