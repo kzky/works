@@ -89,7 +89,7 @@ class Experiment001(object):
         self.recon_loss = ReconstructionLoss()
 
         # Model
-        from st.svhn.cnn_model_000 import Model
+        from st.svhn.cnn_model_001 import Model
         self.model = Model(device, act)
         self.model.to_gpu(device) if device is not None else None
 
