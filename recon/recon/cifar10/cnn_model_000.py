@@ -69,7 +69,7 @@ class Encoder(Chain):
         h = F.max_pooling_2d(h, (2, 2))
         self.hiddens.append(h)
         h = self.linear(h)
-        h = self.bn(h)
+        h = self.bn(h, test)
         return h
 
 class MLP(Chain):
@@ -98,7 +98,7 @@ class Decoder(Chain):
     def __call__(self, h, test=False):
         self.hiddens = []
         h = self.linear(h)
-        h = self.bn(h)
+        h = self.bn(h, test)
         h = F.reshape(h, (h.shape[0], 256, 4, 4))
         self.hiddens.append(h)
         h = self.deconvunit0(h, test)
