@@ -118,8 +118,7 @@ class BatchNormalization(link.Link):
 
         # Var is always ones
         with cuda.get_device(self._device_id):
-            self.one_var = variable.Variable(self.xp.ones(
-                self.avg_mean.shape, dtype=x.dtype), volatile='auto')
+            self.one_var = self.xp.ones(self.avg_mean.shape, dtype=x.dtype)
 
         if not test:
             if finetune:
