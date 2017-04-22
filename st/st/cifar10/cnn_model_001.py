@@ -49,7 +49,8 @@ class Model(Chain):
             #bn_nin1=BatchNormalization(128),
         )
         self.act = F.leaky_relu
-        
+        self.device = device
+
     def __call__(self, x, test=False):
         # add gaussian noise
         xp = cuda.get_array_module(x.data)
