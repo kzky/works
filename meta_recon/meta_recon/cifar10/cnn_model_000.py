@@ -124,7 +124,7 @@ class Decoder(Chain):
         self.act= act
         self.hiddens = []
 
-    def __call__(self, h, params_dict, test=False):
+    def __call__(self, h, test=False):
         self.hiddens = []
         h = self.linear(h)
         h = self.bn(h, test)

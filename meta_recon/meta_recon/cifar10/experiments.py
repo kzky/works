@@ -74,10 +74,10 @@ class Experiment000(object):
 
         #TODO: multiple layers
         # Meta-learner for encoder
-        for _ in self.endocer.params():
+        for _ in self.encoder.params():
             # meta-learner taking gradient in batch dimension
             l = L.LSTM(1, 1)
-            l.to_gpu(device) if self.device else None
+            l.to_gpu(self.device) if self.device else None
             self.meta_enc_learners.append(l)
 
             # optimizer of meta-learner
