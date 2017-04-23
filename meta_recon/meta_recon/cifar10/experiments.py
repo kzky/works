@@ -35,7 +35,7 @@ class Experiment000(object):
         self.t = 0
 
         # Losses
-        self.meta_recon_loss = ReconstructionLoss()
+        self.recon_loss = ReconstructionLoss()
         self.er_loss = EntropyRegularizationLoss()
 
         # Model
@@ -48,6 +48,7 @@ class Experiment000(object):
         self.decoder.to_gpu(device) if self.device else None
         
         # Optimizer
+        #TODO: fix setup parameter for encoder
         self.optimizer_enc = optimizers.Adam(learning_rate)
         self.optimizer_enc.setup(self.encoder)
         self.optimizer_enc.use_cleargrads()
@@ -87,16 +88,17 @@ class Experiment000(object):
             self.opt_meta_enc_learners.append(opt)
 
     def train(self, x_l, y, x_u):
-        # Train meta learner
         self.t += 1
+
         if self.t > self.T:
-            self.update_meta_learners(x_l, y)
+            self.train_meta_learmers(x_l, y)
             self.t = 0
             return
 
         # Train learner
         self._train(x_l, y)
         self._train(x_u, y=None)
+
         
     def _train(self, x, y=None):
         # Classifier
@@ -110,45 +112,41 @@ class Experiment000(object):
             loss.backward()
             self.optimizer_enc.update()
             self.optimizer_mlp.update()
-        
-        # Encoder/Decoder
-        x_rec = self.decoder(h)
-        loss += self.meta_recon_loss(x, x_rec) \
-                + reduce(lambda u, v: u + v,
-                         [self.meta_recon_loss(u, v) \
-                          for u, v in zip(self.encoder.hiddens,
-                                          self.decoder.hiddens[::-1])])  # RC loss
-        self.cleargrads()
-        loss.backward()
-        self.update_parameter_by_meta_learner(loss)
-        self.optimizer_dec.update()
 
-    def update_parameter_by_meta_learner(self, recon_loss):
-        # Reset last params
-        if self.t > self.T:
-            self.last_enc_params = OrderedDict()
+        if y is None:        
+            # Encoder/Decoder
+            x_rec = self.decoder(h)
+            loss += self.recon_loss(x, x_rec) \
+                    + reduce(lambda u, v: u + v,
+                             [self.recon_loss(u, v) \
+                              for u, v in zip(self.encoder.hiddens,
+                                              self.decoder.hiddens[::-1])])  # RC loss
+            self.cleargrads()
+            loss.backward()
+            self.update_parameter_by_meta_learner()
+            self.optimizer_dec.update()
 
+    def update_parameter_by_meta_learner(self, ):
         # Meta-learner forward for encoder
         namedparams = self.last_enc_params
         for i, elm in enumerate(namedparams.items()):  # parameter-loop
+            k, p = elm
+
             #TODO: add loss value and affine to align dimension of the gradients
             with cuda.get_device(self.device):
-                k, p = elm
                 shape = p.shape
-                xp = cuda.get_array_module(p.data)
-                input_ = Variable(xp.expand_dims(
-                    p.data.reshape(np.prod(shape)), axis=1))
+                #xp = cuda.get_array_module(p.data)
+                input_ = F.expand_dims(F.reshape(Variable(p.grad), (np.prod(shape), )), axis=1)
                 meta_learner = self.meta_enc_learners[i]
-                g_t = meta_learner(input_)  
+                g_t = meta_learner(input_)
                 p.data -= g_t.data.reshape(shape)
 
                 # Set parameter as variable to be backward
-                if self.t > self.T:
-                    w = p - F.reshape(g_t, shape)
-                    self.last_enc_params[k].unchain_backward()
+                if self.t + 1 > self.T:
+                    w = p - F.reshape(g_t, shape)                    
                     self.last_enc_params[k] = w
                                 
-    def update_meta_learners(self, x, y):
+    def train_meta_learmers(self, x, y):
         # forward once for learner to chain meta-learner and learner
         h = self.encoder(x, self.last_enc_params)
         y_pred = self.mlp(h)
@@ -160,10 +158,11 @@ class Experiment000(object):
         loss.backward()
 
         # unchain backward
-        #loss.unchain_backward()
+        loss.unchain_backward()
 
         # update
-        self._update_meta_learners()
+        self.update_meta_learners()
+        
 
     def test(self, x, y):
         h = self.encoder(x, self.last_enc_params, test=True)
@@ -180,7 +179,7 @@ class Experiment000(object):
         for ml in self.meta_enc_learners:
             ml.cleargrads()
         
-    def _update_meta_learners(self, ):
+    def update_meta_learners(self, ):
         for opt in self.opt_meta_enc_learners:
             opt.update()
 
