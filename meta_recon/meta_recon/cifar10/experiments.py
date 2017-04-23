@@ -136,7 +136,8 @@ class Experiment000(object):
                 k, p = elm
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
-                input_ = Variable(xp.expand_dims(p.data.reshape(np.prod(shape)), axis=1))
+                input_ = Variable(xp.expand_dims(
+                    p.data.reshape(np.prod(shape)), axis=1))
                 meta_learner = self.meta_enc_learners[i]
                 g_t = meta_learner(input_)  
                 p.data -= g_t.data.reshape(shape)
@@ -144,6 +145,7 @@ class Experiment000(object):
                 # Set parameter as variable to be backward
                 if self.t > self.T:
                     w = p - F.reshape(g_t, shape)
+                    self.last_enc_params[k].unchain_backward()
                     self.last_enc_params[k] = w
                                 
     def update_meta_learners(self, x, y):
@@ -158,7 +160,7 @@ class Experiment000(object):
         loss.backward()
 
         # unchain backward
-        loss.unchain_backward()
+        #loss.unchain_backward()
 
         # update
         self._update_meta_learners()
