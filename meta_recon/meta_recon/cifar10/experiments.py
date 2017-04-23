@@ -106,10 +106,10 @@ class Experiment000(object):
         if y is not None:
             loss += F.softmax_cross_entropy(y_pred, y)  # CE loss
 
-        self.cleargrads()
-        loss.backward()
-        self.optimizer_enc.update()
-        self.optimizer_mlp.update()
+            self.cleargrads()
+            loss.backward()
+            self.optimizer_enc.update()
+            self.optimizer_mlp.update()
         
         # Encoder/Decoder
         x_rec = self.decoder(h)
@@ -129,21 +129,22 @@ class Experiment000(object):
             self.last_enc_params = OrderedDict()
 
         # Meta-learner forward for encoder
-        namedparams = OrderedDict([x for x in self.encoder.namedparams()])
-        for i, elm in enumerate(namedparams):  # parameter-loop
+        namedparams = self.last_enc_params
+        for i, elm in enumerate(namedparams.items()):  # parameter-loop
             #TODO: add loss value and affine to align dimension of the gradients
-            k, p = elm
-            shape = p.shape
-            xp = cuda.get_array_module(p.data)
-            input_ = Variable(xp.expand_dims(p.data.reshape(np.prod(shape)), axis=1))
-            meta_learner = self.meta_enc_learners[i]
-            g_t = meta_learner(input_)  
-            p.data -= g_t.data.reshape(shape)
+            with cuda.get_device(self.device):
+                k, p = elm
+                shape = p.shape
+                xp = cuda.get_array_module(p.data)
+                input_ = Variable(xp.expand_dims(p.data.reshape(np.prod(shape)), axis=1))
+                meta_learner = self.meta_enc_learners[i]
+                g_t = meta_learner(input_)  
+                p.data -= g_t.data.reshape(shape)
 
-            # Set parameter as variable to be backward
-            if self.t > self.T:
-                w = p - F.reshape(g_t, shape)
-                self.last_enc_params[k] = w
+                # Set parameter as variable to be backward
+                if self.t > self.T:
+                    w = p - F.reshape(g_t, shape)
+                    self.last_enc_params[k] = w
                                 
     def update_meta_learners(self, x, y):
         # forward once for learner to chain meta-learner and learner
