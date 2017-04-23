@@ -42,7 +42,7 @@ class DeconvUnit(Chain):
         )
         self.act = act
 
-    def __call__(self, h, W=None, b=None, gamma_=None, beta_=None, test=False):
+    def __call__(self, h, test=False):
         h = self.deconv(h, W, b)
         h = self.bn(h, gamma_, beta_, test)
         h = self.act(h)
@@ -126,37 +126,17 @@ class Decoder(Chain):
 
     def __call__(self, h, params_dict, test=False):
         self.hiddens = []
-        h = self.linear(h, 
-                        params_dict["/linear/W"], 
-                        params_dict["/linear/b"], 
-        )
-        h = self.bn(h, 
-                    params_dict["/bn/gamma"], 
-                    params_dict["/bn/beta"], 
-                    test)
+        h = self.linear(h)
+        h = self.bn(h, test)
         h = F.reshape(h, (h.shape[0], 256, 4, 4))
         self.hiddens.append(h)
 
-        h = self.deconvunit0(h, 
-                             params_dict["/convunit0/conv/W"], 
-                             params_dict["/convunit0/conv/b"], 
-                             params_dict["/convunit0/bn/gamma"],
-                             params_dict["/convunit0/bn/beta"],
-                             test)
+        h = self.deconvunit0(h, test)
         self.hiddens.append(h)
 
-        h = self.deconvunit1(h, 
-                             params_dict["/convunit0/conv/W"], 
-                             params_dict["/convunit0/conv/b"], 
-                             params_dict["/convunit0/bn/gamma"],
-                             params_dict["/convunit0/bn/beta"],
-                             test)
+        h = self.deconvunit1(h, test)
         self.hiddens.append(h)
 
-        h = self.deconv(h, 
-                        params_dict["/deconv/W"], 
-                        params_dict["/deconv/b"], 
-        )
+        h = self.deconv(h)
         h = F.tanh(h)
         return h
-

@@ -23,6 +23,7 @@ class Experiment000(object):
     """Enc-MLP-Dec
 
     - Encoder contains linear function
+    - Gradients of auxiliary task is computed by mete-learner
     """
     def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10, T=5):
         # Settings
@@ -60,45 +61,34 @@ class Experiment000(object):
         # Meta model and its optimizer
         self.setup_meta_learners()
 
-    def meta_learners(self, ):
+    def setup_meta_learners(self, ):
         """
         Reconstruction loss has effects on encoder and decoder, such that
         the number of meta learners is the number of parameters of encoder and
         decoder.
         """
-        
         self.meta_enc_learners = []
         self.opt_meta_enc_learners = []
-        self.meta_dec_learners = []
-        self.opt_dec_learners = []
+        self.last_enc_params = OrderedDict()
 
         #TODO: multiple layers
-        # Encoder
+        # Meta-learner for encoder
         for _ in self.endocer.params():
-            l = L.LSTM(2, 2)  # (grad, loss)
+            # meta-learner taking gradient in batch dimension
+            l = L.LSTM(1, 1)
             l.to_gpu(device) if self.device else None
             self.meta_enc_learners.append(l)
 
+            # optimizer of meta-learner
             opt = optimizers.Adam()
             opt.setup(l)
             opt.use_cleargrads()
             self.opt_meta_enc_learners.append(opt)
 
-        # Decoder
-        for _ in self.decoder.params():
-            l = L.LSTM(2, 2)  # (grad, loss)
-            l.to_gpu(device) if self.device else None
-            self.meta_dec_learners.append(l)
-
-            opt = optimizers.Adam()
-            opt.setup(l)
-            opt.use_cleargrads()
-            self.opt_meta_dec_learners.append(opt)
-        
     def train(self, x_l, y, x_u):
         # Train meta learner
         self.t += 1
-        if self.t > T:
+        if self.t > self.T:
             self.update_meta_learners(x_l, y)
             self.t = 0
             return
@@ -132,39 +122,28 @@ class Experiment000(object):
         self.update_parameter_by_meta_learner(loss)
 
     def update_parameter_by_meta_learner(self, recon_loss):
-        #TODO: Get parameters only, using slice?
-        #TODO: Unchain backward
-        # Encoder
-        for i in range(self.encoder.params()):
-            xp = cuda.get_array_module(p.data)
+        # Reset last params
+        if self.t > self.T:
+            self.last_enc_params = OrderedDict()
+
+        # Meta-learner forward for encoder
+        namedparams = OrderedDict([x for x in self.encoder.namedparams()])
+        for i, elm in enumerate(namedparams):  # parameter-loop
+            #TODO: add loss value and affine to align dimension of the gradients
+            k, p = elm
             shape = p.shape
-            with cuda.get_device(self.device):
-                g_1d = xp.expand_dims(p.grad.reshape(np.prod(shape)), axis=1)
-                recon_loss_tiled = xp.zeros_like(g_1d)
-                xp.copyto(recon_loss_tiled, recon_loss.data)
-                input_ = Variable(xp.concatenate((g_1d, recon_loss_tiled), axis=1))
-                
-                # update parameter at t
-                meta_learner = self.meta_enc_learners[i]
-                g_t = meta_learner(input_)  
-                p.data -= g_t.data.reshape(shape)
+            input_ = Variable(p.data)
+            meta_learner = self.meta_enc_learners[i]
+            g_t = meta_learner(input_)  
+            p.data -= g_t.data.reshape(shape)
+
+            # Set parameter as variable to be backward
+            if self.t > self.T:
+                w = p - g_t
+                self.last_enc_params[k] = w
                                 
-        # Decoder
-        for i in range(self.decoder.target.params()):
-            xp = cuda.get_array_module(p.data)
-            shape = p.shape
-            with cuda.get_device(self.device):
-                g_1d = xp.expand_dims(p.grad.reshape(np.prod(shape)), axis=1)
-                recon_loss_tiled = xp.zeros_like(g_1d)
-                xp.copyto(recon_loss_tiled, recon_loss.data)
-                input_ = Variable(xp.concatenate((g_1d, recon_loss_tiled), axis=1))
-                
-                # update parameter at t
-                meta_learner = self.meta_dec_learners[i]
-                g_t = meta_learner(input_)  
-                p.data -= g_t.data.reshape(shape)
-            
     def update_meta_learners(self, x, y):
+        #TODO: Unchain backward
         h = self.encoder(x)
         y_pred = self.mlp(h)
         loss = 0
