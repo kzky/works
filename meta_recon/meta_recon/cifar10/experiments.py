@@ -143,7 +143,8 @@ class Experiment000(object):
 
                 # Set parameter as variable to be backward
                 if self.t + 1 > self.T:
-                    w = p - F.reshape(g_t, shape)                    
+                    w = p - F.reshape(g_t, shape)
+                    #TODO: this parameters are not reflected to optimizer_enc
                     self.last_enc_params[k] = w
                                 
     def train_meta_learmers(self, x, y):
