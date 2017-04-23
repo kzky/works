@@ -43,8 +43,8 @@ class DeconvUnit(Chain):
         self.act = act
 
     def __call__(self, h, test=False):
-        h = self.deconv(h, W, b)
-        h = self.bn(h, gamma_, beta_, test)
+        h = self.deconv(h)
+        h = self.bn(h, test=test)
         h = self.act(h)
         return h
         
@@ -127,14 +127,14 @@ class Decoder(Chain):
     def __call__(self, h, test=False):
         self.hiddens = []
         h = self.linear(h)
-        h = self.bn(h, test)
+        h = self.bn(h, test=test)
         h = F.reshape(h, (h.shape[0], 256, 4, 4))
         self.hiddens.append(h)
 
-        h = self.deconvunit0(h, test)
+        h = self.deconvunit0(h, test=test)
         self.hiddens.append(h)
 
-        h = self.deconvunit1(h, test)
+        h = self.deconvunit1(h, test=test)
         self.hiddens.append(h)
 
         h = self.deconv(h)
