@@ -21,14 +21,17 @@ class Cifar10DataReader(object):
             shape=False,
     ):
         # Load dataset
-        self.l_train_data = dict(np.load(l_train_path))
+        _l_train_data = dict(np.load(l_train_path))
+        self.l_train_data = {
+            "train_x":_l_train_data["train_x"] / 255., 
+            "train_y":_l_train_data["train_y"]}
         _u_train_data = np.load(u_train_path)
         self.u_train_data = {
-            "train_x":_u_train_data["train_x"], 
+            "train_x":_u_train_data["train_x"] / 255., 
             "train_y":_u_train_data["train_y"]}
         _test_data = np.load(test_path)
         self.test_data = {
-            "test_x": _test_data["test_x"], 
+            "test_x": _test_data["test_x"] / 255., 
             "test_y": _test_data["test_y"]}
 
         # ZCA Whitening
@@ -86,7 +89,7 @@ class Cifar10DataReader(object):
         end = self._next_position_l_train+self._batch_size
         batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.l_train_data["train_y"][beg:end]
-        batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        batch_data_x = (batch_data_x_).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
         batch_data_x1 = self._transform(batch_data_x)
@@ -122,7 +125,7 @@ class Cifar10DataReader(object):
         end = self._next_position_u_train+self._batch_size
         batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
         batch_data_y_ = self.u_train_data["train_y"][beg:end]
-        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        batch_data_x = (batch_data_x_ ).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
         batch_data_x1 = self._transform(batch_data_x)
@@ -156,7 +159,7 @@ class Cifar10DataReader(object):
         # Read data
         batch_data_x_ = self.test_data["test_x"]
         batch_data_y_ = self.test_data["test_y"]
-        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        batch_data_x = (batch_data_x_ ).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         batch_data_x = self.reshape(batch_data_x)

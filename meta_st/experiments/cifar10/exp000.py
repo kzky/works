@@ -16,7 +16,7 @@ def main():
     batch_size = 100
     n_l_train_data = 4000
     n_train_data = 50000
-    n_cls = 10
+    T = 3
 
     learning_rate = 1. * 1e-3
     n_epoch = 300
@@ -37,14 +37,14 @@ def main():
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
-                                  n_cls=n_cls,
+                                  T=T,
                                   da=True,
                                   shape=True)
     exp = Experiment000(
         device,
         learning_rate,
         act,
-        n_cls,
+        T,
         )
 
     # Training loop
