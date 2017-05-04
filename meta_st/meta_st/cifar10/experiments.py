@@ -57,7 +57,7 @@ class Experiment000(object):
         # Meta-learner
         for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
-            l = L.LSTM(1, 1)
+            l = L.LSTM(2, 1)
             l.to_gpu(self.device) if self.device else None
             self.meta_learners.append(l)
 
@@ -67,24 +67,26 @@ class Experiment000(object):
             opt.use_cleargrads()
             self.opt_meta_learners.append(opt)
 
-    def update_parameter_by_meta_learner(self, model_params):
+    def update_parameter_by_meta_learner(self, model_params, loss):
         namedparams = model_params
         for i, elm in enumerate(namedparams.items()):  # parameter-loop
             k, p = elm
-
             with cuda.get_device(self.device):
                 shape = p.shape
                 input_ = F.expand_dims(
                     F.reshape(Variable(p.grad), (np.prod(shape), )), axis=1)
+                loss_ = F.broadcast_to(loss, input_.shape)
+                input_ = F.concat((input_, loss_), axis=1)
                 meta_learner = self.meta_learners[i]
-                g_t = meta_learner(input_)  # forward of meta-learner
-                p.data -= g_t.data.reshape(shape)
+                #TODO: gradient become nan after some iteration
+                g = meta_learner(input_) * 1e-10 # forward of meta-learner
+                p.data -= g.data.reshape(shape)
 
-                # Set parameter as variable to be backproped
-                if self.t  == self.T:
-                    w = p - F.reshape(g_t, shape)
-                    self.model_params[k] = w
-
+            # Set parameter as variable to be backproped
+            if self.t  == self.T:
+                w = p - F.reshape(g, shape)
+                self.model_params[k] = w
+                
     def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         self.t += 1
 
@@ -104,9 +106,10 @@ class Experiment000(object):
         loss_ce = F.softmax_cross_entropy(y_pred, y)
         loss_ce.backward()
 
-        loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
         for opt in self.opt_meta_learners:
             opt.update()
+
+        loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
 
     def _train(self, x0, x1, y=None):
         # Cross Entropy Loss
@@ -128,7 +131,7 @@ class Experiment000(object):
         loss_rec.backward()
 
         # update learner using loss_rec and meta-learner
-        self.update_parameter_by_meta_learner(self.model_params)
+        self.update_parameter_by_meta_learner(self.model_params, loss_rec)
                         
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
