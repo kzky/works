@@ -181,7 +181,7 @@ class Experiment002(Experiment000):
         if y_0 is not None:
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
-            x_rec = self.decoder(h, self.encoder.hiddens)
+        x_rec = self.decoder(h, self.encoder.hiddens)
         loss += self.recon_loss(x, x_rec)
 
         self.cleargrads()
@@ -539,7 +539,7 @@ class Experiment008(Experiment000):
         if y_0 is not None:
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
-            x_rec = self.decoder(y, self.encoder.hiddens)
+        x_rec = self.decoder(y_pred, self.encoder.hiddens)
         loss += self.recon_loss(x, x_rec)
 
         self.cleargrads()
