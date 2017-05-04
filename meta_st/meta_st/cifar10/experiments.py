@@ -138,3 +138,30 @@ class Experiment000(object):
         for k, v in self.model_params:
             v.cleargrad()
         
+class Experiment001(object):
+    """
+    - Stochastic Regularization
+    - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, T=3):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.T = T
+        self.t = 0
+
+        # Loss
+        self.recon_loss = ReconstructionLoss()
+
+        # Model
+        from meta_st.cifar10.cnn_model_001 import Model
+        self.model = Model(device, act)
+        self.model.to_gpu(device) if device is not None else None
+        self.model_params = OrderedDict([x for x in self.model.namedparams()])
+        
+        # Optimizer
+        self.optimizer = Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()
+            
