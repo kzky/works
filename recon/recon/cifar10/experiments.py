@@ -181,7 +181,7 @@ class Experiment002(Experiment000):
         if y_0 is not None:
             loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
 
-        x_rec = self.decoder(h, self.encoder.hiddens)
+            x_rec = self.decoder(h, self.encoder.hiddens)
         loss += self.recon_loss(x, x_rec)
 
         self.cleargrads()
@@ -494,3 +494,59 @@ class Experiment007(Experiment000):
         y_pred = self.mlp(h)
         acc = F.accuracy(y_pred, y)
         return acc
+
+class Experiment008(Experiment000):
+    """Enc-MLP-Dec
+
+    - Encoder contains classifier
+    - ResNet
+    - U-Net
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
+
+        # Model
+        from recon.cifar10.cnn_model_006 import Encoder, Decoder
+        self.encoder = Encoder(device, act)
+        self.decoder = Decoder(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+
+    def _train(self, x, xy, y_0=None):
+        x_, y_ = xy
+        
+        # Encoder/Decoder
+        y = self.encoder(x)
+
+        loss = 0
+        loss += self.er_loss(y_pred)   # ER loss
+        if y_0 is not None:
+            loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
+
+            x_rec = self.decoder(y, self.encoder.hiddens)
+        loss += self.recon_loss(x, x_rec)
+
+        self.cleargrads()
+        loss.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
