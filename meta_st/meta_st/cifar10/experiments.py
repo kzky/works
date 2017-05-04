@@ -47,6 +47,7 @@ class Experiment000(object):
         self.optimizer = Adam(learning_rate)
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
+        self.setup_meta_learners()
 
     def setup_meta_learners(self, ):
         #TODO: multiple layers, loss input, modification input gardient
@@ -164,4 +165,5 @@ class Experiment001(object):
         self.optimizer = Adam(learning_rate)
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
-            
+        self.setup_meta_learners()    
+        
