@@ -1,6 +1,6 @@
-from st.cifar10.experiments import Experiment000
-from st.utils import to_device
-from st.cifar10.datasets import Cifar10DataReader, Separator
+from meta_st.cifar10.experiments import Experiment000
+from meta_st.utils import to_device
+from meta_st.cifar10.datasets import Cifar10DataReader, Separator
 import numpy as np
 import os
 import numpy as np
