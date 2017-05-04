@@ -171,44 +171,44 @@ class Decoder(Chain):
         h = self.bn0(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.linearconcat(h)
-        h = self.bn_linearconcat(h)
+        h = self.bn_linearconcat(h, test)
 
         h = self.linear1(h)
         h = self.bn1(h)
         h = F.reshape(h, (h.shape[0], 64, 4, 4))
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat(h)
-        h = self.bn_convconcat(h)
+        h = self.bn_convconcat(h, test)
         
         h = self.deconvunit0(h)  # 4 -> 8
         h = self.resconv0(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat0(h)
-        h = self.bn_convconcat0(h)
+        h = self.bn_convconcat0(h, test)
         h = self.resconv1(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat1(h)
-        h = self.bn_convconcat1(h)
+        h = self.bn_convconcat1(h, test)
 
         h = self.deconvunit1(h)  # 8 -> 16
         h = self.resconv2(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat2(h)
-        h = self.bn_convconcat2(h)
+        h = self.bn_convconcat2(h, test)
         h = self.resconv3(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat3(h)
-        h = self.bn_convconcat3(h)
+        h = self.bn_convconcat3(h, test)
 
         h = self.deconvunit2(h)  # 16 -> 32
         h = self.resconv4(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat4(h)
-        h = self.bn_convconcat4(h)
+        h = self.bn_convconcat4(h, test)
         h = self.resconv5(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat5(h)
-        h = self.bn_convconcat5(h)
+        h = self.bn_convconcat5(h, test)
 
         h = self.conv(h)
 

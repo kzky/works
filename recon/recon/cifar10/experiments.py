@@ -84,8 +84,7 @@ class Experiment000(object):
         self.optimizer_mlp.update()
 
     def test(self, x, y):
-        h = self.encoder(x, test=True)
-        y_pred = self.mlp(h)
+        y_pred = self.encoder(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
 
