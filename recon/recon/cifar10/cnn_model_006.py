@@ -143,7 +143,7 @@ class Decoder(Chain):
             deconvunit2=DeconvUnit(64, 64, k=4, s=2, p=1, act=act),
 
             # Concat
-            linearconcat=L.Linear(128, 64)
+            linearconcat=L.Linear(128, 64),
             convconcat=L.Convolution2D(128, 64, 1, 1, 0),
             convconcat0=L.Convolution2D(128, 64, 1, 1, 0),
             convconcat1=L.Convolution2D(128, 64, 1, 1, 0),
