@@ -34,13 +34,15 @@ def main():
     l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
     u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
+    zca_path = os.path.join(home, "datasets/cifar10/zca_components.npz")
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
-                                  batch_size=batch_size,
-                                  n_cls=n_cls,
-                                  da=True,
-                                  shape=True)
+                                    zca_path=zca_path,
+                                    batch_size=batch_size,
+                                    n_cls=n_cls,
+                                    da=True,
+                                    shape=True)
     exp = Experiment000(
         device,
         learning_rate,
