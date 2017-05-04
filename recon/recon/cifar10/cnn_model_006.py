@@ -167,7 +167,7 @@ class Decoder(Chain):
         self.hiddens = []
 
     def __call__(self, y, enc_hiddens, test=False):
-        h = self.linear0(h)
+        h = self.linear0(y)
         h = self.bn0(h)
         h = F.concat(h, enc_hiddens.pop())
         h = self.linearconcat(h)
