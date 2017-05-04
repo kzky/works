@@ -50,7 +50,7 @@ class Experiment000(object):
         self.setup_meta_learners()
 
     def setup_meta_learners(self, ):
-        #TODO: multiple layers, loss input, modification input gardient
+        #TODO: multiple layers, modification of inputs
         self.meta_learners = []
         self.opt_meta_learners = []
 
@@ -62,7 +62,7 @@ class Experiment000(object):
             self.meta_learners.append(l)
 
             # optimizer of meta-learner
-            opt = optimizers.Adam()
+            opt = optimizers.Adam(1e-3)
             opt.setup(l)
             opt.use_cleargrads()
             self.opt_meta_learners.append(opt)
@@ -78,8 +78,7 @@ class Experiment000(object):
                 loss_ = F.broadcast_to(loss, input_.shape)
                 input_ = F.concat((input_, loss_), axis=1)
                 meta_learner = self.meta_learners[i]
-                #TODO: gradient become nan after some iteration
-                g = meta_learner(input_) * 1e-10 # forward of meta-learner
+                g = meta_learner(input_) # forward of meta-learner
                 p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped
@@ -104,6 +103,9 @@ class Experiment000(object):
         # Cross Entropy Loss
         y_pred = self.model(x, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred, y)
+
+        for meta_learner in self.meta_learners:
+            meta_learner.cleargrads()
         loss_ce.backward()
 
         for opt in self.opt_meta_learners:
