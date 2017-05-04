@@ -155,6 +155,14 @@ class Decoder(Chain):
             convconcat3=L.Convolution2D(128, 64, 1, 1, 0),
             convconcat4=L.Convolution2D(128, 64, 1, 1, 0),
             convconcat5=L.Convolution2D(128, 64, 1, 1, 0),
+            bn_convconcat=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat0=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat1=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat2=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat3=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat4=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            bn_convconcat5=L.BatchNormalization(64, decay=0.9, use_cudnn=True),
+            
             
             # Output
             conv=L.Convolution2D(64, 3, ksize=3, stride=1, pad=1, ),
@@ -168,30 +176,37 @@ class Decoder(Chain):
         h = F.reshape(h, (h.shape[0], 64, 4, 4))
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat(h)
+        h = self.bn_convconcat(h)
         
         h = self.deconvunit0(h)  # 4 -> 8
         h = self.resconv0(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat0(h)
+        h = self.bn_convconcat0(h)
         h = self.resconv1(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat1(h)
+        h = self.bn_convconcat1(h)
 
         h = self.deconvunit1(h)  # 8 -> 16
         h = self.resconv2(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat2(h)
+        h = self.bn_convconcat2(h)
         h = self.resconv3(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat3(h)
+        h = self.bn_convconcat3(h)
 
         h = self.deconvunit2(h)  # 16 -> 32
         h = self.resconv4(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat4(h)
+        h = self.bn_convconcat4(h)
         h = self.resconv5(h)
         h = F.concat((h, enc_hiddens.pop()))
         h = self.convconcat5(h)
+        h = self.bn_convconcat5(h)
 
         h = self.conv(h)
 
