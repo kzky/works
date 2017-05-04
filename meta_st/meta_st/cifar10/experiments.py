@@ -130,7 +130,7 @@ class Experiment000(object):
         update_parameter_by_meta_learner(self.model_params)
                         
     def test(self, x, y):
-        y_pred = self.model(x, test=True)
+        y_pred = self.model(x, self.model_params, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
 
