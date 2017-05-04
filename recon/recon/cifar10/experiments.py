@@ -532,7 +532,7 @@ class Experiment008(Experiment000):
         x_, y_ = xy
         
         # Encoder/Decoder
-        y_perd = self.encoder(x)
+        y_pred = self.encoder(x)
 
         loss = 0
         loss += self.er_loss(y_pred)   # ER loss
