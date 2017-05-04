@@ -29,8 +29,8 @@ class ConvUnit(Chain):
     def __call__(self, h, model_params, test=False):
         h = self.conv(h, model_params["/conv/W"], )
         h = self.bn(h, 
-                    model_params["/conv/gamma"], 
-                    model_params["/conv/beta"],
+                    model_params["/bn/gamma"], 
+                    model_params["/bn/beta"],
                     test=test)
         h = self.act(h)
         return h
@@ -51,25 +51,25 @@ class ResConvUnit(Chain):
         self.act = act
         
     def __call__(self, x, model_params, test=False):
-        h = self.conv0(x, model_params["conv0/W"])
+        h = self.conv0(x, model_params["/conv0/W"])
         h = self.bn0(h, 
-                     model_params["bn0/gamma"], 
-                     model_params["bn0/beta"], 
+                     model_params["/bn0/gamma"], 
+                     model_params["/bn0/beta"], 
                      test=test)
         h = self.act(h)
 
-        h = self.conv1(h, model_params["conv1/W"])
+        h = self.conv1(h, model_params["/conv1/W"])
         h = self.bn1(h, 
-                     model_params["bn1/gamma"], 
-                     model_params["bn1/beta"], 
+                     model_params["/bn1/gamma"], 
+                     model_params["/bn1/beta"], 
                      test=test)
         h = self.act(h)
 
-        h = self.conv2(h, model_params["conv2/W"])
+        h = self.conv2(h, model_params["/conv2/W"])
         h = h + x
         h = self.bn2(h, 
-                     model_params["bn2/gamma"], 
-                     model_params["bn2/beta"], 
+                     model_params["/bn2/gamma"], 
+                     model_params["/bn2/beta"], 
                      test=test)
         h = self.act(h)
 
@@ -94,37 +94,37 @@ class Model(Chain):
 
     def __call__(self, x, model_params, test=False):
         # First block
-        mp_filtered = self._filter_model_params(model_params, "convunit00")
+        mp_filtered = self._filter_model_params(model_params, "/convunit00")
         h = self.convunit00(x, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "convunit01")
+        mp_filtered = self._filter_model_params(model_params, "/convunit01")
         h = self.convunit01(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "convunit02")
+        mp_filtered = self._filter_model_params(model_params, "/convunit02")
         h = self.convunit02(h, mp_filtered, test)
         h = F.max_pooling_2d(h, (2, 2))  # 32 -> 16
         h = F.dropout(h, train=not test)
 
         # Second block
-        mp_filtered = self._filter_model_params(model_params, "convunit10")
+        mp_filtered = self._filter_model_params(model_params, "/convunit10")
         h = self.convunit10(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "convunit11")
+        mp_filtered = self._filter_model_params(model_params, "/convunit11")
         h = self.convunit11(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "convunit12")
+        mp_filtered = self._filter_model_params(model_params, "/convunit12")
         h = self.convunit12(h, mp_filtered, test)
         h = F.max_pooling_2d(h, (2, 2))  # 16 -> 8
         h = F.dropout(h, train=not test)
 
         # Third block
-        mp_filtered = self._filter_model_params(model_params, "convunit20")
+        mp_filtered = self._filter_model_params(model_params, "/convunit20")
         h = self.convunit20(h, mp_filtered, test)  # 8 -> 6
-        mp_filtered = self._filter_model_params(model_params, "convunit21")
+        mp_filtered = self._filter_model_params(model_params, "/convunit21")
         h = self.convunit21(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "convunit22")
+        mp_filtered = self._filter_model_params(model_params, "/convunit22")
         h = self.convunit22(h, mp_filtered, test)
         h = F.average_pooling_2d(h, (6, 6))
         
         # Linear
-        mp_filtered = self._filter_model_params(model_params, "linear")
-        y = self.linear(h, mp_filtered)
+        mp_filtered = self._filter_model_params(model_params, "/linear")
+        y = self.linear(h, mp_filtered["/W"], mp_filtered["/b"])
 
         return y
 
@@ -136,10 +136,10 @@ class Model(Chain):
         """
         model_params_filtered = OrderedDict()
         for k, v in model_params.items():
-            if not v.find(name):
+            if not k.startswith(name):
                 continue
-            name = k.split("/")[1:]
-            name = "/" + "/".join(name)
-            model_params_filtered[name] = v
+            k = k.split("/")[2:]
+            k = "/" + "/".join(k)
+            model_params_filtered[k] = v
             
         return model_params_filtered

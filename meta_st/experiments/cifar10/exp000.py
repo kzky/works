@@ -17,7 +17,7 @@ def main():
     n_l_train_data = 4000
     n_train_data = 50000
     n_cls = 10
-    T = 3
+    T = 1
 
     learning_rate = 1. * 1e-3
     n_epoch = 300

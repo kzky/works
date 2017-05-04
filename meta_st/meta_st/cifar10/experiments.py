@@ -5,7 +5,7 @@ import chainer
 import chainer.variable as variable
 from chainer.functions.activation import lstm
 from chainer import cuda, Function, gradient_check, report, training, utils, Variable
-from chainer import datasets, iterators, serializers
+from chainer import datasets, iterators, serializers, optimizers
 from chainer import Link, Chain, ChainList
 import chainer.functions as F
 import chainer.links as L
@@ -18,7 +18,7 @@ import csv
 from meta_st.utils import to_device
 from meta_st.losses import ReconstructionLoss, LSGANLoss, GANLoss, EntropyRegularizationLoss
 from meta_st.cifar10.datasets import Cifar10DataReader
-from meta_st.cifar10.optimizers import Adam
+from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
 class Experiment000(object):
@@ -55,7 +55,7 @@ class Experiment000(object):
         self.opt_meta_learners = []
 
         # Meta-learner
-        for _ in self.model_params.params():
+        for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
             l = L.LSTM(1, 1)
             l.to_gpu(self.device) if self.device else None
@@ -76,12 +76,12 @@ class Experiment000(object):
                 shape = p.shape
                 input_ = F.expand_dims(
                     F.reshape(Variable(p.grad), (np.prod(shape), )), axis=1)
-                meta_learner = self.meta_enc_learners[i]
+                meta_learner = self.meta_learners[i]
                 g_t = meta_learner(input_)  # forward of meta-learner
                 p.data -= g_t.data.reshape(shape)
 
                 # Set parameter as variable to be backproped
-                if self.t  ==  self.T:
+                if self.t  == self.T:
                     w = p - F.reshape(g_t, shape)
                     self.model_params[k] = w
 
@@ -128,7 +128,7 @@ class Experiment000(object):
         loss_rec.backward()
 
         # update learner using loss_rec and meta-learner
-        update_parameter_by_meta_learner(self.model_params)
+        self.update_parameter_by_meta_learner(self.model_params)
                         
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
@@ -136,7 +136,7 @@ class Experiment000(object):
         return acc
 
     def cleargrads(self, ):
-        for k, v in self.model_params:
+        for k, v in self.model_params.items():
             v.cleargrad()
         
 class Experiment001(object):

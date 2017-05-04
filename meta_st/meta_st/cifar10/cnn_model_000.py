@@ -19,18 +19,18 @@ from meta_st.deconvolution import Deconvolution2D
 from meta_st.batch_normalization import BatchNormalization
 
 class ConvUnit(Chain):
-    def __init__(self, maps, maps, k=4, s=2, p=1, act=F.relu):
+    def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.relu):
         super(ConvUnit, self).__init__(
-            conv=Convolution2D(maps, maps, ksize=k, stride=s, pad=p, nobias=True),
-            bn=BatchNormalization(maps, decay=0.9, use_cudnn=True),
+            conv=Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
+            bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
     def __call__(self, h, model_params, test=False):
         h = self.conv(h, model_params["/conv/W"], )
         h = self.bn(h, 
-                    model_params["/conv/gamma"], 
-                    model_params["/conv/beta"],
+                    model_params["/bn/gamma"], 
+                    model_params["/bn/beta"],
                     test=test)
         h = self.act(h)
         return h
@@ -51,25 +51,25 @@ class ResConvUnit(Chain):
         self.act = act
         
     def __call__(self, x, model_params, test=False):
-        h = self.conv0(x, model_params["conv0/W"])
+        h = self.conv0(x, model_params["/conv0/W"])
         h = self.bn0(h, 
-                     model_params["bn0/gamma"], 
-                     model_params["bn0/beta"], 
+                     model_params["/bn0/gamma"], 
+                     model_params["/bn0/beta"], 
                      test=test)
         h = self.act(h)
 
-        h = self.conv1(h, model_params["conv1/W"])
+        h = self.conv1(h, model_params["/conv1/W"])
         h = self.bn1(h, 
-                     model_params["bn1/gamma"], 
-                     model_params["bn1/beta"], 
+                     model_params["/bn1/gamma"], 
+                     model_params["/bn1/beta"], 
                      test=test)
         h = self.act(h)
 
-        h = self.conv2(h, model_params["conv2/W"])
+        h = self.conv2(h, model_params["/conv2/W"])
         h = h + x
         h = self.bn2(h, 
-                     model_params["bn2/gamma"], 
-                     model_params["bn2/beta"], 
+                     model_params["/bn2/gamma"], 
+                     model_params["/bn2/beta"], 
                      test=test)
         h = self.act(h)
 
@@ -80,44 +80,44 @@ class Model(Chain):
     def __init__(self, device=None, act=F.relu):
         super(Model, self).__init__(
             convunit=ConvUnit(3, 64, k=3, s=1, p=1, act=act),
-            resconvunit0=ResConvUnit(64, 64),
-            resconvunit1=ResConvUnit(64, 64),
-            resconvunit2=ResConvUnit(64, 64),
-            resconvunit3=ResConvUnit(64, 64),
-            resconvunit4=ResConvUnit(64, 64),
-            resconvunit5=ResConvUnit(64, 64),
+            resconvunit0=ResConvUnit(64),
+            resconvunit1=ResConvUnit(64),
+            resconvunit2=ResConvUnit(64),
+            resconvunit3=ResConvUnit(64),
+            resconvunit4=ResConvUnit(64),
+            resconvunit5=ResConvUnit(64),
             linear=Linear(64*8*8, 10),
         )
         self.act = act
 
     def __call__(self, x, model_params, test=False):
         # Initial convolution
-        mp_filtered = self._filter_model_params(model_params, "convunit")
+        mp_filtered = self._filter_model_params(model_params, "/convunit")
         h = self.convunit(x, mp_filtered, test)
 
         # Residual convolution
-        mp_filtered = self._filter_model_params(model_params, "resconvunit0")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit0")
         h = self.resconvunit0(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "resconvunit1")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit1")
         h = self.resconvunit1(h, mp_filtered, test)
         h = F.max_pooling_2d(h, (2, 2))  # 32 -> 16
         h = F.dropout(h, train=not test)
         
-        mp_filtered = self._filter_model_params(model_params, "resconvunit2")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit2")
         h = self.resconvunit2(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "resconvunit3")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit3")
         h = self.resconvunit3(h, mp_filtered, test)
         h = F.max_pooling_2d(h, (2, 2))  # 16 -> 8
         h = F.dropout(h, train=not test)
 
-        mp_filtered = self._filter_model_params(model_params, "resconvunit4")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit4")
         h = self.resconvunit4(h, mp_filtered, test)
-        mp_filtered = self._filter_model_params(model_params, "resconvunit5")
+        mp_filtered = self._filter_model_params(model_params, "/resconvunit5")
         h = self.resconvunit5(h, mp_filtered, test)
         
         # Linear
-        mp_filtered = self._filter_model_params(model_params, "linear")
-        y = self.linear(h, mp_filtered)
+        mp_filtered = self._filter_model_params(model_params, "/linear")
+        y = self.linear(h, mp_filtered["/W"], mp_filtered["/b"])
 
         return y
 
@@ -129,10 +129,10 @@ class Model(Chain):
         """
         model_params_filtered = OrderedDict()
         for k, v in model_params.items():
-            if not v.find(name):
+            if not k.startswith(name):
                 continue
-            name = k.split("/")[1:]
-            name = "/" + "/".join(name)
-            model_params_filtered[name] = v
+            k = k.split("/")[2:]
+            k = "/" + "/".join(k)
+            model_params_filtered[k] = v
             
         return model_params_filtered
