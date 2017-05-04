@@ -93,7 +93,7 @@ class Model(Chain):
     def __call__(self, x, model_params, test=False):
         # Initial convolution
         mp_filtered = self._filter_model_params(model_params, "convunit")
-        h = self.convunit(x, mp_filtered)
+        h = self.convunit(x, mp_filtered, test)
 
         # Residual convolution
         mp_filtered = self._filter_model_params(model_params, "resconvunit0")
