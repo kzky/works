@@ -117,6 +117,10 @@ class Decoder(Chain):
             conv20=ConvUnit(96, 96, k=3, s=1, p=1),
             conv21=ConvUnit(96, 96, k=3, s=1, p=1),
             conv22=ConvUnit(96, 3, k=3, s=1, p=1),
+
+            # Unpool (Deconv)
+            deconv1=DeconvUnit(192),
+            deconv2=DeconvUnit(96),
         )
         self.act = act
         self.hiddens = []
@@ -124,7 +128,7 @@ class Decoder(Chain):
     def __call__(self, x, test=False):
         self.hiddens = []
         h = self.linear(x)  # 1 -> 6
-        h = self.bn(x)
+        h = self.bn(h)
         self.hiddens.append(h)
         h = F.reshape(h, (x.shape[0], 10, 6, 6))
 
@@ -134,14 +138,14 @@ class Decoder(Chain):
         self.hiddens.append(h)
 
         h = self.bn0(h, test)
-        h = F.unpooling_2d(h, (2, 2))  # 8 -> 16
+        h = self.deconv1(h, test)  # 8 -> 16
         self.hiddens.append(h)
         h = self.conv10(h, test)
         h = self.conv11(h, test)
         h = self.conv12(h, test)
 
         h = self.bn1(h, test)
-        h = F.unpooling_2d(h, (2, 2))  # 16 -> 32
+        h = self.deconv2(h, test)  # 16 -> 32
         self.hiddens.append(h)
         h = self.conv20(h, test)  
         h = self.conv21(h, test)
