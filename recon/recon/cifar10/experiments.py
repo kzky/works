@@ -582,3 +582,25 @@ class Experiment009(Experiment008):
         self.optimizer_dec.setup(self.decoder)
         self.optimizer_dec.use_cleargrads()
         
+    def _train(self, x, xy, y_0=None):
+        x_, y_ = xy
+        
+        # Encoder/Decoder
+        y_pred = self.encoder(x)
+
+        loss = 0
+        loss += self.er_loss(y_pred)   # ER loss
+        if y_0 is not None:
+            loss += F.softmax_cross_entropy(y_pred, y_0)  # CE loss
+
+        x_rec = self.decoder(y_pred)
+        loss += self.recon_loss(x, x_rec)
+
+        self.cleargrads()
+        loss.backward()
+        self.optimizer_enc.update()
+        self.optimizer_dec.update()
+
+    def cleargrads(self, ):
+        self.encoder.cleargrads()
+        self.decoder.cleargrads()
