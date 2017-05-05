@@ -21,6 +21,25 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
+class MetaLearner(Chian):
+    def __init__(self, inmap=4, midmap=4, outmap=1, ):
+        super(MetaLearner, self).__init__(
+            l0=L.LSTM(inmap, midmap, 
+                      forget_bias_init=1e12, 
+                       lateral_init=1e-12*np.random.randn(1, 1), 
+                       upward_init=1e-12*np.random.randn(1, 1)),
+            l1=L.LSTM(midmap, outmap, 
+                      forget_bias_init=1e12, 
+                       lateral_init=1e-12*np.random.randn(1, 1), 
+                      upward_init=1e-12*np.random.randn(1, 1)),
+        )
+
+    def __call__(self, h):
+        h = self.l0(h)
+        h = self.l1(h)
+        return h
+        
+
 class Experiment000(object):
     """
     - Stochastic Regularization
@@ -57,12 +76,9 @@ class Experiment000(object):
         # Meta-learner
         for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
-            l = L.LSTM(4, 1,
-                       forget_bias_init=1e12, 
-                       lateral_init=1e-12*np.random.randn(1, 1), 
-                       upward_init=1e-12*np.random.randn(1, 1))
-            l.to_gpu(self.device) if self.device else None
-            self.meta_learners.append(l)
+            ml = MetaLearner(4, 4, 1)
+            ml.to_gpu(self.device) if self.device else None
+            self.meta_learners.append(ml)
 
             # optimizer of meta-learner
             opt = optimizers.Adam(1e-3)
