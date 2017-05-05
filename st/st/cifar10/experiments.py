@@ -124,3 +124,27 @@ class Experiment001(object):
         y_pred = self.model(x, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
+
+class Experiment002(object):
+    """
+    - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Loss
+        self.recon_loss = ReconstructionLoss()
+
+        # Model
+        from st.cifar10.cnn_model_002 import Model
+        self.model = Model(device, act)
+        self.model.to_gpu(device) if device is not None else None
+
+        # Optimizer
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()
