@@ -549,3 +549,36 @@ class Experiment008(Experiment000):
     def cleargrads(self, ):
         self.encoder.cleargrads()
         self.decoder.cleargrads()
+
+class Experiment009(Experiment008):
+    """Enc-MLP-Dec
+
+    - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
+    - Encoder contains classifier
+    """
+    def __init__(self, device=None, learning_rate=1e-3, act=F.relu, n_cls=10):
+        # Settings
+        self.device = device
+        self.act = act
+        self.learning_rate = learning_rate
+        self.n_cls = n_cls
+
+        # Losses
+        self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
+
+        # Model
+        from recon.cifar10.cnn_model_007 import Encoder, Decoder
+        self.encoder = Encoder(device, act)
+        self.decoder = Decoder(device, act)
+        self.encoder.to_gpu(device) if self.device else None
+        self.decoder.to_gpu(device) if self.device else None
+        
+        # Optimizer
+        self.optimizer_enc = optimizers.Adam(learning_rate)
+        self.optimizer_enc.setup(self.encoder)
+        self.optimizer_enc.use_cleargrads()
+        self.optimizer_dec = optimizers.Adam(learning_rate)
+        self.optimizer_dec.setup(self.decoder)
+        self.optimizer_dec.use_cleargrads()
+        
