@@ -28,7 +28,7 @@ class ConvUnit(Chain):
         
     def __call__(self, h, test=False):
         h = self.conv(h)
-        h = self.bn(h)
+        h = self.bn(h, test)
         h = self.act(h)
         return h
 
