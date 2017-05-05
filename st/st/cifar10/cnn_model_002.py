@@ -57,12 +57,14 @@ class Model(Chain):
         h = self.conv02(h, test)
         h = F.max_pooling_2d(h, (2, 2))  # 32 -> 16
         h = self.bn0(h, test)
+        h = F.dropout(h, train=not test)
     
         h = self.conv10(h, test)
         h = self.conv11(h, test)
         h = self.conv12(h, test)
         h = F.max_pooling_2d(h, (2, 2))  # 16 -> 8
         h = self.bn1(h, test)
+        h = F.dropout(h, train=not test)
     
         h = self.conv20(h, test)  # 8 -> 6
         h = self.conv21(h, test)
