@@ -13,16 +13,12 @@ from collections import OrderedDict
 import logging
 import time
 from meta_st.utils import to_device
-from meta_st.linear import Linear
-from meta_st.convolution import Convolution2D
-from meta_st.deconvolution import Deconvolution2D
-from meta_st.batch_normalization import BatchNormalization
 
 class ConvUnit(Chain):
     def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.relu):
         super(ConvUnit, self).__init__(
-            conv=Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
-            bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
+            conv=L.Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
+            bn=L.BatchNormalization(omaps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
@@ -35,8 +31,8 @@ class ConvUnit(Chain):
 class DeconvUnit(Chain):
     def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.relu):
         super(DeconvUnit, self).__init__(
-            deconv=Deconvolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
-            bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
+            deconv=L.Deconvolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
+            bn=L.BatchNormalization(omaps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
