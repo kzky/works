@@ -57,10 +57,10 @@ class Experiment000(object):
         # Meta-learner
         for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
-            l = L.LSTM(4, 1,)
-                       #forget_bias_init=1e12, 
-                       #lateral_init=1e-12*np.random.randn(1, 1), 
-                       #upward_init=1e-12*np.random.randn(1, 1))
+            l = L.LSTM(4, 1,
+                       forget_bias_init=1e12, 
+                       lateral_init=1e-12*np.random.randn(1, 1), 
+                       upward_init=1e-12*np.random.randn(1, 1))
             l.to_gpu(self.device) if self.device else None
             self.meta_learners.append(l)
 
@@ -92,6 +92,8 @@ class Experiment000(object):
                 input_ = xp.concatenate((input_g, loss_), axis=1)
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
+                #print("g.data")
+                #print(g.data)
                 p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped
@@ -117,11 +119,13 @@ class Experiment000(object):
         y_pred = self.model(x, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred, y)
 
+        self.cleargrads()
         for meta_learner in self.meta_learners:
             meta_learner.cleargrads()
         loss_ce.backward()
 
         for opt in self.opt_meta_learners:
+            opt.clip_grads(0.1)
             opt.update()
 
         loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?

@@ -38,7 +38,7 @@ class ReconstructionLoss(Chain):
     def __call__(self, x_recon, x):
         bs = x.shape[0]
         d = np.prod(x.shape[1:])
-        self.loss = F.mean_squared_error(x_recon, x) #/ d
+        self.loss = F.mean_squared_error(x_recon, x) / d
 
         return self.loss
 
