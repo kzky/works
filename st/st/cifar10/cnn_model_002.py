@@ -17,8 +17,8 @@ from st.utils import to_device
 class ConvUnit(Chain):
     def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.leaky_relu):
         super(ConvUnit, self).__init__(
-            conv=Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
-            bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
+            conv=L.Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
+            bn=L.BatchNormalization(omaps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
