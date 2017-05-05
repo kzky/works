@@ -21,7 +21,7 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
-class MetaLearner(Chian):
+class MetaLearner(Chain):
     def __init__(self, inmap=4, midmap=4, outmap=1, ):
         super(MetaLearner, self).__init__(
             l0=L.LSTM(inmap, midmap, 
@@ -37,6 +37,7 @@ class MetaLearner(Chian):
     def __call__(self, h):
         h = self.l0(h)
         h = self.l1(h)
+        #h = F.tanh(h) * 1e-6
         return h
         
 
@@ -82,7 +83,7 @@ class Experiment000(object):
 
             # optimizer of meta-learner
             opt = optimizers.Adam(1e-3)
-            opt.setup(l)
+            opt.setup(ml)
             opt.use_cleargrads()
             self.opt_meta_learners.append(opt)
 
@@ -93,23 +94,35 @@ class Experiment000(object):
             with cuda.get_device(self.device):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
+                # normalize grad
                 x = p.grad
-                input0 = xp.where(xp.sign(x) > xp.exp(-10), 
-                                   xp.log(xp.sign(x))/10, -1)
-                input1 = xp.where(xp.sign(x) > xp.exp(-10), 
-                                   xp.sign(x), xp.exp(10)*x)
-                input0 = xp.reshape(input0, (np.prod(shape), ))
-                input1 = xp.reshape(input1, (np.prod(shape), ))
-                input0 = xp.expand_dims(input0, axis=1)
-                input1 = xp.expand_dims(input1, axis=1)
-                input_g = xp.concatenate((input0, input1), axis=1)
-                
-                loss_ = xp.broadcast_to(loss.data, input_g.shape)
-                input_ = xp.concatenate((input_g, loss_), axis=1)
+                p_val = 10
+                grad0 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
+                                   xp.log(xp.absolute(x))/p_val, -1)
+                grad1 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
+                                   xp.sign(x), xp.exp(p_val)*x)
+                grad0 = xp.reshape(grad0, (np.prod(shape), ))
+                grad1 = xp.reshape(grad1, (np.prod(shape), ))
+                grad0 = xp.expand_dims(grad0, axis=1)
+                grad1 = xp.expand_dims(grad1, axis=1)
+                input_grad = xp.concatenate((grad0, grad1), axis=1)
+
+                # normalize loss
+                x = loss.data
+                loss0 = xp.where(xp.sign(x) > xp.exp(-p_val), 
+                                   xp.log(xp.sign(x))/p_val, -1)
+                loss1 = xp.where(xp.sign(x) > xp.exp(-p_val), 
+                                   xp.sign(x), xp.exp(p_val)*x)
+                loss0 = xp.expand_dims(loss0, axis=0)
+                loss1 = xp.expand_dims(loss1, axis=0)
+                input_loss = xp.concatenate((loss0, loss1))
+                input_loss = xp.broadcast_to(input_loss, 
+                                             (input_grad.shape[0], 2))
+                # input
+                input_ = xp.concatenate((input_grad, input_loss), axis=1)
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
-                #print("g.data")
-                #print(g.data)
+                #g = g * 1e-12
                 p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped
