@@ -20,7 +20,7 @@ def main():
 
     learning_rate = 1. * 1e-3
     n_epoch = 100
-    act = F.relu
+    act = F.leaky_relu
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
 
