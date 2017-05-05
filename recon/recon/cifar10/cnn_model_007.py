@@ -119,8 +119,8 @@ class Decoder(Chain):
             conv22=ConvUnit(96, 3, k=3, s=1, p=1),
 
             # Unpool (Deconv)
-            deconv1=DeconvUnit(192),
-            deconv2=DeconvUnit(96),
+            deconv1=DeconvUnit(192, 192),
+            deconv2=DeconvUnit(96, 96),
         )
         self.act = act
         self.hiddens = []
