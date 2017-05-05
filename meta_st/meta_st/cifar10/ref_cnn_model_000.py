@@ -21,8 +21,8 @@ from meta_st.batch_normalization import BatchNormalization
 class ConvUnit(Chain):
     def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.relu):
         super(ConvUnit, self).__init__(
-            conv=Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
-            bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
+            conv=L.Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
+            bn=L.BatchNormalization(omaps, decay=0.9, use_cudnn=True),
         )
         self.act = act
         
