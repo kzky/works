@@ -47,5 +47,5 @@ class Adam(opts.Adam):
         self.t += 1
         states = self._states
         for name, param in params_dict.items():
-            with cuda.get_device(param.data):
+            with cuda.get_device_from_array(param.data):
                 self.update_one(param, states[name])

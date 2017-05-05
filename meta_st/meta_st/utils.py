@@ -15,7 +15,7 @@ def to_device(x, device=None):
 def add_normal_noise(h, sigma=0.03):
     if np.random.randint(0, 2):
         n = np.random.normal(0, sigma, h.data.shape).astype(np.float32)
-        device = cuda.get_device(h)
+        device = cuda.get_device_from_array(h)
         if device.id ==  -1:
             n_ = Variable(n)
         else:

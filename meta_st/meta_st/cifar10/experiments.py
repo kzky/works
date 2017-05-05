@@ -91,7 +91,7 @@ class Experiment000(object):
         namedparams = model_params
         for i, elm in enumerate(namedparams.items()):  # parameter-loop
             k, p = elm
-            with cuda.get_device(self.device):
+            with cuda.get_device_from_id(self.device):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
 
@@ -123,7 +123,7 @@ class Experiment000(object):
                 input_ = xp.concatenate((input_grad, input_loss), axis=1)
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
-                g = g * 1e-12
+                #g = g * 1e-12
                 print(g.data)
                 p.data -= g.data.reshape(shape)
 
