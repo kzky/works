@@ -1,6 +1,5 @@
 import numpy as np
 import os
-from chainer import cuda
 import cv2
 
 class Cifar10DataReader(object):
