@@ -25,13 +25,13 @@ class MetaLearner(Chain):
     def __init__(self, inmap=4, midmap=4, outmap=1, ):
         super(MetaLearner, self).__init__(
             l0=L.LSTM(inmap, midmap, 
-                      forget_bias_init=1e12, 
-                       lateral_init=1e-12*np.random.randn(1, 1), 
-                       upward_init=1e-12*np.random.randn(1, 1)),
+                      forget_bias_init=lambda x: 1e12*x, 
+                      lateral_init=lambda x: 1e-12*x,
+                      upward_init=lambda x: 1e-12*x),
             l1=L.LSTM(midmap, outmap, 
-                      forget_bias_init=1e12, 
-                       lateral_init=1e-12*np.random.randn(1, 1), 
-                      upward_init=1e-12*np.random.randn(1, 1)),
+                      forget_bias_init=lambda x: 1e12*x,
+                      lateral_init=lambda x: 1e-12*x,
+                      upward_init=lambda x: 1e-12*x)
         )
 
     def __call__(self, h):
@@ -78,7 +78,7 @@ class Experiment000(object):
         for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
             ml = MetaLearner(4, 4, 1)
-            ml.to_gpu(self.device) if self.device else None
+            ml.to_gpu(self.device) if self.device is not None else None
             self.meta_learners.append(ml)
 
             # optimizer of meta-learner
@@ -94,6 +94,7 @@ class Experiment000(object):
             with cuda.get_device(self.device):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
+
                 # normalize grad
                 x = p.grad
                 p_val = 10
@@ -122,7 +123,8 @@ class Experiment000(object):
                 input_ = xp.concatenate((input_grad, input_loss), axis=1)
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
-                #g = g * 1e-12
+                g = g * 1e-12
+                print(g.data)
                 p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped

@@ -57,11 +57,10 @@ def main():
     acc_prev = 0.
     for i in range(n_iter):
         # Get data
-        x_l0, x_l1, y_l = [Variable(to_device(x, device)) \
+        x_l0, x_l1, y_l = [Variable(cuda.to_gpu(x, device)) \
                            for x in data_reader.get_l_train_batch()]
-        x_u0, x_u1, _ = [Variable(to_device(x, device)) \
+        x_u0, x_u1, _ = [Variable(cuda.to_gpu(x, device)) \
                          for x in data_reader.get_u_train_batch()]
-
         # Train
         exp.train(x_l0, x_l1, y_l, x_u0, x_u1)
         
