@@ -73,6 +73,7 @@ class Model(Chain):
         h = self.conv22(h, test)
         h = F.average_pooling_2d(h, (6, 6))  # 6 -> 1
         h = self.bn2(h, test)
+        h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
         
         return h
     

@@ -29,14 +29,12 @@ class Experiment000(object):
         self.device = device
         self.act = act
         self.learning_rate = learning_rate
-        self.T = T
-        self.t = 0
 
         # Loss
         self.recon_loss = ReconstructionLoss()
 
         # Model
-        from meta_st.cifar10.cnn_model_000 import Model
+        from meta_st.cifar10.ref_cnn_model_000 import Model
         self.model = Model(device, act)
         self.model.to_gpu(device) if device is not None else None
         
@@ -44,7 +42,6 @@ class Experiment000(object):
         self.optimizer = optimizers.Adam(learning_rate)
         self.optimizer.setup(self.model)
         self.optimizer.use_cleargrads()
-        self.setup_meta_learners()
 
     def train(self, x, y):
         # Cross Entropy Loss
