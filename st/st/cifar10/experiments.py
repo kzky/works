@@ -125,7 +125,7 @@ class Experiment001(object):
         acc = F.accuracy(y_pred, y)
         return acc
 
-class Experiment002(object):
+class Experiment002(Experiment000):
     """
     - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
     """
