@@ -19,7 +19,7 @@ from meta_st.deconvolution import Deconvolution2D
 from meta_st.batch_normalization import BatchNormalization
 
 class ConvUnit(Chain):
-    def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.leaky_relu):
+    def __init__(self, imaps, omaps, k=4, s=2, p=1, act=F.relu):
         super(ConvUnit, self).__init__(
             conv=Convolution2D(imaps, omaps, ksize=k, stride=s, pad=p, nobias=True),
             bn=BatchNormalization(omaps, decay=0.9, use_cudnn=True),
@@ -29,12 +29,12 @@ class ConvUnit(Chain):
     def __call__(self, h, test=False):
         h = self.conv(h)
         h = self.bn(h)
-        h = self.act(h, 0.1)
+        h = self.act(h)
         return h
 
 class Model(Chain):
 
-    def __init__(self, device=None, act=F.leaky_relu):
+    def __init__(self, device=None, act=F.relu):
         
         super(Model, self).__init__(
             # ConvBlock0

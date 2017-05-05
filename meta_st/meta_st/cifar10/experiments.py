@@ -57,8 +57,10 @@ class Experiment000(object):
         # Meta-learner
         for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
-            l = L.LSTM(2, 1, 
-                       forget_bias_init=1e12, lateral_init=1e-12, upward_init=1e-12)
+            l = L.LSTM(4, 1,)
+                       #forget_bias_init=1e12, 
+                       #lateral_init=1e-12*np.random.randn(1, 1), 
+                       #upward_init=1e-12*np.random.randn(1, 1))
             l.to_gpu(self.device) if self.device else None
             self.meta_learners.append(l)
 
@@ -74,12 +76,22 @@ class Experiment000(object):
             k, p = elm
             with cuda.get_device(self.device):
                 shape = p.shape
-                input_ = F.expand_dims(
-                    F.reshape(Variable(p.grad), (np.prod(shape), )), axis=1)
-                loss_ = F.broadcast_to(loss, input_.shape)
-                input_ = F.concat((input_, loss_), axis=1)
+                xp = cuda.get_array_module(p.data)
+                x = p.grad
+                input0 = xp.where(xp.sign(x) > xp.exp(-10), 
+                                   xp.log(xp.sign(x))/10, -1)
+                input1 = xp.where(xp.sign(x) > xp.exp(-10), 
+                                   xp.sign(x), xp.exp(10)*x)
+                input0 = xp.reshape(input0, (np.prod(shape), ))
+                input1 = xp.reshape(input1, (np.prod(shape), ))
+                input0 = xp.expand_dims(input0, axis=1)
+                input1 = xp.expand_dims(input1, axis=1)
+                input_g = xp.concatenate((input0, input1), axis=1)
+                
+                loss_ = xp.broadcast_to(loss.data, input_g.shape)
+                input_ = xp.concatenate((input_g, loss_), axis=1)
                 meta_learner = self.meta_learners[i]
-                g = meta_learner(input_) # forward of meta-learner
+                g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
                 p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped

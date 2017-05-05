@@ -33,7 +33,8 @@ def main():
     l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
     u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     test_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
-    zca_path = os.path.join(home, "datasets/cifar10/zca_components.npz")
+    #zca_path = os.path.join(home, "datasets/cifar10/zca_components.npz")
+    zca_path = None
 
     # DataReader, Model, Optimizer, Losses
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
