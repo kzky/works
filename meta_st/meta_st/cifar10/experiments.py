@@ -27,12 +27,12 @@ class MetaLearner(Chain):
             l0=L.LSTM(inmap, midmap, 
                       forget_bias_init=lambda x: 1e12*x,
                       lateral_init=lambda x: 1e-12*x,
-                      upward_init=lambda x: 1e-12*x
+                      #upward_init=lambda x: 1e-12*x
                       ),
             l1=L.LSTM(midmap, outmap,
                       forget_bias_init=lambda x: 1e12*x,
                       lateral_init=lambda x: 1e-12*x,
-                      upward_init=lambda x: 1e-12*x,
+                      #upward_init=lambda x: 1e-12*x,
                       )
         )
 
@@ -262,9 +262,10 @@ class Experiment001(object):
 
         self.optimizer.update(self.model_params)
 
-    def _train_meta_learner(x_l0, x_l1, y_l, x_u0, x_u1)
+    def _train_meta_learner(self, x_l0, x_l1, y_l, x_u0, x_u1):
         # Stochastic Regularization (i.e, Consistency Loss)
-        y_pred1 = self.model(x1, self.model_params)
+        y_pred0 = self.model(x_u0, self.model_params)
+        y_pred1 = self.model(x_u1, self.model_params)
         loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
         self.cleargrads()
         loss_rec.backward()
@@ -320,13 +321,20 @@ class Experiment001(object):
                 self.model_params[k] = w
 
         # Train meta-learner with main objective
-        y_pred = self.model(x, self.model_params)
-        loss_ce = F.softmax_cross_entropy(y_pred, y)
+        y_pred = self.model(x_l0, self.model_params)
+        loss_ce = F.softmax_cross_entropy(y_pred, y_l)
         
         self.cleargrads()  # need to clear W'grad due to loss_rec.backward
         for meta_learner in self.meta_learners:
             meta_learner.cleargrads()
         loss_ce.backward()
+
+        # Check meta-learnear's W and its G
+        #for k, v in meta_learner.namedparams():
+            #print(k)
+            #print(v.data)
+            #print(v.grad)
+        
         loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
         for opt in self.opt_meta_learners:
             opt.update()
