@@ -42,8 +42,10 @@ class AdamLearner(Link):
     def __call__(self, x):
         f1 = F.sigmoid(self.beta1)
         f2 = F.sigmoid(self.beta2)
-        self.m = f1 * self.m + (1 - f1) * x
-        self.v = f2 * self.v + (1 - f2) * x**2
+        #self.m = f1 * self.m + (1 - f1) * x
+        #self.v = f2 * self.v + (1 - f2) * x**2
+        self.m = self.beta1 * self.m + (1 - self.beta1) * x
+        self.v = self.beta2 * self.v + (1 - self.beta2) * x**2
         g = 1e-3 * self.m / F.sqrt(self.v + 1e-8)
         return g
 
