@@ -52,6 +52,12 @@ class Model(Chain):
         self.act = act
 
     def __call__(self, x, test=False):
+        # add gaussian noise
+        xp = cuda.get_array_module(x.data)
+        with cuda.get_device(self.device):
+            noise = xp.random.randn(*x.shape) * 0.15
+            x.data += noise
+
         h = self.conv00(x, test)
         h = self.conv01(h, test)
         h = self.conv02(h, test)
