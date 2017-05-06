@@ -25,13 +25,15 @@ class MetaLearner(Chain):
     def __init__(self, inmap=4, midmap=4, outmap=1, ):
         super(MetaLearner, self).__init__(
             l0=L.LSTM(inmap, midmap, 
-                      forget_bias_init=lambda x: 1e12*x, 
-                      lateral_init=lambda x: 1e-12*x,
-                      upward_init=lambda x: 1e-12*x),
-            l1=L.LSTM(midmap, outmap, 
                       forget_bias_init=lambda x: 1e12*x,
                       lateral_init=lambda x: 1e-12*x,
-                      upward_init=lambda x: 1e-12*x)
+                      upward_init=lambda x: 1e-12*x
+                      ),
+            l1=L.LSTM(midmap, outmap,
+                      forget_bias_init=lambda x: 1e12*x,
+                      lateral_init=lambda x: 1e-12*x,
+                      upward_init=lambda x: 1e-12*x,
+                      )
         )
 
     def __call__(self, h):
@@ -97,7 +99,7 @@ class Experiment000(object):
 
                 # normalize grad
                 x = p.grad
-                p_val = 10
+                p_val = 1
                 grad0 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
                                    xp.log(xp.absolute(x))/p_val, -1)
                 grad1 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
@@ -107,25 +109,29 @@ class Experiment000(object):
                 grad0 = xp.expand_dims(grad0, axis=1)
                 grad1 = xp.expand_dims(grad1, axis=1)
                 input_grad = xp.concatenate((grad0, grad1), axis=1)
+                #print("input_grad.shape")
+                #print(input_grad.shape)
 
                 # normalize loss
                 x = loss.data
-                loss0 = xp.where(xp.sign(x) > xp.exp(-p_val), 
-                                   xp.log(xp.sign(x))/p_val, -1)
-                loss1 = xp.where(xp.sign(x) > xp.exp(-p_val), 
+                loss0 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
+                                   xp.log(xp.absolute(x))/p_val, -1)
+                loss1 = xp.where(xp.absolute(x) > xp.exp(-p_val), 
                                    xp.sign(x), xp.exp(p_val)*x)
                 loss0 = xp.expand_dims(loss0, axis=0)
                 loss1 = xp.expand_dims(loss1, axis=0)
                 input_loss = xp.concatenate((loss0, loss1))
                 input_loss = xp.broadcast_to(input_loss, 
                                              (input_grad.shape[0], 2))
+                #print("input_loss.shape")
+                #print(input_loss.shape)
                 # input
                 input_ = xp.concatenate((input_grad, input_loss), axis=1)
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(input_.astype(xp.float32))) # forward of meta-learner
+                #print(g.data)
                 #g = g * 1e-12
-                print(g.data)
-                p.data -= g.data.reshape(shape)
+                #p.data -= g.data.reshape(shape)
 
             # Set parameter as variable to be backproped
             if self.t  == self.T:
@@ -154,11 +160,16 @@ class Experiment000(object):
         for meta_learner in self.meta_learners:
             meta_learner.cleargrads()
         loss_ce.backward()
-
         for opt in self.opt_meta_learners:
-            opt.clip_grads(0.1)
+            #opt.clip_grads(0.1)
             opt.update()
 
+        # Check meta-learnear's W and its G
+        for k, v in meta_learner.namedparams():
+            print(k)
+            #print(v.data)
+            print(v.grad)
+            
         loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
 
     def _train(self, x0, x1, y=None):
@@ -176,7 +187,7 @@ class Experiment000(object):
         
         # Stochastic Regularization (i.e, Consistency Loss)
         y_pred1 = self.model(x1, self.model_params)
-        loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))  
+        loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1)) * 1./2
         self.cleargrads()
         loss_rec.backward()
 
