@@ -21,17 +21,17 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
-class AdamMetaLearner(Link):
+class AdamLearner(Link):
     def __init__(self, dim):
         super(AdamLearner, self).__init__(
             beta1=(dim, ),
             beta2=(dim, )
         )
-        self.beta1.data.fill(0)
-        self.beta2.data.fill(0)
+        self.beta1.data.fill(-1e12)
+        self.beta2.data.fill(-1e12)
 
-        self.m = Variable(np.zeros_like(beta1))
-        self.v = Variable(np.zeros_like(beta2))
+        self.m = Variable(np.zeros_like(self.beta1.data))
+        self.v = Variable(np.zeros_like(self.beta2.data))
 
     def to_gpu(self, device=None):
         super(AdamLearner, self).to_gpu()
@@ -40,21 +40,23 @@ class AdamMetaLearner(Link):
         self.v.to_gpu(device)
 
     def __call__(self, x):
-        self.m = self.beta1 * self.m + (1 - self.beta1) * x
-        self.v = self.beta2 * self.m + (1 - self.beta2) * x**2
+        f1 = F.sigmoid(beta1)
+        f2 = F.sigmoid(beta2)
+        self.m = self.f1 * self.m + (1 - self.f1) * x
+        self.v = self.f2 * self.v + (1 - self.f2) * x**2
         g = 1e-3 * self.m / F.sqrt(self.v + 1e-8)
         return g
 
 class MetaLearner(Chain):
     def __init__(self, dim):
         super(MetaLearner, self).__init__(
-            ml0=AdamMetaLearner(dim),
+            ml0=AdamLearner(dim),
         )
 
     def __call__(self, h):
         return self.ml0(h)
 
-class Experiment001(object):
+class Experiment002(object):
     """
     - Stochastic Regularization
     - Resnet x 5
@@ -89,7 +91,7 @@ class Experiment001(object):
         self.opt_meta_learners = []
 
         # Meta-learner
-        for k, v in self.model_params:
+        for k, v in self.model_params.items():
             # meta-learner taking gradient in batch dimension
             ml = MetaLearner(np.prod(v.shape))
             ml.to_gpu(self.device) if self.device is not None else None
@@ -154,18 +156,12 @@ class Experiment001(object):
         self.cleargrads()  # need to clear W'grad due to loss_rec.backward
         for meta_learner in self.meta_learners:
             meta_learner.cleargrads()
-        loss_ce.backward()
-
-        # Check meta-learnear's W and its G
-        #for k, v in meta_learner.namedparams():
-            #print(k)
-            #print(v.data)
-            #print(v.grad)
-        
-        loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
+        loss_ce.backward(retain_grad=True)
         for opt in self.opt_meta_learners:
             opt.update()
-                        
+
+        loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
+
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
         acc = F.accuracy(y_pred, y)
