@@ -7,7 +7,7 @@ import shutil
 import csv
 
 def to_device(x, device=None):
-    if device:
+    if device is not None:
         return cuda.to_gpu(x, device)
     else:
         return cuda.to_cpu(x)
