@@ -54,10 +54,10 @@ class Model(Chain):
 
     def __call__(self, x, test=False):
         # add gaussian noise
-        xp = cuda.get_array_module(x.data)
-        with cuda.get_device_from_id(self.device):
-            noise = xp.random.randn(*x.shape) * 0.015
-            x.data += noise
+        #xp = cuda.get_array_module(x.data)
+        #with cuda.get_device_from_id(self.device):
+        #    noise = xp.random.randn(*x.shape) * 0.0015
+        #    x.data += noise
 
         h = self.conv00(x, test)
         h = self.conv01(h, test)
