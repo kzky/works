@@ -90,26 +90,26 @@ class Experiment000(object):
             opt.use_cleargrads()
             self.ml_optimizers.append(opt)        
 
-    def train(self, x_l, y_l, x_u):
-        self._train_for_primary_task(x_l, y_l)
-        self._train_for_auxiliary_task(x_l, y_l, x_u)
+    def train(self, x_l0, x_l1, y_l, x_u, x_u1):
+        self._train_for_primary_task(x_l0, y_l)
+        self._train_for_auxiliary_task(x_l0, y_l, x_u0)
         
         self.t += 1
         if self.t == self.T:
             self._train_meta_learners()
             self.t = 0
 
-    def _train_for_primary_task(self, x_l, y_l):
-        y_pred = self.model(x_l, self.model_params)
+    def _train_for_primary_task(self, x_l0, y_l):
+        y_pred = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred, y_l)
         self._cleargrads()
         loss_ce.backward()
         self.optimizer.update(self.model_params)
         
-    def _train_for_auxiliary_task(self, x_l, y_l, x_u):
+    def _train_for_auxiliary_task(self, x_l0, x_l1, y_l, x_u0, x_u1):
         # Compute gradients
-        y_pred0 = self.model(x_u, self.model_params)
-        y_pred1 = self.model(x_u, self.model_params)
+        y_pred0 = self.model(x_u0, self.model_params)
+        y_pred1 = self.model(x_u1, self.model_params)
         loss_rc = self.rc_loss(y_pred0, y_pred1)
         self._cleargrads()
         loss_rc.backward()
@@ -133,14 +133,14 @@ class Experiment000(object):
 
         # Forward primary taks for training meta-leaners
         #TODO: use the same labeled data?
-        y_pred = self.model(x_l, self.model_params)
+        y_pred = self.model(x_l0, self.model_params)
         self.loss_ml += F.softmax_cross_entropy(y_pred, y_l)
 
     def _train_meta_learners():
         self.cleargrads()
         self.loss_ml.backward()
         for opt in self.ml_optimizers:
-            opt.update(self.model_params)
+            opt.update()
         self.loss_ml.unchain_backward()
         self.loss_ml = 0
             
