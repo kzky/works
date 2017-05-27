@@ -78,9 +78,9 @@ class Experiment000(object):
         self.ml_optimizers = []
 
         # Meta-learner
-        for k, v in self.model_params.items():
+        for _ in self.model_params:
             # meta-learner taking gradient in batch dimension
-            ml = MetaLearner(np.prod(v.shape))
+            ml = MetaLearner(inmap=1, midmap=1, outmap=1)
             ml.to_gpu(self.device) if self.device is not None else None
             self.meta_learners.append(ml)
 
@@ -90,9 +90,9 @@ class Experiment000(object):
             opt.use_cleargrads()
             self.ml_optimizers.append(opt)        
 
-    def train(self, x_l0, x_l1, y_l, x_u, x_u1):
+    def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         self._train_for_primary_task(x_l0, y_l)
-        self._train_for_auxiliary_task(x_l0, y_l, x_u0)
+        self._train_for_auxiliary_task(x_l0, x_l1, y_l, x_u0, x_u1)
         
         self.t += 1
         if self.t == self.T:
@@ -116,19 +116,19 @@ class Experiment000(object):
 
         # Update optimizee parameters
         model_params = self.model_params
-        for i, elm in enumerate(model_params):
+        for i, elm in enumerate(model_params.items()):
             name, w = elm
             meta_learner = self.meta_learners[i]
             ml_optimizer = self.ml_optimizers[i]
+            shape = w.shape
             with cuda.get_device_from_id(self.device):
                 xp = cuda.get_array_module(w.data)
-                shape = np.prod(w.shape)
-                grad_data = xp.reshape(w.grad, np.prod(shape))
-
-            # refince grad, update w, and replace
+                grad_data = xp.reshape(w.grad, (np.prod(shape), 1))
+                
+            # refine grad, update w, and replace
             grad = Variable(grad_data)
             g = meta_learner(grad)  #TODO: use either h or c
-            w -= g
+            w -= F.reshape(g, shape)
             model_params[name] = w
 
         # Forward primary taks for training meta-leaners
