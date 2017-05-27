@@ -1,4 +1,4 @@
-"""Models
+"""ResNet model
 """
 import numpy as np
 import chainer
