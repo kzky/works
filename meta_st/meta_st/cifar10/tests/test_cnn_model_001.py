@@ -3,6 +3,7 @@ from meta_st.cifar10.cnn_model_001 import Model
 import chainer.functions as F
 from collections import OrderedDict
 from chainer import Variable
+import time
 
 def test_forward():
     device = None
@@ -20,26 +21,27 @@ def test_forward():
     l = F.softmax_cross_entropy(y_pred, y)
     
     # backward
-    l.backward()
+    model.cleargrads()
+    l.backward(retain_grad=True)
 
     # change variable held in model_params
     for k, v in model_params.items():
-        w = Variable(v.grad)
-        model_params[k] = w
+        w = Variable(np.copy(v.grad))
+        w_ = F.dropout(w)
+        model_params[k] = w_
 
     # forward
     y_pred = model(x, model_params, test=False)
     l = F.softmax_cross_entropy(y_pred, y)
     
     # backward
-    l.backward()
+    model.cleargrads()
+    l.backward(retain_grad=True)
 
     # check
+    print("after backward")
     for k, v in model_params.items():
         if v.grad is not None:
             print(k)
-
-    
-    
 
 
