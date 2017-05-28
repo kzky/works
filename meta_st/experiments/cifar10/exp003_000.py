@@ -43,7 +43,7 @@ def main():
                                     n_cls=n_cls,
                                     da=True,
                                     shape=True)
-    exp = Experiment002(
+    exp = Experiment000(
         device,
         learning_rate,
         act,
