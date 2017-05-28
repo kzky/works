@@ -71,6 +71,7 @@ class Model(Chain):
                      mp_filtered["/gamma"], 
                      mp_filtered["/beta"],
                      test)
+        h = F.dropout(h, train=not test)
     
         mp_filtered = self._filter_model_params(model_params, "/conv10")
         h = self.conv10(h, mp_filtered, test)
@@ -84,6 +85,7 @@ class Model(Chain):
                      mp_filtered["/gamma"], 
                      mp_filtered["/beta"],
                      test)
+        h = F.dropout(h, train=not test)
 
         mp_filtered = self._filter_model_params(model_params, "/conv20")
         h = self.conv20(h, mp_filtered, test)  # 8 -> 6
