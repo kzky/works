@@ -165,7 +165,7 @@ class Experiment000(object):
         for opt in self.opt_meta_learners:
             opt.update()
 
-        loss_ce.unchain_backward()  #TODO: here is a proper place to unchain?
+        loss_ml.unchain_backward()  #TODO: here is a proper place to unchain?
 
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
