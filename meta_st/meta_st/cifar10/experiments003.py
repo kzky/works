@@ -71,6 +71,7 @@ class Experiment000(object):
         self.learning_rate = learning_rate
         self.T = T
         self.t = 0
+        self.loss_ml = 0
 
         # Loss
         self.recon_loss = ReconstructionLoss()
@@ -166,7 +167,8 @@ class Experiment000(object):
         self.loss_ml.backward(retain_grad=True)
         for opt in self.opt_meta_learners:
             opt.update()
-        loss_ml.unchain_backward()  #TODO: here is a proper place to unchain?
+        self.loss_ml.unchain_backward()  #TODO: here is a proper place to unchain?
+        self.loss_ml = 0
 
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
