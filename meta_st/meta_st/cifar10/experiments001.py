@@ -103,12 +103,7 @@ class Experiment000(object):
         y_pred = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred, y_l)
         self._cleargrads()
-        loss_ce.backward()
-        print("_train_for_primary_task")
-        for k, v in self.model_params.items():
-            if v.grad is None:
-                print(k)
-                
+        loss_ce.backward(retain_grad=True)
         self.optimizer.update(self.model_params)
         
     def _train_for_auxiliary_task(self, x_l0, x_l1, y_l, x_u0, x_u1):
@@ -117,7 +112,7 @@ class Experiment000(object):
         y_pred1 = self.model(x_u1, self.model_params)
         loss_rc = self.rc_loss(y_pred0, y_pred1)
         self._cleargrads()
-        loss_rc.backward()
+        loss_rc.backward(retain_grad=True)
 
         # Update optimizee parameters
         model_params = self.model_params
@@ -128,9 +123,9 @@ class Experiment000(object):
             shape = w.shape
             with cuda.get_device_from_id(self.device):
                 xp = cuda.get_array_module(w.data)
-                g_old = xp.copy(w.grad)
+                g_old = w.grad  # no nedd to deep copy
                 grad_data = xp.reshape(g_old, (np.prod(shape), 1))
-                
+            
                 # refine grad, update w, and replace
                 grad = Variable(grad_data)
                 g = meta_learner(grad)  #TODO: use either h or c
@@ -139,8 +134,8 @@ class Experiment000(object):
                 
         # Forward primary taks for training meta-leaners
         #TODO: use the same labeled data?
-        #y_pred = self.model(x_l0, self.model_params)
-        #self.loss_ml += F.softmax_cross_entropy(y_pred, y_l)
+        y_pred = self.model(x_l0, self.model_params)
+        self.loss_ml += F.softmax_cross_entropy(y_pred, y_l)
 
     def _train_meta_learners(self, ):
         self._cleargrads()
