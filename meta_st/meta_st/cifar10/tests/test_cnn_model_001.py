@@ -21,7 +21,24 @@ def test_forward():
     
     # backward
     l.backward()
+
+    # change variable held in model_params
+    for k, v in model_params.items():
+        w = Variable(v.grad)
+        model_params[k] = w
+
+    # forward
+    y_pred = model(x, model_params, test=False)
+    l = F.softmax_cross_entropy(y_pred, y)
     
+    # backward
+    l.backward()
+
+    # check
+    for k, v in model_params.items():
+        if v.grad is not None:
+            print(k)
+
     
     
 
