@@ -134,9 +134,9 @@ class BatchNormalization(link.Link):
                 ret = func(x, gamma_, beta_)
             else:
                 ret = func(x, gamma, beta)
-
-            self.avg_mean[:] = func.running_mean
-            self.avg_var[:] = func.running_var
+            with cuda.get_device_from_id(self._device_id):
+                self.avg_mean[:] = func.running_mean
+                self.avg_var[:] = func.running_var
         else:
             # Use running average statistics or fine-tuned statistics.
             mean = variable.Variable(self.avg_mean, volatile='auto')
