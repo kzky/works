@@ -21,6 +21,18 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
+class IdentityLearner(Link):
+    def __init__(self, ):
+        super(IdentityLearner, self).__init__(
+        )
+
+
+    def to_gpu(self, device=None):
+        super(IdentityLearner, self).to_gpu()
+
+    def __call__(self, x):
+        return x
+
 class AdamLearner(Link):
     def __init__(self, dim):
         super(AdamLearner, self).__init__(
@@ -52,7 +64,8 @@ class AdamLearner(Link):
 class MetaLearner(Chain):
     def __init__(self, dim):
         super(MetaLearner, self).__init__(
-            ml0=AdamLearner(dim),
+            #ml0=AdamLearner(dim),
+            ml0=IdentityLearner(),
         )
 
     def __call__(self, h):

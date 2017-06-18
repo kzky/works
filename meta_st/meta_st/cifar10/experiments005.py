@@ -24,11 +24,10 @@ from sklearn.metrics import confusion_matrix
 class IdentityLearner(Link):                                          
     def __init__(self, ):                                             
         super(IdentityLearner, self).__init__(                        
-        )                                                             
-                                                                      
-                                                                      
+        )
+
     def to_gpu(self, device=None):                                    
-        super(IdentityLearner, self).to_gpu()                         
+        super(IdentityLearner, self).to_gpu(device)                         
                                                                       
     def __call__(self, x):                                            
         return x       
@@ -46,7 +45,7 @@ class AdamLearner(Link):
         self.v = Variable(np.zeros_like(self.beta2.data))
 
     def to_gpu(self, device=None):
-        super(AdamLearner, self).to_gpu()
+        super(AdamLearner, self).to_gpu(device)
 
         self.m.to_gpu(device)
         self.v.to_gpu(device)
@@ -56,15 +55,26 @@ class AdamLearner(Link):
         f2 = F.sigmoid(self.beta2)
         #self.m = f1 * self.m + (1 - f1) * x
         #self.v = f2 * self.v + (1 - f2) * x**2
-        self.m = self.beta1 * self.m + (1 - self.beta1) * x
-        self.v = self.beta2 * self.v + (1 - self.beta2) * x**2
-        g = 1e-3 * self.m / F.sqrt(self.v + 1e-8)
+        self.m = f1 * self.m + (1 - f1) * x
+        self.v = f2 * self.v + (1 - f2) * x**2
+        g = 1e-2 * self.m / F.sqrt(self.v + 1e-8)
         return g
+
+class GRULearner(Chain):
+    def __init__(self, dim):
+        super(GRULearner, self).__init__(
+            gru0=L.StatefulGRU(dim, dim),
+        )
+
+    def __call__(self, x):
+        return self.gru0(x)
 
 class MetaLearner(Chain):
     def __init__(self, dim):
         super(MetaLearner, self).__init__(
-            ml0=AdamLearner(dim),
+            #ml0=IdentityLearner()
+            #ml0=AdamLearner(dim),
+            ml0=GRULearner(dim)
         )
 
     def __call__(self, h):
@@ -91,6 +101,9 @@ class Experiment000(object):
         self.model.to_gpu(device) if device is not None else None
         self.model_params = OrderedDict([x for x in self.model.namedparams()])
         
+        # Optimizer
+        self.setup_meta_learners()
+        
     def setup_meta_learners(self, ):
         #TODO: multiple layers, modification of inputs
         self.meta_learners = []
@@ -99,7 +112,8 @@ class Experiment000(object):
         # Meta-learner
         for k, v in self.model_params.items():
             # meta-learner taking gradient in batch dimension
-            ml = MetaLearner(np.prod(v.shape))
+            #ml = MetaLearner(np.prod(v.shape))
+            ml = MetaLearner(1, )
             ml.to_gpu(self.device) if self.device is not None else None
             self.meta_learners.append(ml)
 
@@ -111,29 +125,33 @@ class Experiment000(object):
                 
     def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         # Foward/Backward of learner w.r.t. cross-entropy
-        y_pred0 = self.model(x_l0, self.model_params[k])
+        y_pred0 = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred0, y_l)
         self.cleargrads()
-        loss_ce.backward()
+        loss_ce.backward(retain_grad=True)
+        loss_ce.unchain_backward()
 
         # Forward of meta-learner, i.e., parameter update
-        for i, elm in enumerate(self.model_params.items()):  # parameter-loop
+        for i, elm in enumerate(self.model_params.items()):
             k, p = elm
             with cuda.get_device_from_id(self.device):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
 
                 x = p.grad
-                grad = xp.reshape(x, (np.prod(shape), ))
+                #grad = xp.reshape(x, (np.prod(shape), ))
+                grad = xp.reshape(x, (np.prod(shape), 1))
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(grad))  # forward
                 w = p - F.reshape(g, shape)
-                self.model_params[k] = w  # 
-        
-        # Foward/Backward of learner w.r.t. stochastic regularization loss
-        y_pred0 = self.model(x_u0, self.model_params[k])
-        y_pred1 = self.model(x_u1, self.model_params[k])
-        loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
+                self.model_params[k] = w  # parameter update
+                #self.model_params[k] = F.reshape(g, shape)
+
+        # Foward/Backward of learner w.r.t. stochastic regularization
+        y_pred0 = self.model(x_u0, self.model_params)
+        y_pred1 = self.model(x_u1, self.model_params)
+        loss_rec = self.recon_loss(F.softmax(y_pred0), 
+                                   F.softmax(y_pred1))
         self.cleargrads()
         loss_rec.backward()
         
@@ -142,6 +160,7 @@ class Experiment000(object):
             meta_learner.cleargrads()
         for opt in self.opt_meta_learners:
             opt.update()
+            
 
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
