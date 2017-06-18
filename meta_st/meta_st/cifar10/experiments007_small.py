@@ -42,13 +42,13 @@ class OneByOneConvLeanrer(Chain):
 
     def __call__(self, x):
         if self.w_accum is None:
-            self.w_aacum = x
+            self.w_accum = x
             return self.w_accum
 
         h = self.conv0(x)
         h = self.conv1(h)
         h = F.sigmoid(h)
-        self.w_accum = h * self.w_accum + (1 - h) * self.x
+        self.w_accum = h * self.w_accum + (1 - h) * x
         return self.w_accum
 
 class MetaLearner(Chain):
@@ -147,10 +147,10 @@ class Experiment000(object):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
 
-                x = p.data  # meta learner is gated-reccurent unit for W not for G
-                w = xp.reshape(x, (1, 1, np.prod(shape)))
+                w_data = p.data  # meta learner is gated-reccurent unit for W not for G
+                w_data = xp.reshape(w_data, (1, 1, np.prod(shape)))
                 meta_learner = self.meta_learners[i]
-                w_accum = meta_learner(Variable(w))  # forward
+                w_accum = meta_learner(Variable(w_data))  # forward
                 w_accum = F.reshape(w_accum, shape)
                 self.model_params[k] = w_accum
 
