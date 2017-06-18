@@ -63,6 +63,9 @@ class Experiment000(object):
         loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
         loss += loss_rec
 
+        # Entropy Regularization
+        loss += self.er_loss(y_pred0)
+
         self.model.cleargrads()
         loss.backward()
         self.optimizer.update()
@@ -116,6 +119,9 @@ class Experiment001(object):
         loss_rec = self.recon_loss(F.softmax(y_pred0), F.softmax(y_pred1))
         loss += loss_rec
 
+        # Entropy Regularization
+        loss += self.er_loss(y_pred0)
+
         self.model.cleargrads()
         loss.backward()
         self.optimizer.update()
@@ -138,6 +144,7 @@ class Experiment002(Experiment000):
 
         # Loss
         self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
 
         # Model
         from st.cifar10.cnn_model_002 import Model
@@ -163,6 +170,7 @@ class Experiment003(Experiment000):
 
         # Loss
         self.recon_loss = ReconstructionLoss()
+        self.er_loss = EntropyRegularizationLoss()
 
         # Model
         from st.cifar10.cnn_model_003 import Model
