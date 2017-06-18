@@ -1,6 +1,6 @@
 """Experiments
 
-GRU meta-learner for W
+Conv meta-learner for W
 
 """
 import numpy as np
@@ -24,21 +24,38 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
-class GRULearner(Chain):
-    def __init__(self, dim):
-        super(GRULearner, self).__init__(
-            gru0=L.StatefulGRU(dim, dim),
+class OneByOneConvLeanrer(Chain):
+    def __init__(self, ):
+        in_channels = 1
+        maps = 16
+        super(OneByOneConvLeanrer, self).__init__(
+            conv0=L.ConvolutionND(ndim=1, 
+                                  in_channels=in_channels, 
+                                  out_channels=maps, 
+                                  ksize=1, initial_bias=None),
+            conv1=L.ConvolutionND(ndim=1, 
+                                  in_channels=maps, 
+                                  out_channels=1, 
+                                  ksize=1, initial_bias=None),
         )
+        self.w_accum = None
 
     def __call__(self, x):
-        return self.gru0(x)
+        if self.w_accum is None:
+            self.w_aacum = x
+            return self.w_accum
+
+        h = self.conv0(x)
+        h = self.conv1(h)
+        h = F.sigmoid(h)
+        self.w_accum = h * self.w_accum + (1 - h) * self.x
+        return self.w_accum
 
 class MetaLearner(Chain):
-    def __init__(self, dim):
+    def __init__(self, ):
         super(MetaLearner, self).__init__(
-            ml0=GRULearner(dim)
+            ml0=OneByOneConvLeanrer(),
         )
-
     def __call__(self, h):
         return self.ml0(h)
 
@@ -79,7 +96,7 @@ class Experiment000(object):
         # Meta-learner
         for k, v in self.model_params.items():
             # meta-learner taking gradient in batch dimension
-            ml = MetaLearner(1, )
+            ml = MetaLearner()
             ml.to_gpu(self.device) if self.device is not None else None
             self.meta_learners.append(ml)
 
@@ -131,7 +148,7 @@ class Experiment000(object):
                 xp = cuda.get_array_module(p.data)
 
                 x = p.data  # meta learner is gated-reccurent unit for W not for G
-                w = xp.reshape(x, (np.prod(shape), 1))
+                w = xp.reshape(x, (1, 1, np.prod(shape)))
                 meta_learner = self.meta_learners[i]
                 w_accum = meta_learner(Variable(w))  # forward
                 w_accum = F.reshape(w_accum, shape)
