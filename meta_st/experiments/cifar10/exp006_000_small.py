@@ -1,4 +1,4 @@
-from meta_st.cifar10.experiments005_small import Experiment000
+from meta_st.cifar10.experiments006_small import Experiment000
 from meta_st.utils import to_device
 from meta_st.cifar10.datasets import Cifar10DataReader, Separator
 import numpy as np
