@@ -23,18 +23,22 @@ from sklearn.metrics import confusion_matrix
 
 class OneByOneConvLeanrer(Chain):
     def __init__(self, ):
-        maps = 10
+        maps = 16
         super(OneByOneConvLeanrer, self).__init__(
             conv0=L.ConvolutionND(ndim=1, 
-                                  in_channels=1, out_channels=maps, ksize=1),
+                                  in_channels=3, 
+                                  out_channels=maps, 
+                                  ksize=1, nobias=True),
             conv1=L.ConvolutionND(ndim=1, 
-                                  in_channels=maps, out_channels=1, ksize=1),
+                                  in_channels=maps, 
+                                  out_channels=1, 
+                                  ksize=1, nobias=True),
         )
 
     def __call__(self, x):
         # (b, m, #params)
-        h = self.conv0(x)  # (1, 1, #params) -> (1, maps, #params)
-        h = self.conv1(h) # (1, maps, #params) -> (1, 1, #params)
+        h = self.conv0(x)  # (1, 3, #params) -> (1, maps, #params)
+        h = self.conv1(x)  # (1, maps, #params) -> (1, 1, #params)
         return h
 
 class MetaLearner(Chain):
@@ -134,9 +138,14 @@ class Experiment000(object):
                 xp = cuda.get_array_module(p.data)
 
                 x = p.grad
-                grad = xp.reshape(x, (1, 1, np.prod(shape)))  # (b, m, d) = (1, 1, #params)
+                grad = xp.reshape(x, (1, 1, np.prod(shape)))
+                grad_sign = xp.sign(grad)
+                grad_abs = xp.abs_(grad)
+                grad_separated = xp.concatenate(
+                    (grad, grad_sign, grad_abs), 
+                    axis=1)
                 meta_learner = self.meta_learners[i]
-                g = meta_learner(Variable(grad))  # forward
+                g = meta_learner(Variable(grad_separated))  # forward
                 w = p - F.reshape(g, shape)
                 self.model_params[k] = w  # parameter update
 
