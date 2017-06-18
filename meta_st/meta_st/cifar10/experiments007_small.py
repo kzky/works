@@ -1,4 +1,7 @@
 """Experiments
+
+GRU meta-learner for W
+
 """
 import numpy as np
 import chainer
@@ -21,27 +24,21 @@ from meta_st.cifar10.datasets import Cifar10DataReader
 from meta_st.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 
-class OneByOneConvLeanrer(Chain):
-    def __init__(self, ):
-        maps = 10
-        super(OneByOneConvLeanrer, self).__init__(
-            conv0=L.ConvolutionND(ndim=1, 
-                                  in_channels=1, out_channels=maps, ksize=1),
-            conv1=L.ConvolutionND(ndim=1, 
-                                  in_channels=maps, out_channels=1, ksize=1),
+class GRULearner(Chain):
+    def __init__(self, dim):
+        super(GRULearner, self).__init__(
+            gru0=L.StatefulGRU(dim, dim),
         )
 
     def __call__(self, x):
-        # (b, m, #params)
-        h = self.conv0(x)  # (1, 1, #params) -> (1, maps, #params)
-        h = self.conv1(h) # (1, maps, #params) -> (1, 1, #params)
-        return h
+        return self.gru0(x * 1e-3)
 
 class MetaLearner(Chain):
-    def __init__(self, ):
+    def __init__(self, dim):
         super(MetaLearner, self).__init__(
-            ml0=OneByOneConvLeanrer(),
+            ml0=GRULearner(dim)
         )
+
     def __call__(self, h):
         return self.ml0(h)
 
@@ -54,8 +51,6 @@ class Experiment000(object):
         self.device = device
         self.act = act
         self.learning_rate = learning_rate
-        self.T = T
-        self.t = 0
 
         # Loss
         self.recon_loss = ReconstructionLoss()
@@ -97,29 +92,35 @@ class Experiment000(object):
     def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         # Supervised loss
         ## Forward of CE loss
+        self.forward_meta_learners()  #TODO: init ML'W as 0?
         y_pred0 = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred0, y_l)
 
         ## Backward of CE loss
+        self.cleargrad_meta_learners()
         self.cleargrads()
         loss_ce.backward(retain_grad=True)
         loss_ce.unchain_backward()
         
         ## Optimizer update
         self.optimizer.update(self.model_params)
+        self.update_meta_learners()
 
         # Semi-supervised loss
+        self.forward_meta_learners()
         y_pred0 = self.model(x_u0, self.model_params)
         y_pred1 = self.model(x_u1, self.model_params)
         loss_rec = self.recon_loss(F.softmax(y_pred0),  F.softmax(y_pred1))
 
         ## Backward of SR loss
+        self.cleargrad_meta_learners()
         self.cleargrads()
         loss_rec.backward(retain_grad=True)
         loss_rec.unchain_backward()
 
         ## Optimizer update
         self.optimizer.update(self.model_params)
+        self.update_meta_learners()
 
     def forward_meta_learners(self, ):
         # Forward of meta-learner, i.e., parameter update
@@ -129,12 +130,11 @@ class Experiment000(object):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
 
-                x = p.grad
-                grad = xp.reshape(x, (1, 1, np.prod(shape)))  # (b, m, d) = (1, 1, #params)
+                x = p.data  # meta learner is gated-reccurent unit for W not for G
+                w = xp.reshape(x, (np.prod(shape), 1))
                 meta_learner = self.meta_learners[i]
-                g = meta_learner(Variable(grad))  # forward
-                w = p - F.reshape(g, shape)
-                self.model_params[k] = w  # parameter update
+                w_accum = meta_learner(Variable(w))  # forward
+                self.model_params[k] = w_accum
 
     def cleargrad_meta_learners(self, ):
         for meta_learner in self.meta_learners:
@@ -149,16 +149,9 @@ class Experiment000(object):
         acc = F.accuracy(y_pred, y)
         return acc
 
-    def zerograds(self, ):
-        """For initialization of Meta-learner forward
-        """
-        for k, v in self.model_params.items():
-            v.zerograd()  # creates the gradient region for W
-        
     def cleargrads(self, ):
         """For initialization of Meta-learner forward
         """
         for k, v in self.model_params.items():
             v.cleargrad()  # creates the gradient region for W
         
-            
