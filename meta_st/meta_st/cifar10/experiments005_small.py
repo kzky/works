@@ -67,7 +67,7 @@ class GRULearner(Chain):
         )
 
     def __call__(self, x):
-        return self.gru0(x)
+        return self.gru0(x * 1e-3)
 
 class MetaLearner(Chain):
     def __init__(self, dim):
@@ -155,8 +155,8 @@ class Experiment000(object):
         self.cleargrad_meta_learners()
 
         ## Backward of SR loss
-        loss_ce.backward(retain_grad=True)
-        loss_ce.unchain_backward()
+        loss_rec.backward(retain_grad=True)
+        loss_rec.unchain_backward()
 
         ## Update ML
         self.update_meta_learners()
