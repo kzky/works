@@ -153,4 +153,10 @@ class Experiment000(object):
         for k, v in self.model_params.items():
             v.zerograd()  # creates the gradient region for W
         
+    def cleargrads(self, ):
+        """For initialization of Meta-learner forward
+        """
+        for k, v in self.model_params.items():
+            v.cleargrad()  # creates the gradient region for W
+        
             
