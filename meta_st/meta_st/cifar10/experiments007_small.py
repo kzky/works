@@ -95,7 +95,6 @@ class Experiment000(object):
     def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
         # Supervised loss
         ## Forward of CE loss
-        self.forward_meta_learners()
         y_pred0 = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred0, y_l)
 
