@@ -131,19 +131,22 @@ class Experiment000(object):
         self.forward_meta_learners()
         y_pred0 = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred0, y_l)
-        loss_ce.backward()
 
         ## Cleargrads for ML
         self.cleargrad_meta_learners()
 
         ## Backward of CE loss
-        loss_ce.backward()
+        loss_ce.backward(retain_grad=True)
+        loss_ce.unchain_backward()
 
         ## Update ML
         self.update_meta_learners()
 
         # Semi-supervised loss
+
         ## Forward of SR loss
+        self.forward_meta_learners()
+
         y_pred0 = self.model(x_u0, self.model_params)
         y_pred1 = self.model(x_u1, self.model_params)
         loss_rec = self.recon_loss(F.softmax(y_pred0),  F.softmax(y_pred1))
@@ -152,7 +155,8 @@ class Experiment000(object):
         self.cleargrad_meta_learners()
 
         ## Backward of SR loss
-        loss_ce.backward()
+        loss_ce.backward(retain_grad=True)
+        loss_ce.unchain_backward()
 
         ## Update ML
         self.update_meta_learners()
@@ -170,7 +174,8 @@ class Experiment000(object):
                 grad = xp.reshape(x, (np.prod(shape), 1))
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(grad))  # forward
-                w = p - F.reshape(g, shape)
+                w = p - F.reshape(g, shape)                
+                w.zerograd()  # preent None of w.grad
                 self.model_params[k] = w  # parameter update
 
     def cleargrad_meta_learners(self, ):
