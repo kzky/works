@@ -104,7 +104,7 @@ class Experiment000(object):
         # Optimizer, or Meta-Learner (ML)
         self.setup_meta_learners()
         
-        # Initialize Meat-learners input zero
+        # Initialize Meat-learners input as zero
         self.zerograds()
         
     def setup_meta_learners(self, ):
@@ -190,6 +190,6 @@ class Experiment000(object):
         """For initialization of Meta-learner forward
         """
         for k, v in self.model_params.items():
-            v.zerograds()  # creates the gradient region for W
+            v.zerograd()  # creates the gradient region for W
         
             
