@@ -68,6 +68,8 @@ class Experiment000(object):
 
         # Optimizer for model
         self.optimizer = Adam()
+        self.optimizer.setup(self.model)
+        self.optimizer.use_cleargrads()
         
         # Optimizer, or Meta-Learner (ML)
         self.setup_meta_learners()
@@ -104,7 +106,7 @@ class Experiment000(object):
         loss_ce.unchain_backward()
         
         ## Optimizer update
-        optimizer.update(self.model_params)
+        self.optimizer.update(self.model_params)
 
         # Semi-supervised loss
         y_pred0 = self.model(x_u0, self.model_params)
@@ -117,7 +119,7 @@ class Experiment000(object):
         loss_rec.unchain_backward()
 
         ## Optimizer update
-        optimizer.update(self.model_params)
+        self.optimizer.update(self.model_params)
 
     def forward_meta_learners(self, ):
         # Forward of meta-learner, i.e., parameter update
