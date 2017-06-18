@@ -1,4 +1,6 @@
 """Experiments
+
+CNN meta-learner
 """
 import numpy as np
 import chainer
@@ -23,23 +25,25 @@ from sklearn.metrics import confusion_matrix
 
 class OneByOneConvLeanrer(Chain):
     def __init__(self, ):
+        in_channels = 1
         maps = 16
         super(OneByOneConvLeanrer, self).__init__(
             conv0=L.ConvolutionND(ndim=1, 
-                                  in_channels=3, 
+                                  in_channels=in_channels, 
                                   out_channels=maps, 
-                                  ksize=1, nobias=True),
+                                  ksize=1, initial_bias=None),
             conv1=L.ConvolutionND(ndim=1, 
                                   in_channels=maps, 
                                   out_channels=1, 
-                                  ksize=1, nobias=True),
+                                  ksize=1, initial_bias=None),
         )
+        self.h = None
 
     def __call__(self, x):
         # (b, m, #params)
-        h = self.conv0(x)  # (1, 3, #params) -> (1, maps, #params)
-        h = self.conv1(x)  # (1, maps, #params) -> (1, 1, #params)
-        return h
+        h = self.conv0(x)  # (1, in_channels, #params) -> (1, maps, #params)
+        h = self.conv1(h)  # (1, maps, #params) -> (1, 1, #params)
+        return h * 0.001
 
 class MetaLearner(Chain):
     def __init__(self, ):
@@ -139,13 +143,14 @@ class Experiment000(object):
 
                 x = p.grad
                 grad = xp.reshape(x, (1, 1, np.prod(shape)))
-                grad_sign = xp.sign(grad)
-                grad_abs = xp.abs_(grad)
-                grad_separated = xp.concatenate(
-                    (grad, grad_sign, grad_abs), 
-                    axis=1)
+                #grad_sign = xp.sign(grad)
+                #grad_abs = xp.absolute(grad)
+                #grad_separated = xp.concatenate(
+                #    (grad, grad_sign, grad_abs), 
+                    #(grad_sign, grad_abs), 
+                #    axis=1)
                 meta_learner = self.meta_learners[i]
-                g = meta_learner(Variable(grad_separated))  # forward
+                g = meta_learner(Variable(grad))  # forward
                 w = p - F.reshape(g, shape)
                 self.model_params[k] = w  # parameter update
 
