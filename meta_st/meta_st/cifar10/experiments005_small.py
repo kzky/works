@@ -101,11 +101,13 @@ class Experiment000(object):
         self.model.to_gpu(device) if device is not None else None
         self.model_params = OrderedDict([x for x in self.model.namedparams()])
         
-        # Optimizer
+        # Optimizer, or Meta-Learner (ML)
         self.setup_meta_learners()
         
+        # Initialize Meat-learners input zero
+        self.zerograds()
+        
     def setup_meta_learners(self, ):
-        #TODO: multiple layers, modification of inputs
         self.meta_learners = []
         self.opt_meta_learners = []
 
@@ -121,19 +123,44 @@ class Experiment000(object):
             opt = optimizers.Adam(1e-3)
             opt.setup(ml)
             opt.use_cleargrads()
-            self.opt_meta_learners.append(opt)        
+            self.opt_meta_learners.append(opt)
                 
     def train(self, x_l0, x_l1, y_l, x_u0, x_u1):
-        # Foward/Backward of learner w.r.t. cross-entropy
+        # Supervised loss
+        ## Forward of CE loss
+        self.forward_meta_learners()
         y_pred0 = self.model(x_l0, self.model_params)
         loss_ce = F.softmax_cross_entropy(y_pred0, y_l)
-        self.cleargrads()
-        loss_ce.backward(retain_grad=True)
-        loss_ce.unchain_backward()
+        loss_ce.backward()
 
+        ## Cleargrads for ML
+        self.cleargrad_meta_learners()
+
+        ## Backward of CE loss
+        loss_ce.backward()
+
+        ## Update ML
+        self.update_meta_learners()
+
+        # Semi-supervised loss
+        ## Forward of SR loss
+        y_pred0 = self.model(x_u0, self.model_params)
+        y_pred1 = self.model(x_u1, self.model_params)
+        loss_rec = self.recon_loss(F.softmax(y_pred0),  F.softmax(y_pred1))
+
+        ## Cleargrads for ML
+        self.cleargrad_meta_learners()
+
+        ## Backward of SR loss
+        loss_ce.backward()
+
+        ## Update ML
+        self.update_meta_learners()
+
+    def forward_meta_learners(self, ):
         # Forward of meta-learner, i.e., parameter update
-        for i, elm in enumerate(self.model_params.items()):
-            k, p = elm
+        for i, name_param in enumerate(self.model_params.items()):
+            k, p = name_param
             with cuda.get_device_from_id(self.device):
                 shape = p.shape
                 xp = cuda.get_array_module(p.data)
@@ -145,29 +172,24 @@ class Experiment000(object):
                 g = meta_learner(Variable(grad))  # forward
                 w = p - F.reshape(g, shape)
                 self.model_params[k] = w  # parameter update
-                #self.model_params[k] = F.reshape(g, shape)
 
-        # Foward/Backward of learner w.r.t. stochastic regularization
-        y_pred0 = self.model(x_u0, self.model_params)
-        y_pred1 = self.model(x_u1, self.model_params)
-        loss_rec = self.recon_loss(F.softmax(y_pred0), 
-                                   F.softmax(y_pred1))
-        self.cleargrads()
-        loss_rec.backward()
-        
-        # Update meta-learner
+    def cleargrad_meta_learners(self, ):
         for meta_learner in self.meta_learners:
             meta_learner.cleargrads()
+
+    def update_meta_learners(self, ):
         for opt in self.opt_meta_learners:
             opt.update()
             
-
     def test(self, x, y):
         y_pred = self.model(x, self.model_params, test=True)
         acc = F.accuracy(y_pred, y)
         return acc
 
-    def cleargrads(self, ):
+    def zerograds(self, ):
+        """For initialization of Meta-learner forward
+        """
         for k, v in self.model_params.items():
-            v.cleargrad()
+            v.zerograds()  # creates the gradient region for W
         
+            
