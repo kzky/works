@@ -31,7 +31,7 @@ class GRULearner(Chain):
         )
 
     def __call__(self, x):
-        return self.gru0(x * 1e-3)
+        return self.gru0(x)
 
 class MetaLearner(Chain):
     def __init__(self, dim):
@@ -70,7 +70,7 @@ class Experiment000(object):
         self.setup_meta_learners()
         
         # Initialize Meat-learners input as zero
-        self.zerograds()
+        #self.zerograds()
         
     def setup_meta_learners(self, ):
         self.meta_learners = []
@@ -79,7 +79,7 @@ class Experiment000(object):
         # Meta-learner
         for k, v in self.model_params.items():
             # meta-learner taking gradient in batch dimension
-            ml = MetaLearner()
+            ml = MetaLearner(1, )
             ml.to_gpu(self.device) if self.device is not None else None
             self.meta_learners.append(ml)
 
@@ -134,6 +134,7 @@ class Experiment000(object):
                 w = xp.reshape(x, (np.prod(shape), 1))
                 meta_learner = self.meta_learners[i]
                 w_accum = meta_learner(Variable(w))  # forward
+                w_accum = F.reshape(w_accum, shape)
                 self.model_params[k] = w_accum
 
     def cleargrad_meta_learners(self, ):
@@ -155,3 +156,8 @@ class Experiment000(object):
         for k, v in self.model_params.items():
             v.cleargrad()  # creates the gradient region for W
         
+    def zerograds(self, ):
+        """For initialization of Meta-learner forward
+        """
+        for k, v in self.model_params.items():
+            v.zerograd()  # creates the gradient region for W
