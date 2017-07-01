@@ -38,14 +38,16 @@ def main(args):
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
     pred = cnn_model_003(ctx, x_l)
-    loss_ce = F.mean(F.softmax_cross_entropy(pred, y_l))
+    with nn.context_scope(ctx):
+        loss_ce = F.mean(F.softmax_cross_entropy(pred, y_l))
 
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0 = F.softmax(cnn_model_003(ctx, x_u0))
-    pred_x_u1 = F.softmax(cnn_model_003(ctx, x_u1))
-    loss_sr = F.mean(F.squared_error(pred_x_u0, pred_x_u1))
+    with nn.context_scope(ctx):
+        pred_x_u0 = F.softmax(cnn_model_003(ctx, x_u0))
+        pred_x_u1 = F.softmax(cnn_model_003(ctx, x_u1))
+        loss_sr = F.mean(F.squared_error(pred_x_u0, pred_x_u1))
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
