@@ -22,14 +22,17 @@ class Cifar10DataReader(object):
     ):
         # Load dataset
         self.l_train_data = dict(np.load(l_train_path))
+        self.l_train_data = {
+            "train_x":self.l_train_data["train_x"], 
+            "train_y":self.l_train_data["train_y"][:, np.newaxis]}
         _u_train_data = np.load(u_train_path)
         self.u_train_data = {
             "train_x":_u_train_data["train_x"], 
-            "train_y":_u_train_data["train_y"]}
+            "train_y":_u_train_data["train_y"][:, np.newaxis]}
         _test_data = np.load(test_path)
         self.test_data = {
             "test_x": _test_data["test_x"], 
-            "test_y": _test_data["test_y"]}
+            "test_y": _test_data["test_y"][:, np.newaxis]}
 
         # ZCA Whitening
         if zca_path is not None:

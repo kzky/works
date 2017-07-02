@@ -5,9 +5,11 @@ import nnabla.solvers as S
 import nnabla
 from nnabla.contrib.context import extension_context
 import numpy as np
+import os
+import time
 import argparse
-from cnn_model_003 import cnn_model_003
-from st2.cifar10.datasets import Cifar10DataReader
+from st2.cifar10.cnn_model_003 import cnn_model_003, ce_loss, sr_loss
+from st2.cifar10.datasets import Cifar10DataReader, Separator
 
 def categorical_error(pred, label):
     """
@@ -87,7 +89,7 @@ def main(args):
         x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch()
         x_u0_data, x_u1_data, y_u_data = data_reader.get_u_train_batch()
         
-        x_l0.d, x_l1.d, y_l.d= x_l0_data, x_l1_data, y_l_data
+        x_l.d, _ , y_l.d= x_l0_data, x_l1_data, y_l_data
         x_u0.d, x_u1.d= x_u0_data, x_u1_data
 
         # Train
