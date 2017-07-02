@@ -39,16 +39,14 @@ def main(args):
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
     pred = cnn_model_003(ctx, x_l)
-    with nn.context_scope(ctx):
-        loss_ce = F.mean(F.softmax_cross_entropy(pred, y_l))
+    loss_ce = ce_loss(ctx, pred, y_l)
 
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    with nn.context_scope(ctx):
-        pred_x_u0 = F.softmax(cnn_model_003(ctx, x_u0))
-        pred_x_u1 = F.softmax(cnn_model_003(ctx, x_u1))
-        loss_sr = F.mean(F.squared_error(pred_x_u0, pred_x_u1))
+    pred_x_u0 = cnn_model_003(ctx, x_u0)
+    pred_x_u1 = cnn_model_003(ctx, x_u1)
+    loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
@@ -57,8 +55,9 @@ def main(args):
     pred_eval = cnn_model_003(ctx, x_eval)
     
     # Solver
-    solver = S.(alpha=learning_rate)
-    solver.set_parameters(nn.get_parameters())
+    with nn.context_scope(ctx):
+        solver = S.Adam(alpha=learning_rate)
+        solver.set_parameters(nn.get_parameters())
 
     # Dataset
     ## separate dataset
@@ -104,6 +103,7 @@ def main(args):
             # Get data and set it to the varaibles
             x_data, y_data = data_reader.get_test_batch()
 
+            # Evaluation loop
             ve = 0.
             iter_val = 0
             for k in range(0, len(x_data), batch_size_eval):
@@ -112,7 +112,6 @@ def main(args):
                 pred_eval.forward()
                 ve += categorical_error(y_eval.d, y_data)
                 iter_val += 1
-                
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 

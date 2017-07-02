@@ -46,4 +46,14 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
         h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
         return h
 
+def ce_loss(ctx, pred, y_l):
+    with nn.context_scope(ctx):
+        loss_ce = F.mean(F.softmax_cross_entropy(pred, y_l))
+    return loss_ce
 
+def sr_loss(ctx, pred0, pred1):
+    with nn.context_scope(ctx):
+        pred_x_u0 = F.softmax(pred0)
+        pred_x_u1 = F.softmax(pred1)
+        loss_sr = F.mean(F.squared_error(pred_x_u0, pred_x_u1))
+    return loss_sr
