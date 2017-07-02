@@ -53,7 +53,6 @@ def main(args):
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    y_eval = nn.Variable((batch_size_eval, 1))
     pred_eval = cnn_model_003(ctx, x_eval)
     
     # Solver
@@ -110,14 +109,14 @@ def main(args):
             iter_val = 0
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = x_data[k:k+batch_size_eval, :]
-                y_data = y_data[k:k+batch_size_eval, :]
+                label = y_data[k:k+batch_size_eval, :]
                 pred_eval.forward()
-                ve += categorical_error(y_eval.d, y_data)
+                ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
             msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
                 epoch,
                 time.time() - st, 
-                100 - ve / iter_val)
+                (1. - ve / iter_val) * 100)
             print(msg)
             st = time.time()
             epoch +=1
