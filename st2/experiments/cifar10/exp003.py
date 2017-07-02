@@ -7,6 +7,7 @@ from nnabla.contrib.context import extension_context
 import numpy as np
 import argparse
 from cnn_model_003 import cnn_model_003
+from st2.cifar10.datasets import Cifar10DataReader
 
 def categorical_error(pred, label):
     """
