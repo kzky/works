@@ -113,7 +113,7 @@ def main(args):
                 pred_eval.forward()
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
-            msg = "Epoch:{},ElapsedTime:{},Acc:{}".format(
+            msg = "Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
                 epoch,
                 time.time() - st, 
                 (1. - ve / iter_val) * 100)
