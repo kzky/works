@@ -11,6 +11,13 @@ import argparse
 from st2.cifar10.cnn_model_003 import cnn_model_003, ce_loss, sr_loss
 from st2.cifar10.datasets import Cifar10DataReader, Separator
 
+"""
+The same script as the `st` module but with nnabla.
+
+- ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
+- Stochastic Regularization
+"""
+
 def categorical_error(pred, label):
     """
     Compute categorical error given score vectors and labels as
