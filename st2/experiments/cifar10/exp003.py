@@ -92,11 +92,11 @@ def main(args):
         x_u0.d, x_u1.d= x_u0_data, x_u1_data
 
         # Train
-        loss_ce.forward()
-        loss_sr.forward()
+        loss_ce.forward(clear_no_need_grad=True)
+        loss_sr.forward(clear_no_need_grad=True)
         solver.zero_grad()
-        loss_ce.backward()
-        loss_sr.backward()
+        loss_ce.backward(clear_buffer=True)
+        loss_sr.backward(clear_buffer=True)
         solver.update()
         
         # Evaluate
@@ -110,7 +110,7 @@ def main(args):
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = x_data[k:k+batch_size_eval, :]
                 label = y_data[k:k+batch_size_eval, :]
-                pred_eval.forward()
+                pred_eval.forward(clear_buffer=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
             msg = "Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
