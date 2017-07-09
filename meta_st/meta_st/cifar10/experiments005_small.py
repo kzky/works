@@ -1,4 +1,7 @@
 """Experiments
+
+GRU meta-learner for W
+
 """
 import numpy as np
 import chainer
@@ -175,7 +178,6 @@ class Experiment000(object):
                 meta_learner = self.meta_learners[i]
                 g = meta_learner(Variable(grad))  # forward
                 w = p - F.reshape(g, shape)                
-                w.zerograd()  # preent None of w.grad
                 self.model_params[k] = w  # parameter update
 
     def cleargrad_meta_learners(self, ):

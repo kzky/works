@@ -1,4 +1,7 @@
 """Experiments
+
+GRU meta-learner for W
+
 """
 import numpy as np
 import chainer

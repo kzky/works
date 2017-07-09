@@ -114,7 +114,7 @@ class Experiment000(object):
         self._cleargrads()
         loss_rc.backward(retain_grad=True)
 
-        # Update optimizee parameters
+        # Update optimizee parameters by meta-learner
         model_params = self.model_params
         for i, elm in enumerate(model_params.items()):
             name, w = elm
@@ -139,7 +139,7 @@ class Experiment000(object):
 
     def _train_meta_learners(self, ):
         self._cleargrads()
-        self.loss_ml.backward()
+        self.loss_ml.backward(retain_grad=True)
         for opt in self.ml_optimizers:
             opt.update()
         self.loss_ml.unchain_backward()
@@ -153,5 +153,4 @@ class Experiment000(object):
     def _cleargrads(self, ):
         for k, v in self.model_params.items():
             v.cleargrad()
-            #v.zerograd()
         
