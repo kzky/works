@@ -120,7 +120,6 @@ def main(args):
         loss_unsupervised.backward(clear_buffer=True)
         gsc.set_scales_unsupervised_loss(nn.get_parameters())
         gsc.scale_grad(ctx, nn.get_parameters())
-        solver.zero_grad()
         loss_supervised.backward(clear_buffer=True)  # backward again
 
         ## update
