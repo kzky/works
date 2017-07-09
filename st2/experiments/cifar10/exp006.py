@@ -118,7 +118,7 @@ def main(args):
         solver.zero_grad()
         loss_unsupervised.backward(clear_buffer=True)
         gsc.set_scales_unsupervised_loss(nn.get_parameters())
-        gsc.scale_grad(ct, nn.get_parameters())
+        gsc.scale_grad(ctx, nn.get_parameters())
         loss_supervised.backward(clear_buffer=True)  # backward again
         solver.update()
         

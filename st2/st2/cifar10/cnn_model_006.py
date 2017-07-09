@@ -76,16 +76,17 @@ class GradScaleContainer(object):
         self.n = n
 
     def scale_grad(self, ctx, parameters):
+        values = parameters.values()
         for i in range(self.n):
-            p = parameters[i]
+            p = values[i]
             scale = self.scales_supervised_loss[i] / self.scales_unsupervised_loss[i]
             p.g = p.g * scale
-            p.grad.cast(ctx, p.g.dtype)
+            p.grad.cast(p.g.dtype, ctx)
 
     def set_scales_supervised_loss(self, parameters):
-        for i, p in enumerate(parameters):
-            scales_supervised_loss[i] = np.scale(p.g)
+        for i, p in enumerate(parameters.values()):
+            self.scales_supervised_loss[i] = np.std(p.g)
     
     def set_scales_unsupervised_loss(self, parameters):
-        for i, p in enumerate(parameters):
-            scales_unsupervised_loss[i] = np.scale(p.g)
+        for i, p in enumerate(parameters.values()):
+            self.scales_unsupervised_loss[i] = np.std(p.g)
