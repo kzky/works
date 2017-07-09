@@ -18,7 +18,7 @@ The same script as the `st` module but with nnabla.
 - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
-- Gradient scaling: just consider large gradients of g_u
+- Gradient scaling: just consider large gradients of g_u and constant update
 """
 
 def categorical_error(pred, label):
