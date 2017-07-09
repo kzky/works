@@ -67,3 +67,25 @@ def er_loss(ctx, pred):
         pred_log_normalized = F.log(F.softmax(pred))
         loss_er = - F.sum(pred_normalized * pred_log_normalized) / denominator
     return loss_er
+
+
+class GradScaleContainer(object):
+    def __init__(self, n):
+        self.scales_supervised_loss = [None] * n
+        self.scales_unsupervised_loss = [None] * n
+        self.n = n
+
+    def scale_grad(self, ctx, parameters):
+        for i in range(self.n):
+            p = parameters[i]
+            scale = self.scales_supervised_loss[i] / self.scales_unsupervised_loss[i]
+            p.g = p.g * scale
+            p.grad.cast(ctx, p.g.dtype)
+
+    def set_scales_supervised_loss(self, parameters):
+        for i, p in enumerate(parameters):
+            scales_supervised_loss[i] = np.scale(p.g)
+    
+    def set_scales_unsupervised_loss(self, parameters):
+        for i, p in enumerate(parameters):
+            scales_unsupervised_loss[i] = np.scale(p.g)

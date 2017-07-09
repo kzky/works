@@ -8,7 +8,8 @@ import numpy as np
 import os
 import time
 import argparse
-from st2.cifar10.cnn_model_006 import cnn_model_003, ce_loss, sr_loss, er_loss
+from st2.cifar10.cnn_model_006 import cnn_model_003, ce_loss, sr_loss, er_loss, \
+    GradScaleContainer
 from st2.cifar10.datasets import Cifar10DataReader, Separator
 
 """
@@ -17,6 +18,7 @@ The same script as the `st` module but with nnabla.
 - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
+- Naive implementation for gradient scaling
 """
 
 def categorical_error(pred, label):
@@ -73,6 +75,9 @@ def main(args):
         solver = S.Adam(alpha=learning_rate)
         solver.set_parameters(nn.get_parameters())
 
+    # Gradient Scale Container
+    gsc = GradScaleContainer(len(nn.get_parameters()))
+
     # Dataset
     ## separate dataset
     home = os.environ.get("HOME")
@@ -88,7 +93,7 @@ def main(args):
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls,
-                                  da=True,
+                                  da=True,  #TODO: use F.image_augmentation
                                   shape=True)
 
     # Training loop
@@ -107,9 +112,14 @@ def main(args):
         # Train
         loss_supervised.forward(clear_no_need_grad=True)
         loss_unsupervised.forward(clear_no_need_grad=True)
-        solver.zero_grad()
+        ## compute scales
         loss_supervised.backward(clear_buffer=True)
+        gsc.set_scales_supervised_loss(nn.get_parameters())
+        solver.zero_grad()
         loss_unsupervised.backward(clear_buffer=True)
+        gsc.set_scales_unsupervised_loss(nn.get_parameters())
+        gsc.scale_grad(ct, nn.get_parameters())
+        loss_supervised.backward(clear_buffer=True)  # backward again
         solver.update()
         
         # Evaluate
