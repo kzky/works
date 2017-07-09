@@ -19,7 +19,7 @@ The same script as the `st` module but with nnabla.
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
 - Naive implementation for gradient scaling; basis is grad scale of supervised loss
-- all ER losses is added to unsupervised loss.
+- all ER losses are added to unsupervised loss.
 """
 
 def categorical_error(pred, label):
