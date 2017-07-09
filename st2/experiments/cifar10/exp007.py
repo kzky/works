@@ -8,7 +8,7 @@ import numpy as np
 import os
 import time
 import argparse
-from st2.cifar10.cnn_model_006 import cnn_model_003, ce_loss, sr_loss, er_loss, \
+from st2.cifar10.cnn_model_007 import cnn_model_003, ce_loss, sr_loss, er_loss, \
     GradScaleContainer
 from st2.cifar10.datasets import Cifar10DataReader, Separator
 
