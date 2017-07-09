@@ -112,14 +112,18 @@ def main(args):
         # Train
         loss_supervised.forward(clear_no_need_grad=True)
         loss_unsupervised.forward(clear_no_need_grad=True)
-        ## compute scales
+        ## compute scales and backwards
+        solver.zero_grad()
         loss_supervised.backward(clear_buffer=True)
         gsc.set_scales_supervised_loss(nn.get_parameters())
         solver.zero_grad()
         loss_unsupervised.backward(clear_buffer=True)
         gsc.set_scales_unsupervised_loss(nn.get_parameters())
         gsc.scale_grad(ctx, nn.get_parameters())
+        solver.zero_grad()
         loss_supervised.backward(clear_buffer=True)  # backward again
+
+        ## update
         solver.update()
         
         # Evaluate
