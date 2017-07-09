@@ -114,7 +114,7 @@ def main(args):
         loss_unsupervised.forward(clear_no_need_grad=True)
         ## compute scales and backwards
         solver.zero_grad()
-        loss_unsupervised.backward(clear_buffer=True)
+        loss_unsupervised.backward(clear_buffer=False)
         gsc.set_scales_unsupervised_loss(nn.get_parameters())
         solver.zero_grad()
         loss_supervised.backward(clear_buffer=True)
