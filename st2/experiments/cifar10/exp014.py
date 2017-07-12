@@ -20,6 +20,7 @@ The same script as the `st` module but with nnabla.
 - Entropy Regularization for the outputs before CE loss and SR loss
 - Naive implementation for gradient scaling; basis is grad scale of supervised loss
 - Solver is separated
+- gamma and beta are not scaled
 """
 
 def categorical_error(pred, label):
