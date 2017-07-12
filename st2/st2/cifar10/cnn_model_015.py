@@ -13,7 +13,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False, cnt=0):
 
 def batch_normalization(h, cnt=0, test=False):
     with nn.parameter_scope("{}".format(cnt)):
-        h = batch_normalization(h, batch_stat=not test)
+        h = PF.batch_normalization(h, batch_stat=not test)
     return h
 
 def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
