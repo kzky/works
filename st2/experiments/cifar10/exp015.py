@@ -53,7 +53,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred = cnn_model_003(ctx, x_l, cnt++)
+    pred = cnn_model_003(ctx, x_l, cnt); cnt += 1
     loss_ce = ce_loss(ctx, pred, y_l)
     loss_er = er_loss(ctx, pred)
     loss_supervised = loss_ce + loss_er
@@ -61,8 +61,8 @@ def main(args):
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0 = cnn_model_003(ctx, x_u0, cnt++)
-    pred_x_u1 = cnn_model_003(ctx, x_u1, cnt++)
+    pred_x_u0 = cnn_model_003(ctx, x_u0, cnt); cnt += 1
+    pred_x_u1 = cnn_model_003(ctx, x_u1, cnt); cnt += 1
     loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
     loss_er0 = er_loss(ctx, pred_x_u0)
     loss_er1 = er_loss(ctx, pred_x_u1)
