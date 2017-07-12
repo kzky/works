@@ -11,7 +11,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False, cnt=0):
         h = act(h)
         return h
 
-def batch_normalization(h, cnt=0, batch_stat=True):
+def batch_normalization(h, cnt=0, test=False):
     with nn.parameter_scope("{}".format(cnt)):
         h = batch_normalization(h, batch_stat=not test)
     return h
