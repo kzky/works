@@ -4,17 +4,17 @@ import nnabla.parametric_functions as PF
 from nnabla.contrib.context import extension_context
 import numpy as np
 
-def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False, cnt=0):
-    with nn.parameter_scope(scope):
-        h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
-        h = batch_normalization(h, test=not test)
-        h = act(h)
-        return h
-
 def batch_normalization(h, cnt=0, test=False):
     with nn.parameter_scope("{}".format(cnt)):
         h = PF.batch_normalization(h, batch_stat=not test)
     return h
+
+def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False, cnt=0):
+    with nn.parameter_scope(scope):
+        h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
+        h = batch_normalization(h, test=test)
+        h = act(h)
+        return h
 
 def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
     with nn.context_scope(ctx):
@@ -24,7 +24,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         h = conv_unit(h, "conv02", 128, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 32 -> 16
         with nn.parameter_scope("bn0"):
-            h = batch_normalization(h, cnt, test=not test)
+            h = batch_normalization(h, cnt, test=test)
         if not test:
             h = F.dropout(h)
 
@@ -34,7 +34,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         h = conv_unit(h, "conv12", 256, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 16 -> 8
         with nn.parameter_scope("bn1"):
-            h = batch_normalization(h, cnt, test=not test)
+            h = batch_normalization(h, cnt, test=test)
         if not test:
             h = F.dropout(h)
 
@@ -47,7 +47,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         # Convblock 3
         h = F.average_pooling(h, (6, 6))
         with nn.parameter_scope("bn2"):
-            h = batch_normalization(h, cnt, test=not test)
+            h = batch_normalization(h, cnt, test=test)
         h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
         return h
 
