@@ -24,7 +24,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         h = conv_unit(h, "conv02", 128, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 32 -> 16
         with nn.parameter_scope("bn0"):
-            h = batch_normalization(h, cnt, batch_stat=not test)
+            h = batch_normalization(h, cnt, test=not test)
         if not test:
             h = F.dropout(h)
 
@@ -34,7 +34,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         h = conv_unit(h, "conv12", 256, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 16 -> 8
         with nn.parameter_scope("bn1"):
-            h = batch_normalization(h, cnt, batch_stat=not test)
+            h = batch_normalization(h, cnt, test=not test)
         if not test:
             h = F.dropout(h)
 
@@ -47,7 +47,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False, cnt=0):
         # Convblock 3
         h = F.average_pooling(h, (6, 6))
         with nn.parameter_scope("bn2"):
-            h = batch_normalization(h, cnt, batch_stat=not test)
+            h = batch_normalization(h, cnt, test=not test)
         h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
         return h
 
