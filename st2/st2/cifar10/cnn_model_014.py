@@ -79,7 +79,7 @@ class GradScaleContainer(object):
         values = parameters.values()
         names = parameters.keys()
         for i in range(self.n):
-            if names[i] in "gamma" or names[i] in "beta":
+            if "gamma" in names[i] or  "beta" in names[i]:
                 continue
             p = values[i]
             scale = self.scales_supervised_loss[i] / self.scales_unsupervised_loss[i]
