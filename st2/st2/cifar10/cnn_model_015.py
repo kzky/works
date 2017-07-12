@@ -7,7 +7,7 @@ import numpy as np
 def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False, cnt=0):
     with nn.parameter_scope(scope):
         h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
-        h = batch_normalization(h, batch_stat=not test)
+        h = batch_normalization(h, test=not test)
         h = act(h)
         return h
 
