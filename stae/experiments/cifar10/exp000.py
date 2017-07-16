@@ -17,6 +17,7 @@ import cv2
 """
 
 def save_images(dpath, epoch, images):
+    images *= 255.
     for i, image in enumerate(images):
         fpath = os.path.join(
             dpath, "epoch_{:05d}-index_{:05d}.png".format(epoch, i))
