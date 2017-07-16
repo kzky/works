@@ -58,5 +58,5 @@ def cnn_ae_model_000(ctx, x, act=F.relu, test=False):
 
 def recon_loss(ctx, pred, x_l):
     with nn.context_scope(ctx):
-        loss_recon = F.mean(pred - x_l)
+        loss_recon = F.mean(F.squared_error(pred, x_l))
     return loss_recon
