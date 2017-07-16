@@ -16,10 +16,7 @@ import cv2
 - Stochastic Autoencoder (using dropout)
 """
 
-def save_images(images, epoch, dpath=""):
-    if not os.path.exists(dpath):
-        os.makedir(dpath)
-        
+def save_images(images, epoch, dpath=""):        
     for i, image in enumerate(images):
         fpath = os.path.join(dpath, "epoch_{:05d}-index_{:05d}".format(epoch, i))
         image = cv.cvtColor(cv2.COLOR_RGB2BGR).transpose((2, 0, 1))
@@ -95,13 +92,17 @@ def main(args):
         
         # Evaluate
         if (i+1) % iter_epoch == 0:
-            # Get data and set it to the varaibles
+            # Get data and forward
             x_data, y_data = data_reader.get_test_batch()
-
-            # Save n images
             pred.forward(clear_buffer=True)
             images = pred.d
+
+            # Save n images
+            if not os.path.exists(dpath):
+                os.makedir(dpath)
             save_images(images[:n_images], dpath)
+            fpath = os.path.join(dpath, "epoch_{:05d}.h5".format(epoch))
+            nn.save_parameters(fpath)
 
             st = time.time()
             epoch +=1
