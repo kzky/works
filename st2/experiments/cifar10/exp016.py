@@ -68,12 +68,12 @@ def main(args):
     ## autoencoder
     path = args.model_path
     nn.load_parameters(path)
-    x_u0_rc = cnn_ae_model_000(ctx, x_u0, act=F.relu, test=False)
-    x_u1_rc = cnn_ae_model_000(ctx, x_u1, act=F.relu, test=False)
+    x_u0_rc = cnn_ae_model_000(ctx, x_u0, act=F.relu, test=True)
+    x_u1_rc = cnn_ae_model_000(ctx, x_u1, act=F.relu, test=True)
     x_u0_rc.need_grad = False
     x_u1_rc.need_grad = False
-    pred_x_u0_rc = cnn_model_003(ctx, x_u0_rc, test=True)
-    pred_x_u1_rc = cnn_model_003(ctx, x_u1_rc, test=True)
+    pred_x_u0_rc = cnn_model_003(ctx, x_u0_rc, test=False)
+    pred_x_u1_rc = cnn_model_003(ctx, x_u1_rc, test=False)
     loss_sr_rc = sr_loss(ctx, pred_x_u0_rc, pred_x_u1_rc)
     loss_er0_rc = er_loss(ctx, pred_x_u0_rc)
     loss_er1_rc = er_loss(ctx, pred_x_u1_rc)
