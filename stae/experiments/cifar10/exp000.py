@@ -95,7 +95,7 @@ def main(args):
         solver.update()
         
         # Evaluate
-        if (i) % iter_epoch == 0:
+        if (i+1) % iter_epoch == 0:
             # Get data and forward
             x_data, y_data = data_reader.get_test_batch()
             pred.forward(clear_buffer=True)
