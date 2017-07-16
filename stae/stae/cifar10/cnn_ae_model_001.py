@@ -22,7 +22,7 @@ def deconv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
         h = act(h)
         return h
 
-def cnn_ae_model_000(ctx, x, act=F.relu, test=False):
+def cnn_ae_model_001(ctx, x, act=F.relu, test=False):
     with nn.parameter_scope("ae"):
         with nn.context_scope(ctx):
             # Convblock0
