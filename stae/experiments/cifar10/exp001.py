@@ -98,8 +98,8 @@ def main(args):
         if (i+1) % iter_epoch == 0:
             # Get data and forward
             x_data, y_data = data_reader.get_test_batch()
-            pred.forward(clear_buffer=True)
-            images = pred.d
+            pred_eval.forward(clear_buffer=True)
+            images = pred_eval.d
 
             # Save n images
             if not os.path.exists(dpath):
