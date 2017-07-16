@@ -7,6 +7,8 @@ import numpy as np
 def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
     with nn.parameter_scope(scope):
         h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
+        if act == None:
+            return h
         h = PF.batch_normalization(h, batch_stat=not test)
         h = act(h)
         return h
@@ -48,7 +50,7 @@ def cnn_ae_model_000(ctx, x, act=F.relu, test=False):
             h = deconv_unit(h, "deconv10", 128, k=4, s=2, p=1, act=act, test=test)  # 16 -> 32
             h = deconv_unit(h, "deconv11", 128, k=3, s=1, p=1, act=act, test=test)
             h = deconv_unit(h, "deconv12", 128, k=3, s=1, p=1, act=act, test=test)
-            h = deconv_unit(h, "deconv13", 3, k=3, s=1, p=1, act=act, test=test)
+            h = deconv_unit(h, "deconv13", 3, k=3, s=1, p=1, act=None, test=test)
 
         return h
 
