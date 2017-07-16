@@ -8,18 +8,20 @@ import numpy as np
 import os
 import time
 import argparse
-from st2.cifar10.cnn_ae_model import cnn_ae_model, ce_loss, sr_loss
-from st2.cifar10.datasets import Cifar10DataReader, Separator
+from stae.cifar10.cnn_ae_model_000 import cnn_ae_model_000, recon_loss
+from stae.cifar10.datasets import Cifar10DataReader, Separator
 import cv2
 
 """
 - Stochastic Autoencoder (using dropout)
 """
 
-def save_images(images, epoch, dpath=""):        
+def save_images(dpath, epoch, images):
     for i, image in enumerate(images):
-        fpath = os.path.join(dpath, "epoch_{:05d}-index_{:05d}".format(epoch, i))
-        image = cv.cvtColor(cv2.COLOR_RGB2BGR).transpose((2, 0, 1))
+        fpath = os.path.join(
+            dpath, "epoch_{:05d}-index_{:05d}.png".format(epoch, i))
+        image = cv2.cvtColor(image.transpose((1, 2, 0)), 
+                             cv2.COLOR_RGB2BGR)
         cv2.imwrite(fpath, image)
 
 def main(args):
@@ -37,19 +39,20 @@ def main(args):
     n_iter = n_epoch * iter_epoch
     extension_module = args.context
     n_images = args.n_images 
-    dpath = "./images_{}".format(int(time.time()))
+    fname, _ = os.path.splitext(__file__)
+    dpath = "./{}_images_{}".format(fname, int(time.time()))
 
     # Model
     batch_size, m, h, w = batch_size, 3, 32, 32
     ctx = extension_context(extension_module, device_id=device_id)
     x_u = nn.Variable((batch_size, m, h, w))
-    pred = cnn_ae_model(ctx, x_u)
+    pred = cnn_ae_model_000(ctx, x_u)
     loss_recon = recon_loss(ctx, pred, x_u)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    pred_eval = cnn_ae_model(ctx, x_eval, test=True)
+    pred_eval = cnn_ae_model_000(ctx, x_eval, test=True)
     
     # Solver
     with nn.context_scope(ctx):
@@ -91,7 +94,7 @@ def main(args):
         solver.update()
         
         # Evaluate
-        if (i+1) % iter_epoch == 0:
+        if (i) % iter_epoch == 0:
             # Get data and forward
             x_data, y_data = data_reader.get_test_batch()
             pred.forward(clear_buffer=True)
@@ -99,8 +102,8 @@ def main(args):
 
             # Save n images
             if not os.path.exists(dpath):
-                os.makedir(dpath)
-            save_images(images[:n_images], dpath)
+                os.makedirs(dpath)
+            save_images(dpath, epoch, images[:n_images])
             fpath = os.path.join(dpath, "epoch_{:05d}.h5".format(epoch))
             nn.save_parameters(fpath)
 
