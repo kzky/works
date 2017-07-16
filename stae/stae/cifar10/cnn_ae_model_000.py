@@ -16,6 +16,8 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
 def deconv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
     with nn.parameter_scope(scope):
         h = PF.deconvolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
+        if act is None:
+            return h
         h = PF.batch_normalization(h, batch_stat=not test)
         h = act(h)
         return h
