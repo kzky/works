@@ -123,9 +123,11 @@ def main(args):
 
         # Train
         loss_supervised.forward(clear_no_need_grad=True)
-        loss_unsupervised.forward(clear_no_need_grad=True)
         solver.zero_grad()
         loss_supervised.backward(clear_buffer=True)
+        solver.update()
+        loss_unsupervised.forward(clear_no_need_grad=True)
+        solver.zero_grad()
         loss_unsupervised.backward(clear_buffer=True)
         solver.update()
         
