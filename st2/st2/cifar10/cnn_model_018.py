@@ -24,7 +24,8 @@ def res_unit(x, scope_name, act=F.relu, dn=False, test=False):
             h = PF.convolution(h, C, kernel=(1, 1), pad=(0, 0), with_bias=False)
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
     # Residual -> Relu
-    h = act(h + x)
+    h = F.add2(h, x)
+    h = act(h)
     
     # Maxpooling
     if dn:
