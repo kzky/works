@@ -5,7 +5,7 @@ from nnabla.contrib.context import extension_context
 import numpy as np
 
 # Residual Unit
-def res_unit(x, scope_name, dn=False, test=False):
+def res_unit(x, scope_name, act=F.relu, dn=False, test=False):
     C = x.shape[1]
 
     with nn.parameter_scope(scope_name):
@@ -13,18 +13,19 @@ def res_unit(x, scope_name, dn=False, test=False):
         with nn.parameter_scope("conv1"):
             h = PF.convolution(x, C/2, kernel=(1, 1), pad=(0, 0), with_bias=False)
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
-            h = F.relu(h)
+            h = act(h)
         # Conv -> BN -> Relu
         with nn.parameter_scope("conv2"):
             h = PF.convolution(h, C/2, kernel=(3, 3), pad=(1, 1), with_bias=False)
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
-            h = F.relu(h)
+            h = act(h)
         # Conv -> BN
         with nn.parameter_scope("conv3"): 
             h = PF.convolution(h, C, kernel=(1, 1), pad=(0, 0), with_bias=False)
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
     # Residual -> Relu
-    h = F.relu(h + x)
+    h = F.add2(h, x)
+    h = act(h)
     
     # Maxpooling
     if dn:
@@ -38,7 +39,7 @@ def resnet_model(ctx, x, inmaps=64, act=F.relu, test=False):
         with nn.parameter_scope("conv1"):
             h = PF.convolution(x, inmaps, kernel=(3, 3), pad=(1, 1), with_bias=False)
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
-            h = F.relu(h)
+            h = act(h)
         
         h = res_unit(h, "conv2", False) # -> 32x32
         h = res_unit(h, "conv3", True)  # -> 16x16
