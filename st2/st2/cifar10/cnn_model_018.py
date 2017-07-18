@@ -56,9 +56,7 @@ def resnet_model(ctx, x, inmaps=64, act=F.relu, test=False):
         h = F.average_pooling(h, kernel=(4, 4))  # -> 1x1
         
         pred = PF.affine(h, 10)
-    loss = F.mean(F.softmax_cross_entropy(pred, y))
-        
-    return x, y, pred, loss
+    return pred
 
 def ce_loss(ctx, pred, y_l):
     with nn.context_scope(ctx):
