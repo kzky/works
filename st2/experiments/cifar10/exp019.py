@@ -48,20 +48,20 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred = resnet_model(ctx, x_l)
+    pred = resnet_model(ctx, x_l, inmaps, act)
     loss_ce = ce_loss(ctx, pred, y_l)
 
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0 = resnet_model(ctx, x_u0, inmaps)
-    pred_x_u1 = resnet_model(ctx, x_u1, inmaps)
+    pred_x_u0 = resnet_model(ctx, x_u0, inmaps, act)
+    pred_x_u1 = resnet_model(ctx, x_u1, inmaps, act)
     loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    pred_eval = resnet_model(ctx, x_eval, inmaps, test=True)
+    pred_eval = resnet_model(ctx, x_eval, inmaps, act, test=True)
     
     # Solver
     with nn.context_scope(ctx):
