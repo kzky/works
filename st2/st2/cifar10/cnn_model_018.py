@@ -41,19 +41,19 @@ def resnet_model(ctx, x, inmaps=64, act=F.relu, test=False):
             h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
             h = act(h)
         
-        h = res_unit(h, "conv2", False) # -> 32x32
-        h = res_unit(h, "conv3", True)  # -> 16x16
+        h = res_unit(h, "conv2", act, False) # -> 32x32
+        h = res_unit(h, "conv3", act, True)  # -> 16x16
         if not test:
             h = F.dropout(h)
-        h = res_unit(h, "conv4", False) # -> 16x16
-        h = res_unit(h, "conv5", True)  # -> 8x8
+        h = res_unit(h, "conv4", act, False) # -> 16x16
+        h = res_unit(h, "conv5", act, True)  # -> 8x8
         if not test:
             h = F.dropout(h)
-        h = res_unit(h, "conv6", False) # -> 8x8
-        h = res_unit(h, "conv7", True)  # -> 4x4
+        h = res_unit(h, "conv6", act, False) # -> 8x8
+        h = res_unit(h, "conv7", act, True)  # -> 4x4
         if not test:
             h = F.dropout(h)
-        h = res_unit(h, "conv8", False) # -> 4x4
+        h = res_unit(h, "conv8", act, False) # -> 4x4
         h = F.average_pooling(h, kernel=(4, 4))  # -> 1x1
         
         pred = PF.affine(h, 10)
