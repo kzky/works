@@ -27,7 +27,7 @@ def res_unit(x, scope_name, act=F.relu, dn=False, test=False):
     if not test:
         h = F.dropout(h)
     with nn.parameter_scope(scope_name):
-        h = F.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
+        h = PF.batch_normalization(h, decay_rate=0.9, batch_stat=not test)
     h = F.add2(h, x)
     h = act(h)
     
