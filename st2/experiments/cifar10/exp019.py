@@ -16,6 +16,7 @@ The same script as the `st` module but with nnabla.
 
 - ResNet
 - Stochastic Regularization
+- Batchnorm after dropout
 """
 
 def categorical_error(pred, label):
