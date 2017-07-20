@@ -18,6 +18,7 @@ The same script as the `st` module but with nnabla.
 - Stochastic Regularization
 - Dropout in-between non-shortcut
 - Batchrnoam after dropout
+- No average pooling
 """
 
 def categorical_error(pred, label):
