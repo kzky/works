@@ -29,11 +29,12 @@ def batch_stochastic_supervised_network(ctx, batch_sizes, c, h, w):
         y = nn.Variable((b, 1))
         pred = cnn_model_003(ctx, x)
         loss_ce = ce_loss(ctx, pred, y)
-        
+        loss_er = er_loss(ctx, pred)
+        loss_supervised - loss_ce + loss_er
         x_list.append(x)
         y_list.append(y)
         preds.append(pred)
-        losses.append(loss_ce)
+        losses.append(loss_supervised)
     return x_list, y_list, preds, losses
 
 def batch_stochastic_unsupervised_network(ctx, batch_sizes, c, h, w):
@@ -46,9 +47,12 @@ def batch_stochastic_unsupervised_network(ctx, batch_sizes, c, h, w):
         pred_x0 = cnn_model_003(ctx, x0)
         pred_x1 = cnn_model_003(ctx, x1)
         loss_sr = sr_loss(ctx, pred_x0, pred_x1)
+        loss_er0 = er_loss(ctx, pred_x0)
+        loss_er1 = er_loss(ctx, pred_x1)
+        loss_unsupervised = loss_sr + loss_er0 + loss_er1
         x0_list.append(x0)
         x1_list.append(x1)
-        losses.append(loss_sr)
+        losses.append(loss_unsupervised)
     return x0_list, x1_list, None, losses
 
 def categorical_error(pred, label):
