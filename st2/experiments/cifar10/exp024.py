@@ -110,11 +110,11 @@ def main(args):
             loss_er0 = er_loss(ctx, pred_x_u0)
             loss_er1 = er_loss(ctx, pred_x_u1)
             loss_unsupervised = loss_sr + loss_er0 + loss_er1
-
+            
+            loss = loss_supervised + loss_unsupervised
         solver.set_parameters(nn.get_parameters(), reset=False, retain_state=True)
         solver.zero_grad()
-        loss_supervised.backward(clear_buffer=True)
-        loss_unsupervised.backward(clear_buffer=True)
+        loss.backward(clear_buffer=True)
         solver.update()
         
         # Evaluate
