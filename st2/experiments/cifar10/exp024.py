@@ -16,7 +16,6 @@ The same script as the `st` module but with nnabla.
 
 - ResNet
 - Stochastic Regularization
-- Entropy Regularization for the outputs before CE loss and SR loss
 - Stochastic Depth
 """
 
@@ -100,16 +99,13 @@ def main(args):
             # for CE
             pred = resnet_model(ctx, x_l, inmaps, act)
             loss_ce = ce_loss(ctx, pred, y_l)
-            loss_er = er_loss(ctx, pred)
-            loss_supervised = loss_ce + loss_er
+            loss_supervised = loss_ce
 
             # for SR
             pred_x_u0 = resnet_model(ctx, x_u0, inmaps, act)
             pred_x_u1 = resnet_model(ctx, x_u1, inmaps, act)
             loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
-            loss_er0 = er_loss(ctx, pred_x_u0)
-            loss_er1 = er_loss(ctx, pred_x_u1)
-            loss_unsupervised = loss_sr + loss_er0 + loss_er1
+            loss_unsupervised = loss_sr
             
             loss = loss_supervised + loss_unsupervised
         solver.set_parameters(nn.get_parameters(), reset=False, retain_state=True)
