@@ -12,6 +12,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
         return h
 
 def attention(k, q, v, dim=None):
+    v_shape = v.shape
     k = F.reshpae(k, (k.shape[0], np.prod(k.shape[1:])))
     q = F.reshpae(q, (q.shape[0], np.prod(q.shape[1:])))
     v = F.reshpae(v, (v.shape[0], np.prod(.shape[1:])))
@@ -20,6 +21,7 @@ def attention(k, q, v, dim=None):
         cf /= dim
     softmax = F.softmax(cf)
     h = F.linear(softmax, v)
+    h = F.reshape(h, v_shape)
     return h
 
 def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
