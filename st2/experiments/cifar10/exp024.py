@@ -66,7 +66,6 @@ def main(args):
     # Solver
     with nn.context_scope(ctx):
         solver = S.Adam(alpha=learning_rate)
-        solver.set_parameters(nn.get_parameters())
 
     # Dataset
     ## separate dataset
