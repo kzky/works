@@ -122,7 +122,7 @@ class Cifar10DataReader(object):
             self.l_train_data["train_y"] = self.l_train_data["train_y"][idx]
 
         batch_data_x0 = self.reshape(batch_data_x0)
-        return batch_data_x0, _, batch_data_y
+        return batch_data_x0, None, batch_data_y
 
     def get_u_train_batch(self, batch_size=None):
         """Return next batch data.
