@@ -101,7 +101,7 @@ def main(args):
             pred = resnet_model(ctx, x_l, inmaps, act)
             loss_ce = ce_loss(ctx, pred, y_l)
             loss_er = er_loss(ctx, pred)
-            loss_supervised = lsos_ce + loss_er
+            loss_supervised = loss_ce + loss_er
 
             # for SR
             pred_x_u0 = resnet_model(ctx, x_u0, inmaps, act)
