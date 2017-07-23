@@ -100,16 +100,21 @@ def main(args):
             # for CE
             pred = resnet_model(ctx, x_l, inmaps, act)
             loss_ce = ce_loss(ctx, pred, y_l)
+            loss_er = er_loss(ctx, pred)
+            loss_supervised = lsos_ce + loss_er
 
             # for SR
             pred_x_u0 = resnet_model(ctx, x_u0, inmaps, act)
             pred_x_u1 = resnet_model(ctx, x_u1, inmaps, act)
             loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
-        
+            loss_er0 = er_loss(ctx, pred_x_u0)
+            loss_er1 = er_loss(ctx, pred_x_u1)
+            loss_unsupervised = loss_sr + loss_er0 + loss_er1
+
         solver.set_parameters(nn.get_parameters(), reset=False, retain_state=True)
         solver.zero_grad()
-        loss_ce.backward(clear_buffer=True)
-        loss_sr.backward(clear_buffer=True)
+        loss_supervised.backward(clear_buffer=True)
+        loss_unsupervised.backward(clear_buffer=True)
         solver.update()
         
         # Evaluate
