@@ -127,8 +127,8 @@ def main(args):
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
                 label = get_test_data(y_data, k, batch_size_eval)
-                pred_eval = resnet_model(ctx, x_eval, inmaps, act, test=True)
-
+                with nn.auto_forward():
+                    pred_eval = resnet_model(ctx, x_eval, inmaps, act, test=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
             msg = "Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
