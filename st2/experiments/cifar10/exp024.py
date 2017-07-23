@@ -16,6 +16,8 @@ The same script as the `st` module but with nnabla.
 
 - ResNet
 - Stochastic Regularization
+- Entropy Regularization for the outputs before CE loss and SR loss
+- Stochastic Depth
 """
 
 def categorical_error(pred, label):
