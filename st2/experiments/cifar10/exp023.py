@@ -24,10 +24,8 @@ def batch_stochastic_supervised_network(ctx, batch_sizes, c, h, w):
     preds = []
     losses = []
     for b in batch_sizes:
-        batch_size, c, h, w = batch_size, c, h, w
-        ctx = extension_context(extension_module, device_id=device_id)
-        x = nn.Variable((batch_size, c, h, w))
-        y = nn.Variable((batch_size, 1))
+        x = nn.Variable((b, c, h, w))
+        y = nn.Variable((b, 1))
         pred = cnn_model_003(ctx, x)
         loss_ce = ce_loss(ctx, pred, y)
         
@@ -42,17 +40,15 @@ def batch_stochastic_unsupervised_network(ctx, batch_sizes, c, h, w):
     x1_list = []
     losses = []
     for b in batch_sizes:
-        batch_size, c, h, w = batch_size, c, h, w
-        ctx = extension_context(extension_module, device_id=device_id)
-        x0 = nn.Variable((batch_size, c, h, w))
-        x1 = nn.Variable((batch_size, 1))
-        pred_x0 = cnn_model_003(ctx, x)
-        pred_x1 = cnn_model_003(ctx, x)
+        x0 = nn.Variable((b, c, h, w))
+        x1 = nn.Variable((b, c, h, w))
+        pred_x0 = cnn_model_003(ctx, x0)
+        pred_x1 = cnn_model_003(ctx, x1)
         loss_sr = sr_loss(ctx, pred_x0, pred_x1)
         x0_list.append(x0)
         x1_list.append(x1)
-        losses.append(loss_ce)
-    return x0_list, x1_list, _, losses
+        losses.append(loss_sr)
+    return x0_list, x1_list, None, losses
 
 def categorical_error(pred, label):
     """
@@ -79,13 +75,14 @@ def main(args):
     extension_module = args.context
 
     # Model (Batch-Stochastic)
+    ctx = extension_context(extension_module, device_id=device_id)
     ## supervised
     x_list, y_list, preds, losses = batch_stochastic_supervised_network(
         ctx, batch_sizes, c, h, w)
     
     ## stochastic regularization
     x0_list, x1_list, _, losses = batch_stochastic_unsupervised_network(
-        ctx, batch_sizes, c, h, w):
+        ctx, batch_sizes, c, h, w)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size_eval, c, h, w
@@ -110,7 +107,7 @@ def main(args):
 
     # data reader
     data_reader = Cifar10DataReader(l_train_path, u_train_path, test_path,
-                                  batch_size=batch_size,
+                                  batch_size=batch_sizes[0],
                                   n_cls=n_cls,
                                   da=True,
                                   shape=True)
