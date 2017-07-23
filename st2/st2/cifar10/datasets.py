@@ -87,9 +87,21 @@ class Cifar10DataReader(object):
         # Read data
         beg = self._next_position_l_train
         end = self._next_position_l_train+self._batch_size
-        batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
-        batch_data_y_ = self.l_train_data["train_y"][beg:end]
-        batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        if end < self._n_l_train_data:
+            batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
+            batch_data_y_ = self.l_train_data["train_y"][beg:end]
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        else:
+            bs_s = self._batch_size - self._n_l_train_data + beg
+            batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
+            batch_data_y_ = self.l_train_data["train_y"][beg:end]
+            batch_data_x__ = self.l_train_data["train_x"][0:bs_s, :]
+            batch_data_y__ = self.l_train_data["train_y"][0:bs_s]
+            batch_data_x_ = np.concatenate(
+                (batch_data_x_, batch_data_x__))
+            batch_data_y_ = np.concatenate(
+                (batch_data_y_, batch_data_y__))
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
         batch_data_x1 = self._transform(batch_data_x)
@@ -123,9 +135,21 @@ class Cifar10DataReader(object):
         # Read data
         beg = self._next_position_u_train
         end = self._next_position_u_train+self._batch_size
-        batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
-        batch_data_y_ = self.u_train_data["train_y"][beg:end]
-        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
+        if end < self._n_u_train_data:
+            batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
+            batch_data_y_ = self.u_train_data["train_y"][beg:end]
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        else:
+            bs_s = self._batch_size - self._n_u_train_data + beg
+            batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
+            batch_data_y_ = self.u_train_data["train_y"][beg:end]
+            batch_data_x__ = self.u_train_data["train_x"][0:bs_s, :]
+            batch_data_y__ = self.u_train_data["train_y"][0:bs_s]
+            batch_data_x_ = np.concatenate(
+                (batch_data_x_, batch_data_x__))
+            batch_data_y_ = np.concatenate(
+                (batch_data_y_, batch_data_y__))
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
         batch_data_x1 = self._transform(batch_data_x)
