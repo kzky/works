@@ -119,11 +119,17 @@ def main(args):
     acc_prev = 0.
     iter_ = 0
     for i in range(n_iter):
-        # Get data and set it to the varaibles with stochastic batch
-        batch_size = np.random.choice(batch_sizes)
+        idx = np.random.choice(np.arange(0, len(batch_sizes)))
+        # Get data
+        batch_size = batch_sizes[idx]
         x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch(batch_size)
         x_u0_data, x_u1_data, y_u_data = data_reader.get_u_train_batch(batch_size)
-        
+
+        #  Set it to the varaibles
+        x_l = x_list[idx]
+        y_l = y_list[idx]
+        x_u0 = x0_list[idx]
+        x_u1 = x1_list[idx]
         x_l.d, _ , y_l.d= x_l0_data, x_l1_data, y_l_data
         x_u0.d, x_u1.d= x_u0_data, x_u1_data
 
@@ -134,8 +140,6 @@ def main(args):
         loss_ce.backward(clear_buffer=True)
         loss_sr.backward(clear_buffer=True)
         solver.update()
-
-        iter_ += batch_size
         
         # Evaluate
         if (i+1) % iter_epoch == 0:  # approximate epoch
