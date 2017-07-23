@@ -22,7 +22,7 @@ def attention(k, q, v, dim=None):
     h = F.linear(softmax, v)
     return h
 
-def cnn_model_003_with_cross_attension(ctx, x_list, act=F.relu, test=False):
+def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
     with nn.context_scope(ctx):
         # Convblock0
         h0_list = []
