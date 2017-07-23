@@ -57,3 +57,13 @@ def sr_loss(ctx, pred0, pred1):
         pred_x_u1 = F.softmax(pred1)
         loss_sr = F.mean(F.squared_error(pred_x_u0, pred_x_u1))
     return loss_sr
+
+def er_loss(ctx, pred):
+    with nn.context_scope(ctx):
+        bs = pred.shape[0]
+        d = np.prod(pred.shape[1:])
+        denominator = bs * d
+        pred_normalized = F.softmax(pred)
+        pred_log_normalized = F.log(F.softmax(pred))
+        loss_er = - F.sum(pred_normalized * pred_log_normalized) / denominator
+    return loss_er
