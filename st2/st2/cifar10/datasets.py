@@ -73,26 +73,30 @@ class Cifar10DataReader(object):
             return x.reshape(bs, 3, 32, 32)
         return x
     
-    def get_l_train_batch(self,):
+    def get_l_train_batch(self, batch_size=None):
         """Return next batch data.
 
         Return next batch data. Once all samples are read, permutate all samples.
         
         Returns
         ------------
-        tuple of 2: First is for sample and the second is for label.
-                            First data is binarized if a value is greater than 0, then 1;
-                            otherwise 0.
+        tuple of 3: ndarray (data), placeholder, ndarray (label)
+
         """
         # Read data
+        if batch_size is None:
+            _batch_size = self._batch_size
+        else:
+            _batch_size = batch_size
+
         beg = self._next_position_l_train
-        end = self._next_position_l_train+self._batch_size
+        end = self._next_position_l_train + _batch_size
         if end < self._n_l_train_data:
             batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
             batch_data_y_ = self.l_train_data["train_y"][beg:end]
             batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
         else:
-            bs_s = self._batch_size - self._n_l_train_data + beg
+            bs_s = _batch_size - self._n_l_train_data + beg
             batch_data_x_ = self.l_train_data["train_x"][beg:end, :]
             batch_data_y_ = self.l_train_data["train_y"][beg:end]
             batch_data_x__ = self.l_train_data["train_x"][0:bs_s, :]
@@ -107,7 +111,7 @@ class Cifar10DataReader(object):
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
-        self._next_position_l_train += self._batch_size
+        self._next_position_l_train += _batch_size
         if self._next_position_l_train >= self._n_l_train_data:
             self._next_position_l_train = 0
 
@@ -120,25 +124,29 @@ class Cifar10DataReader(object):
         batch_data_x0 = self.reshape(batch_data_x0)
         return batch_data_x0, _, batch_data_y
 
-    def get_u_train_batch(self,):
+    def get_u_train_batch(self, batch_size=None):
         """Return next batch data.
 
         Return next batch data. Once all samples are read, permutate all samples.
 
         Returns:
-        tuple of 2: First is for sample and the second is for label.
-                            First data is binarized if a value is greater than 0, then 1;
-                            otherwise 0.
+        tuple of 3: ndarray (data), ndarray (data), ndarray (label)
+
         """
         # Read data
+        if batch_size is None:
+            _batch_size = self._batch_size
+        else:
+            _batch_size = batch_size
+
         beg = self._next_position_u_train
-        end = self._next_position_u_train+self._batch_size
+        end = self._next_position_u_train + _batch_size
         if end < self._n_u_train_data:
             batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
             batch_data_y_ = self.u_train_data["train_y"][beg:end]
             batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
         else:
-            bs_s = self._batch_size - self._n_u_train_data + beg
+            bs_s = _batch_size - self._n_u_train_data + beg
             batch_data_x_ = self.u_train_data["train_x"][beg:end, :]
             batch_data_y_ = self.u_train_data["train_y"][beg:end]
             batch_data_x__ = self.u_train_data["train_x"][0:bs_s, :]
@@ -154,7 +162,7 @@ class Cifar10DataReader(object):
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
-        self._next_position_u_train += self._batch_size
+        self._next_position_u_train += _batch_size
         if self._next_position_u_train >= self._n_u_train_data:
             self._next_position_u_train = 0
 
