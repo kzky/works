@@ -30,7 +30,7 @@ def batch_stochastic_supervised_network(ctx, batch_sizes, c, h, w):
         pred = cnn_model_003(ctx, x)
         loss_ce = ce_loss(ctx, pred, y)
         loss_er = er_loss(ctx, pred)
-        loss_supervised - loss_ce + loss_er
+        loss_supervised = loss_ce + loss_er
         x_list.append(x)
         y_list.append(y)
         preds.append(pred)
