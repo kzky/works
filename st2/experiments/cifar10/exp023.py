@@ -77,11 +77,11 @@ def main(args):
     # Model (Batch-Stochastic)
     ctx = extension_context(extension_module, device_id=device_id)
     ## supervised
-    x_list, y_list, preds, losses = batch_stochastic_supervised_network(
+    x_list, y_list, preds, losses_ce = batch_stochastic_supervised_network(
         ctx, batch_sizes, c, h, w)
     
     ## stochastic regularization
-    x0_list, x1_list, _, losses = batch_stochastic_unsupervised_network(
+    x0_list, x1_list, _, losses_sr = batch_stochastic_unsupervised_network(
         ctx, batch_sizes, c, h, w)
 
     ## evaluate
@@ -120,20 +120,24 @@ def main(args):
     iter_ = 0
     for i in range(n_iter):
         idx = np.random.choice(np.arange(0, len(batch_sizes)))
+        idx_u = np.random.choice(np.arange(0, len(batch_sizes)))
         # Get data
-        batch_size = batch_sizes[idx]
-        x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch(batch_size)
-        x_u0_data, x_u1_data, y_u_data = data_reader.get_u_train_batch(batch_size)
+        bs = batch_sizes[idx]
+        bs_u = batch_sizes[idx_u]
+        x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch(bs)
+        x_u0_data, x_u1_data, y_u_data = data_reader.get_u_train_batch(bs_u)
 
         #  Set it to the varaibles
         x_l = x_list[idx]
         y_l = y_list[idx]
-        x_u0 = x0_list[idx]
-        x_u1 = x1_list[idx]
+        x_u0 = x0_list[idx_u]
+        x_u1 = x1_list[idx_u]
         x_l.d, _ , y_l.d= x_l0_data, x_l1_data, y_l_data
         x_u0.d, x_u1.d= x_u0_data, x_u1_data
 
         # Train
+        loss_ce = losses_ce[idx]
+        loss_sr = losses_sr[idx_u]
         loss_ce.forward(clear_no_need_grad=True)
         loss_sr.forward(clear_no_need_grad=True)
         solver.zero_grad()
