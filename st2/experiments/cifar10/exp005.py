@@ -121,8 +121,8 @@ def main(args):
             ve = 0.
             iter_val = 0
             for k in range(0, len(x_data), batch_size_eval):
-                x_eval.d = x_data[k:k+batch_size_eval, :]
-                label = y_data[k:k+batch_size_eval, :]
+                x_eval.d = get_test_data(x_data, k, batch_size_eval)
+                label = get_test_data(y_data, k, batch_size_eval)
                 pred_eval.forward(clear_buffer=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
@@ -133,6 +133,15 @@ def main(args):
             print(msg)
             st = time.time()
             epoch +=1
+
+def get_test_data(data, k, batch_size):
+    data_ = data[k:k+batch_size, :]
+    if len(data_) == batch_size:
+        return data_
+    data_ = np.concatenate(
+        (data[0:batch_size-len(data_), :], data_)
+    )
+    return data_
             
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
