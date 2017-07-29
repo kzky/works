@@ -72,7 +72,7 @@ def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var0, log_var1):
     s1 = F.exp(log_var1)
     squared_error = F.squared_error(F.softmax(pred0), F.softmax(pred1))
     with nn.context_scope(ctx):
-        loss_sr = F.mean(squared_error * (1 / s0 + 1 / s1) + (s0 / s1 + s1 / s0))
+        loss_sr = F.mean(squared_error * (1 / s0 + 1 / s1) + (s0 / s1 + s1 / s0)) * 0.5
     return loss_sr
 
 def er_loss(ctx, pred):
