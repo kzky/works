@@ -69,7 +69,8 @@ def sr_loss(ctx, pred0, pred1):
 def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var):
     #TODO: squared error/absolute error
     with nn.context_scope(ctx):
-        loss_sr = F.mean(F.squared_error(pred0, pred1) * F.exp(-log_var)) \
+        loss_sr = F.mean(F.squared_error(
+            F.softmax(pred0), F.softmax(pred1)) * F.exp(-log_var)) \
                   + F.mean(log_var)
     return loss_sr
 
