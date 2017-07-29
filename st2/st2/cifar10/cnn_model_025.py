@@ -11,17 +11,20 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
         h = act(h)
         return h
 
-def attention(k, q, v, dim=None, softmat=True):
+def attention(k, q, v, div_dim=True, softmax=True):
     v_shape = v.shape
-    k = F.reshpae(k, (k.shape[0], np.prod(k.shape[1:])))
-    q = F.reshpae(q, (q.shape[0], np.prod(q.shape[1:])))
-    v = F.reshpae(v, (v.shape[0], np.prod(.shape[1:])))
-    cf = F.linear(q, F.transpose(k))
-    if dim:
-        cf /= dim
-    if sfotmax: 
-        softmax = F.softmax(cf)
-    h = F.linear(softmax, v)
+    k = F.identity(k)
+    q = F.identity(q)
+    k = F.reshape(k, (k.shape[0], np.prod(k.shape[1:])))
+    q = F.reshape(q, (q.shape[0], np.prod(q.shape[1:])))
+    v = q  # F.reshape is inplace, thus 
+    cf = F.affine(q, F.transpose(k, (1, 0)))
+    if div_dim:
+        dim = np.prod(v_shape[1:])
+        cf /= np.sqrt(dim)
+    if softmax: 
+        h = F.softmax(cf)
+    h = F.affine(h, v)
     h = F.reshape(h, v_shape)
     return h
 
@@ -38,8 +41,10 @@ def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
             h0_list.append(h)
 
         # Corss attention
-        ca0 = attention(h0_list[0], h0_list[1], h0_list[1], softmax=True)
-        ca1 = attention(h0_list[1], h0_list[0], h0_list[0], softmax=True)
+        ca0 = attention(h0_list[0], h0_list[1], h0_list[1], 
+                        div_dim=True, softmax=True)
+        ca1 = attention(h0_list[1], h0_list[0], h0_list[0], 
+                        div_dim=True, softmax=True)
 
         # Maxpooing, Batchnorm, Dropout
         h0_list = []
@@ -60,8 +65,10 @@ def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
             h1_list.append(h)
 
         # Corss attention
-        ca0 = attention(h1_list[0], h1_list[1], h1_list[1], softmax=True)
-        ca1 = attention(h1_list[1], h1_list[0], h1_list[0], softmax=True)
+        ca0 = attention(h1_list[0], h1_list[1], h1_list[1], 
+                        div_dim=True, softmax=True)
+        ca1 = attention(h1_list[1], h1_list[0], h1_list[0], 
+                        div_dim=True, softmax=True)
             
         # Maxpooing, Batchnorm, Dropout
         h1_list = []
@@ -83,8 +90,10 @@ def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
             h2_list.append(h)
 
         # Corss attention
-        ca0 = attention(h2_list[0], h2_list[1], h2_list[1], softmax=True)
-        ca1 = attention(h2_list[1], h2_list[0], h2_list[0], softmax=True)
+        ca0 = attention(h2_list[0], h2_list[1], h2_list[1], 
+                        div_dim=True, softmax=True)
+        ca1 = attention(h2_list[1], h2_list[0], h2_list[0], 
+                        div_dim=True, softmax=True)
 
         # Convblock 3
         h3_list = []
@@ -93,8 +102,8 @@ def cnn_model_003_with_cross_attention(ctx, x_list, act=F.relu, test=False):
             with nn.parameter_scope("bn2"):
                 h = PF.batch_normalization(h, batch_stat=not test)
             h = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
-            h_list3.append(h)
-        return h_list3
+            h3_list.append(h)
+        return h3_list
 
 def one_by_one_conv(h, scope, k=1, s=1, p=1):
     with nn.parameter_scope(scope):
@@ -110,7 +119,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
         h = conv_unit(h, "conv02", 128, k=3, s=1, p=1, act=act, test=test)
 
         # Learned attention multiplication
-        h = one_by_one_conv(h)
+        h = one_by_one_conv(h, "attend0")
         h = F.max_pooling(h, (2, 2))  # 32 -> 16
         with nn.parameter_scope("bn0"):
             h = PF.batch_normalization(h, batch_stat=not test)
@@ -123,7 +132,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
         h = conv_unit(h, "conv12", 256, k=3, s=1, p=1, act=act, test=test)
 
         # Learned attention multiplication
-        h = one_by_one_conv(h)
+        h = one_by_one_conv(h, "attend1")
         h = F.max_pooling(h, (2, 2))  # 16 -> 8
         with nn.parameter_scope("bn1"):
             h = PF.batch_normalization(h, batch_stat=not test)
@@ -137,7 +146,7 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
         h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
 
         # Learned attention multiplication
-        h = one_by_one_conv(h)
+        h = one_by_one_conv(h, "attend2")
 
         # Convblock 3
         h = F.average_pooling(h, (6, 6))
