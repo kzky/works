@@ -49,7 +49,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred = cnn_model_003(ctx, x_l)
+    pred, _ = cnn_model_003(ctx, x_l)
     loss_ce = ce_loss(ctx, pred, y_l)
     loss_er = er_loss(ctx, pred)
     loss_supervised = loss_ce + loss_er
@@ -57,9 +57,10 @@ def main(args):
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0 = cnn_model_003(ctx, x_u0)
-    pred_x_u1 = cnn_model_003(ctx, x_u1, do=False)
-    loss_sr = sr_loss_with_uncertainty(ctx, pred_x_u0, pred_x_u1)
+    pred_x_u0, log_var = cnn_model_003(ctx, x_u0)
+    pred_x_u1, _ = cnn_model_003(ctx, x_u1, do=False)
+    loss_sr = sr_loss_with_uncertainty(ctx, 
+                                       pred_x_u0, pred_x_u1, log_var)
     loss_er0 = er_loss(ctx, pred_x_u0)
     loss_er1 = er_loss(ctx, pred_x_u1)
     loss_unsupervised = loss_sr + loss_er0 + loss_er1
@@ -67,7 +68,7 @@ def main(args):
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    pred_eval = cnn_model_003(ctx, x_eval, test=True)
+    pred_eval, _ = cnn_model_003(ctx, x_eval, test=True)
     
     # Solver
     with nn.context_scope(ctx):
