@@ -37,7 +37,7 @@ def cnn_model_003(ctx, x, act=F.relu, do=True, test=False):
         h = conv_unit(h, "conv20", 512, k=3, s=1, p=0, act=act, test=test)  # 8 -> 6
         h = conv_unit(h, "conv21", 256, k=1, s=1, p=0, act=act, test=test)
         u = conv_unit(h, "conv22", 128, k=1, s=1, p=0, act=act, test=test)
-        h = conv_unit(prev_head, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
+        h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
 
         # Convblock 3
         h = F.average_pooling(h, (6, 6))
@@ -46,8 +46,7 @@ def cnn_model_003(ctx, x, act=F.relu, do=True, test=False):
         pred = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
 
         # Uncertainty
-        u = conv_unit(prev_head, 
-                            "u0", 10, k=1, s=1, p=0, act=act, test=test)
+        u = conv_unit(u, "u0", 10, k=1, s=1, p=0, act=act, test=test)
         u = F.average_pooling(u, (6, 6))
         with nn.parameter_scope("u0bn"):
             u = PF.batch_normalization(u, batch_stat=not test)
