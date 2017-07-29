@@ -18,6 +18,7 @@ The same script as the `st` module but with nnabla.
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
 - Cross Attention before maxpooing and/or after convblock
+- Softmax is used
 """
 
 def categorical_error(pred, label):
