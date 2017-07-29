@@ -18,14 +18,14 @@ def attention(k, q, v, div_dim=True, softmax=True):
     k = F.reshape(k, (k.shape[0], np.prod(k.shape[1:])))
     q = F.reshape(q, (q.shape[0], np.prod(q.shape[1:])))
     v = q  # F.reshape is inplace
-    cf = F.affine(q, F.transpose(k, (1, 0)), with_bias=False)
+    cf = F.affine(q, F.transpose(k, (1, 0)))
     if div_dim:
         dim = np.prod(v_shape[1:])
         cf /= np.sqrt(dim)
     h = cf
     if softmax: 
         h = F.softmax(h)
-    h = F.affine(h, v, with_bias=False)
+    h = F.affine(h, v)x
     h = F.reshape(h, v_shape)
     return h
 
