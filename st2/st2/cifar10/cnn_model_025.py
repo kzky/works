@@ -22,8 +22,9 @@ def attention(k, q, v, div_dim=True, softmax=True):
     if div_dim:
         dim = np.prod(v_shape[1:])
         cf /= np.sqrt(dim)
+    h = cf
     if softmax: 
-        h = F.softmax(cf)
+        h = F.softmax(h)
     h = F.affine(h, v)
     h = F.reshape(h, v_shape)
     return h
