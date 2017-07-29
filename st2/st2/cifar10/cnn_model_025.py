@@ -17,7 +17,7 @@ def attention(k, q, v, div_dim=True, softmax=True):
     q = F.identity(q)
     k = F.reshape(k, (k.shape[0], np.prod(k.shape[1:])))
     q = F.reshape(q, (q.shape[0], np.prod(q.shape[1:])))
-    v = q  # F.reshape is inplace, thus 
+    v = q  # F.reshape is inplace
     cf = F.affine(q, F.transpose(k, (1, 0)))
     if div_dim:
         dim = np.prod(v_shape[1:])
