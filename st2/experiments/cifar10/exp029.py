@@ -32,8 +32,8 @@ def categorical_error(pred, label):
 def main(args):
     # Settings
     device_id = args.device_id
-    batch_size = 100
-    batch_size_eval = 100
+    batch_size = args.batch_size
+    batch_size_eval = args.batch_size_eval
     n_l_train_data = 4000
     n_train_data = 50000
     n_cls = 10
@@ -151,6 +151,8 @@ if __name__ == '__main__':
     parser.add_argument("--device_id", "-d", type=int, default=0)
     parser.add_argument('--context', '-c', type=str,
                         default="cpu", help="Extension modules. ex) 'cpu', 'cuda.cudnn'.")
+    parser.add_argument("--batch_size", "-b", type=int, default=100)
+    parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
     args = parser.parse_args()
 
     main(args)
