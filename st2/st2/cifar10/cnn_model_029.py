@@ -36,10 +36,11 @@ def cnn_model_003(ctx, x, act=F.relu, do=True, test=False):
         # Convblock 2
         h = conv_unit(h, "conv20", 512, k=3, s=1, p=0, act=act, test=test)  # 8 -> 6
         h = conv_unit(h, "conv21", 256, k=1, s=1, p=0, act=act, test=test)
-        u = conv_unit(h, "conv22", 128, k=1, s=1, p=0, act=act, test=test)
-        h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
+        h = conv_unit(h, "conv22", 128, k=1, s=1, p=0, act=act, test=test)
+        u = h
 
         # Convblock 3
+        h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
         h = F.average_pooling(h, (6, 6))
         with nn.parameter_scope("bn2"):
             h = PF.batch_normalization(h, batch_stat=not test)
