@@ -62,7 +62,7 @@ def ce_loss(ctx, pred, y_l):
 
 def ce_loss_with_uncertainty(ctx, pred, y_l, log_var):
     r = F.randn(0, 1)
-    r *= F.pow_scalar(F.exp(log_var), 0.5)
+    r = r * F.pow_scalar(F.exp(log_var), 0.5)
     h = pred + r
     with nn.context_scope(ctx):
         loss_ce = F.mean(F.softmax_cross_entropy(h, y_l))
