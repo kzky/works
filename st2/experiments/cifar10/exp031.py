@@ -52,7 +52,7 @@ def main(args):
     y_l = nn.Variable((batch_size, 1))
     pred, log_var = cnn_model_003(ctx, x_l)
     loss_ce = ce_loss_with_uncertainty(ctx, pred, y_l, log_var)
-    loss_supervised = loss_ce + er_loss(pred)
+    loss_supervised = loss_ce + er_loss(ctx, pred)
 
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
@@ -61,7 +61,7 @@ def main(args):
     pred_x_u1, log_var1 = cnn_model_003(ctx, x_u1)
     loss_sr = sr_loss_with_uncertainty(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1)
-    loss_unsupervised = loss_sr + er_loss(pred_x_u0) + er_loss(pred_x_u1)
+    loss_unsupervised = loss_sr + er_loss(ctx, pred_x_u0) + er_loss(ctx, pred_x_u1)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
