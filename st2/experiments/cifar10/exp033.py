@@ -67,8 +67,10 @@ def main(args):
                                        pred_x_u0, pred_x_u1, log_var0, log_var1)
     loss_er0 = er_loss(ctx, pred_x_u0)
     loss_er1 = er_loss(ctx, pred_x_u1)
-    reg_sigma = sigma_regularization(ctx, log_var, one)
-    loss_unsupervised = loss_sr + loss_er0 + loss_er1 + reg_sigma
+    reg_sigma0 = sigma_regularization(ctx, log_var0, one)
+    reg_sigma1 = sigma_regularization(ctx, log_var1, one)
+    loss_unsupervised = loss_sr + loss_er0 + loss_er1 \
+                        + reg_sigma0 + reg_sigma1
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
