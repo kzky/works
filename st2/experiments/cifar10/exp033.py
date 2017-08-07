@@ -20,7 +20,7 @@ The same script as the `st` module but with nnabla.
 - Uncertainty for SR loss using ESD
 - Uncertainty for ER loss
 - Not using softmax before squared_error
-- Squared error between uncertainty (sigma) and one, sigma becmoes one at the end.
+- Squared error between uncertainty (sigma) and one, sigma becmoes one at the end. Applied for CE loss also.
 """
 
 def categorical_error(pred, label):
