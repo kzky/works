@@ -21,6 +21,7 @@ The same script as the `st` module but with nnabla.
 - Uncertainty for ER loss
 - Not using softmax before squared_error
 - Absolute error between uncertainty (sigma) and one, sigma becmoes one at the end. Applied for CE loss also.
+- Separate solver
 """
 
 def categorical_error(pred, label):
