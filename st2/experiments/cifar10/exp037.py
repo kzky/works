@@ -120,8 +120,8 @@ def main(args):
         ## for supervised loss
         loss_supervised.forward(clear_no_need_grad=True)
         solver_l.zero_grad()
-        solver_l.update()
         loss_supervised.backward(clear_buffer=True)
+        solver_l.update()
         ## for unsupervised loss
         loss_unsupervised.forward(clear_no_need_grad=True)
         solver_u.zero_grad()
