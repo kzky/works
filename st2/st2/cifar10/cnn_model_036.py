@@ -96,7 +96,7 @@ def sigma_regularization(ctx, log_var, one):
     with nn.context_scope(ctx):
         h = F.exp(log_var)
         h = F.pow_scalar(h, 0.5)
-        r = F.mean(F.squared_error(h, one))
+        r = F.mean(F.abs(h - one))
     return r
     
 
