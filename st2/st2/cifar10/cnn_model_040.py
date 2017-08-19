@@ -78,8 +78,9 @@ def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var0, log_var1):
     s0 = F.exp(log_var0)
     s1 = F.exp(log_var1)
     squared_error = F.squared_error(pred0, pred1)
+    b = pred0.shape[0]
     with nn.context_scope(ctx):
-        loss_sr = F.sum(squared_error * (1 / s0 + 1 / s1) + (s0 / s1 + s1 / s0)) * 0.5
+        loss_sr = F.sum(squared_error * (1 / s0 + 1 / s1) + (s0 / s1 + s1 / s0)) * 0.5 / b
     return loss_sr
 
 def er_loss(ctx, pred):
@@ -96,7 +97,8 @@ def sigma_regularization(ctx, log_var, one):
     with nn.context_scope(ctx):
         h = F.exp(log_var)
         h = F.pow_scalar(h, 0.5)
-        r = F.sum(F.squared_error(h, one))
+        b = log_var.shape[0]
+        r = F.sum(F.squared_error(h, one)) / b
     return r
     
 
