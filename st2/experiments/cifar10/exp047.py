@@ -51,7 +51,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred, log_var = cnn_model_003(ctx, x_l, p=args.p)
+    pred, log_var = cnn_model_003(ctx, x_l, p=args.prob)
     one = F.constant(1., log_var.shape)
     loss_ce = ce_loss_with_uncertainty(ctx, pred, y_l, log_var)
     reg_sigma = sigma_regularization(ctx, log_var, one)
@@ -60,8 +60,8 @@ def main(args):
     ## stochastic regularization
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0, log_var0 = cnn_model_003(ctx, x_u0, p=args.p)
-    pred_x_u1, log_var1 = cnn_model_003(ctx, x_u1, p=args.p)
+    pred_x_u0, log_var0 = cnn_model_003(ctx, x_u0, p=args.prob)
+    pred_x_u1, log_var1 = cnn_model_003(ctx, x_u1, p=args.prob)
     loss_sr = sr_loss_with_uncertainty(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1)
     reg_sigma0 = sigma_regularization(ctx, log_var0, one)
