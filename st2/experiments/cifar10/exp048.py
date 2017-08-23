@@ -44,7 +44,7 @@ def main(args):
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
     extension_module = args.context
-    lambda_ = args.lambda
+    lambda_ = args.lambda_
 
     # Model
     ## supervised 
@@ -156,7 +156,7 @@ if __name__ == '__main__':
                         default="cpu", help="Extension modules. ex) 'cpu', 'cuda.cudnn'.")
     parser.add_argument("--batch_size", "-b", type=int, default=100)
     parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
-    parser.add_argument("--lambda", "-l", type=float, default=1.)
+    parser.add_argument("--lambda_", "-l", type=float, default=1.)
     args = parser.parse_args()
 
     main(args)
