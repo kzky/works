@@ -64,6 +64,7 @@ def main(args):
     x_u1 = nn.Variable((batch_size, m, h, w))
     pred_x_u0, log_var0, log_s0 = cnn_model_003(ctx, x_u0)
     pred_x_u1, log_var1, log_s1 = cnn_model_003(ctx, x_u1)
+    zero = F.constant(0., log_s0.shape)
     loss_sr = sr_loss_with_uncertainty(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1, log_s0, log_s1)
     reg_sigma0 = sigma_regularization(ctx, log_var0, one)
