@@ -8,7 +8,7 @@ import numpy as np
 import os
 import time
 import argparse
-from st2.cifar10.cnn_model_050 import cnn_model_003, ce_loss, sr_loss, er_loss, sr_loss_with_uncertainty, ce_loss_with_uncertainty, sigma_regularization, sigma_sigma_regularization
+from st2.cifar10.cnn_model_050 import cnn_model_003, ce_loss, sr_loss, er_loss, sr_loss_with_uncertainty, ce_loss_with_uncertainty, sigma_regularization
 from st2.cifar10.datasets import Cifar10DataReader, Separator
 
 """
@@ -65,16 +65,13 @@ def main(args):
     x_u1 = nn.Variable((batch_size, m, h, w))
     pred_x_u0, log_var0, log_s0 = cnn_model_003(ctx, x_u0)
     pred_x_u1, log_var1, log_s1 = cnn_model_003(ctx, x_u1)
-    zero = F.constant(0., log_s0.shape)
     loss_sr = sr_loss_with_uncertainty(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1, log_s0, log_s1)
     reg_sigma0 = sigma_regularization(ctx, log_var0, one)
     reg_sigma1 = sigma_regularization(ctx, log_var1, one)
-    reg_sigma_sigma0 = sigma_regularization(ctx, log_s0, zero)
-    reg_sigma_sigma1 = sigma_regularization(ctx, log_s1, zero)
     loss_unsupervised = loss_sr + er_loss(ctx, pred_x_u0) + er_loss(ctx, pred_x_u1) \
-                        + lambda_ * (reg_sigma0 + reg_sigma1) \
-                        + lambda_ * (reg_sigma_sigma0 + reg_sigma_sigma1)
+                        + lambda_ * (reg_sigma0 + reg_sigma1)
+
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))

@@ -108,12 +108,3 @@ def sigma_regularization(ctx, log_var, one):
         h = F.pow_scalar(h, 0.5)
         r = F.mean(F.squared_error(h, one))
     return r
-    
-def sigma_sigma_regularization(ctx, log_var, zero):
-    with nn.context_scope(ctx):
-        h = F.exp(log_var)  # sigma square
-        r = F.mean(h)
-    return r
-    
-
-
