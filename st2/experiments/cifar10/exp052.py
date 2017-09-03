@@ -59,7 +59,7 @@ def main(args):
     x_u1 = nn.Variable((batch_size, m, h, w))
     pred_x_u0, log_var0 = cnn_model_003(ctx, x_u0)
     pred_x_u1, log_var1 = cnn_model_003(ctx, x_u1)
-    loss_sr = sr_loss_with_uncertainty(ctx, 
+    loss_sr = sr_loss_with_uncertainty_and_coef(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1)
     loss_unsupervised = loss_sr + er_loss(ctx, pred_x_u0) + er_loss(ctx, pred_x_u1)
 
