@@ -77,8 +77,8 @@ def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var0, log_var1):
 def sr_loss_with_uncertainty_and_coef(ctx, pred0, pred1, log_var0, log_var1):
     c0 = srwu_coef(ctx, log_var0)
     c1 = srwu_coef(ctx, log_var1)
-    sc0 = sigmas_coef(log_var0, log_var1)
-    sc1 = sigmas_coef(log_var1, log_var0)
+    sc0 = sigmas_coef(ctx, log_var0, log_var1)
+    sc1 = sigmas_coef(ctx, log_var1, log_var0)
 
     #TODO: squared error/absolute error
     s0 = F.exp(log_var0)
