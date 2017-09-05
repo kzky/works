@@ -30,8 +30,8 @@ def categorical_error(pred, label):
 def main(args):
     # Settings
     device_id = args.device_id
-    batch_size = args.bath_size
-    batch_size_eval = args.bath_size_eval
+    batch_size = args.batch_size
+    batch_size_eval = args.batch_size_eval
     n_l_train_data = 4000
     n_train_data = 50000
     n_cls = 10
