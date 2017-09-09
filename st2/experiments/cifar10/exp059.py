@@ -49,8 +49,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    with nn.parameter_scope("cnn"):
-        pred = cnn_model_003(ctx, x_l)
+    pred = cnn_model_003(ctx, "cnn", x_l)
     loss_ce = ce_loss(ctx, pred, y_l)
     loss_er = er_loss(ctx, pred)
     loss_supervised = loss_ce + loss_er
@@ -64,9 +63,8 @@ def main(args):
     ## stochastic regularization for cnn
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
-    with nn.parameter_scope("cnn"):
-        pred_x_u0 = cnn_model_003(ctx, x_u0)
-        pred_x_u1 = cnn_model_003(ctx, x_u1)
+    pred_x_u0 = cnn_model_003(ctx, "cnn", x_u0)
+    pred_x_u1 = cnn_model_003(ctx, "cnn", x_u1)
     loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
     loss_er0 = er_loss(ctx, pred_x_u0)
     loss_er1 = er_loss(ctx, pred_x_u1)
@@ -80,10 +78,8 @@ def main(args):
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    with nn.parameter_scope("cnn"):
-        pred_eval = cnn_model_003(ctx, x_eval, test=True)
-    with nn.parameter_scope("resnet"):
-        pred_res_eval = cifar10_resnet23_prediction(ctx, x_eval, test=True)
+    pred_eval = cnn_model_003(ctx, "cnn", x_eval, test=True)
+    pred_res_eval = cifar10_resnet23_prediction(ctx, "resnet", x_eval, test=True)
     
     # Solver
     with nn.context_scope(ctx):
