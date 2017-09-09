@@ -32,7 +32,7 @@ class SVHNDataReader(object):
             "X":_u_train_data["X"], 
             "y":np.squeeze(_u_train_data["y"]).reshape((u, 1))}
         _test_data = scipy.io.loadmat(test_path)
-        n = len(_test_data)
+        n = _test_data.shape[-1]
         self.test_data = {
             "X": _test_data["X"],
             "y": np.squeeze(_test_data["y"]).reshape((n, 1))}
