@@ -26,7 +26,7 @@ def er_loss(ctx, pred):
         loss_er = - F.sum(pred_normalized * pred_log_normalized) / denominator
     return loss_er
 
-def cifar10_resnet23_prediction(image, ctx, test=False):
+def cifar10_resnet23_prediction(ctx, image, test=False):
     """
     Construct ResNet 23
     """
@@ -37,29 +37,20 @@ def cifar10_resnet23_prediction(image, ctx, test=False):
 
             # Conv -> BN -> Relu
             with nn.parameter_scope("conv1"):
-                w_init = UniformInitializer(
-                    calc_uniform_lim_glorot(C, C / 2, kernel=(1, 1)),
-                    rng=rng)
                 h = PF.convolution(x, C / 2, kernel=(1, 1), pad=(0, 0),
-                                   w_init=w_init, with_bias=False)
+                                   with_bias=False)
                 h = PF.batch_normalization(h, batch_stat=not test)
                 h = F.relu(h)
             # Conv -> BN -> Relu
             with nn.parameter_scope("conv2"):
-                w_init = UniformInitializer(
-                    calc_uniform_lim_glorot(C / 2, C / 2, kernel=(3, 3)),
-                    rng=rng)
                 h = PF.convolution(h, C / 2, kernel=(3, 3), pad=(1, 1),
-                                   w_init=w_init, with_bias=False)
+                                   with_bias=False)
                 h = PF.batch_normalization(h, batch_stat=not test)
                 h = F.relu(h)
             # Conv -> BN
             with nn.parameter_scope("conv3"):
-                w_init = UniformInitializer(
-                    calc_uniform_lim_glorot(C / 2, C, kernel=(1, 1)),
-                    rng=rng)
                 h = PF.convolution(h, C, kernel=(1, 1), pad=(0, 0),
-                                   w_init=w_init, with_bias=False)
+                                   with_bias=False)
                 h = PF.batch_normalization(h, batch_stat=not test)
             # Residual -> Relu
             h = F.relu(h + x)
@@ -78,19 +69,8 @@ def cifar10_resnet23_prediction(image, ctx, test=False):
     # Conv -> BN -> Relu
     with nn.context_scope(ctx):
         with nn.parameter_scope("conv1"):
-            # Preprocess
-            if not test:
-
-                image = F.image_augmentation(image, contrast=1.0,
-                                             angle=0.25,
-                                             flip_lr=True)
-                image.need_grad = False
-
-            w_init = UniformInitializer(
-                calc_uniform_lim_glorot(3, nmaps, kernel=(3, 3)),
-                rng=rng)
             h = PF.convolution(image, nmaps, kernel=(3, 3), pad=(1, 1),
-                               w_init=w_init, with_bias=False)
+                               with_bias=False)
             h = PF.batch_normalization(h, batch_stat=not test)
             h = F.relu(h)
 
@@ -102,10 +82,7 @@ def cifar10_resnet23_prediction(image, ctx, test=False):
         h = res_unit(h, "conv7", rng, True)     # -> 4x4
         h = res_unit(h, "conv8", rng, False)    # -> 4x4
         h = F.average_pooling(h, kernel=(4, 4))  # -> 1x1
-
-        w_init = UniformInitializer(
-            calc_uniform_lim_glorot(int(np.prod(h.shape[1:])), ncls, kernel=(1, 1)), rng=rng)
-        pred = PF.affine(h, ncls, w_init=w_init)
+        pred = PF.affine(h, ncls)
 
     return pred
 
