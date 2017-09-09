@@ -159,6 +159,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", "-b", type=int, default=100)
     parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
     parser.add_argument("--lambda_", "-l", type=float, default=1.)
+    parser.add_argument("--epoch", type=int, default=300)
     args = parser.parse_args()
 
     main(args)
