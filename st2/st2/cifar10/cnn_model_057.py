@@ -29,7 +29,7 @@ def er_loss(ctx, pred):
 def bn_dropout(h, scope_name, test=False):
     with nn.parameter_scope(scope_name):
         h = PF.batch_normalization(h, batch_stat=not test)
-    if not test and do:
+    if not test:
         h = F.dropout(h)
     return h
 
