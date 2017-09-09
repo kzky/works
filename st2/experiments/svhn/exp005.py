@@ -36,7 +36,7 @@ def main(args):
     n_train_data = 73257
     n_cls = 10
     learning_rate = 1. * 1e-3
-    n_epoch = 300
+    n_epoch = args.epoch
     act = F.relu
     iter_epoch = n_train_data / batch_size
     n_iter = n_epoch * iter_epoch
@@ -150,6 +150,7 @@ if __name__ == '__main__':
                         default="cpu", help="Extension modules. ex) 'cpu', 'cuda.cudnn'.")
     parser.add_argument("--batch_size", "-b", type=int, default=100)
     parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
+    parser.add_argument("--epoch", type=int, default=300)
     args = parser.parse_args()
 
     main(args)
