@@ -81,13 +81,13 @@ def cifar10_resnet23_prediction(ctx, image, test=False):
 
         h = res_unit(h, "conv2", False)    # -> 32x32
         h = res_unit(h, "conv3", True)     # -> 16x16
-        h = bn_dropout(h, "bn_dropout1", not test)
+        h = bn_dropout(h, "bn_dropout1", test)
         h = res_unit(h, "conv4", False)    # -> 16x16
         h = res_unit(h, "conv5", True)     # -> 8x8
-        h = bn_dropout(h, "bn_dropout2", not test)
+        h = bn_dropout(h, "bn_dropout2", test)
         h = res_unit(h, "conv6", False)    # -> 8x8
         h = res_unit(h, "conv7", True)     # -> 4x4
-        h = bn_dropout(h, "bn_dropout3", not test)
+        h = bn_dropout(h, "bn_dropout3",  test)
         h = res_unit(h, "conv8", False)    # -> 4x4
         h = F.average_pooling(h, kernel=(4, 4))  # -> 1x1
         pred = PF.affine(h, ncls)
