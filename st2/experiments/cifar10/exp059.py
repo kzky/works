@@ -55,8 +55,7 @@ def main(args):
     loss_supervised = loss_ce + loss_er
 
     ## supervised resnet
-    with nn.parameter_scope("resnet"):
-        pred_res = cifar10_resnet23_prediction(ctx, x_l)
+    pred_res = cifar10_resnet23_prediction(ctx, "resnet", x_l)
     loss_res_ce = ce_loss(ctx, pred_res, y_l)
     loss_res_supervised = loss_res_ce
     
@@ -71,8 +70,7 @@ def main(args):
     loss_unsupervised = loss_sr + loss_er0 + loss_er1
 
     ## knowledge transfer for cnn
-    with nn.parameter_scope("resnet"):
-        pred_res_x_u0 = cifar10_resnet23_prediction(ctx, x_u0)
+    pred_res_x_u0 = cifar10_resnet23_prediction(ctx, "resnet", x_u0)
     loss_res_unsupervised = kl_divergence(ctx, pred_res_x_u0, pred_x_u0)
 
     ## evaluate
