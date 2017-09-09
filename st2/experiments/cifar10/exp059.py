@@ -59,7 +59,7 @@ def main(args):
     with nn.parameter_scope("resnet"):
         pred_res = cifar10_resnet23_prediction(ctx, x_l)
     loss_res_ce = ce_loss(ctx, pred_res, y_l)
-    loss_res_supervised = loss_rec_ce
+    loss_res_supervised = loss_res_ce
     
     ## stochastic regularization for cnn
     x_u0 = nn.Variable((batch_size, m, h, w))
