@@ -66,7 +66,7 @@ def main(args):
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
-    pred_eval = cnn_model_003(ctx, x_eval, test=True)
+    pred_eval = cifar10_resnet23_prediction(ctx, x_eval, test=True)
     
     # Solver
     with nn.context_scope(ctx):
