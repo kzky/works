@@ -169,7 +169,7 @@ def main(args):
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
                 label = get_test_data(y_data, k, batch_size_eval)
-                pred_eval.forward(clear_buffer=True)
+                pred_res_eval.forward(clear_buffer=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
             msg = "Model:resnet,Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
