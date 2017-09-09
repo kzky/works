@@ -56,13 +56,20 @@ def sigmas_regularization(ctx, log_var0, log_var1):
         h1 = F.pow_scalar(h1, 0.5)
         r = F.mean(F.squared_error(h0, h1))
     return r
-    
+
+def bn_dropout(h, scope_name, test=False):
+    with nn.parameter_scope(scope_name):
+        h = PF.batch_normalization(h, batch_stat=not test)
+    if not test:
+        h = F.dropout(h)
+    return h
+
 def cifar10_resnet23_prediction(ctx, image, test=False):
     """
     Construct ResNet 23
     """
     # Residual Unit
-    def res_unit(x, scope_name, rng, dn=False, test=False):
+    def res_unit(x, scope_name, dn=False, test=False):
         C = x.shape[1]
         with nn.parameter_scope(scope_name):
 
@@ -89,11 +96,9 @@ def cifar10_resnet23_prediction(ctx, image, test=False):
             # Maxpooling
             if dn:
                 h = F.max_pooling(h, kernel=(2, 2), stride=(2, 2))
-
             return h
 
     # Random generator for using the same init parameters in all devices
-    rng = np.random.RandomState(0)
     nmaps = 64
     ncls = 10
 
@@ -105,17 +110,27 @@ def cifar10_resnet23_prediction(ctx, image, test=False):
             h = PF.batch_normalization(h, batch_stat=not test)
             h = F.relu(h)
 
-        h = res_unit(h, "conv2", rng, False)    # -> 32x32
-        h = res_unit(h, "conv3", rng, True)     # -> 16x16
-        h = res_unit(h, "conv4", rng, False)    # -> 16x16
-        h = res_unit(h, "conv5", rng, True)     # -> 8x8
-        h = res_unit(h, "conv6", rng, False)    # -> 8x8
-        h = res_unit(h, "conv7", rng, True)     # -> 4x4
-        h = res_unit(h, "conv8", rng, False)    # -> 4x4
+        h = res_unit(h, "conv2", False)    # -> 32x32
+        h = res_unit(h, "conv3", True)     # -> 16x16
+        h = bn_dropout(h, "bn_dropout1", test)
+        h = res_unit(h, "conv4", False)    # -> 16x16
+        h = res_unit(h, "conv5", True)     # -> 8x8
+        h = bn_dropout(h, "bn_dropout2", test)
+        h = res_unit(h, "conv6", False)    # -> 8x8
+        h = res_unit(h, "conv7", True)     # -> 4x4
+        u = h
+
+        # Certainty (nornal case)
+        h = res_unit(h, "conv8", False)    # -> 4x4
         h = F.average_pooling(h, kernel=(4, 4))  # -> 1x1
         pred = PF.affine(h, ncls)
 
-    return pred
+        # Uncertainty
+        u = res_unit(u, "conv8", False)    # -> 4x4
+        u = F.average_pooling(u, kernel=(4, 4))  # -> 1x1
+        log_var = PF.affine(u, ncls)
+        
+    return pred, log_var
 
 def cifar10_resnet23_loss(pred, label):
     loss = F.mean(F.softmax_cross_entropy(pred, label))
