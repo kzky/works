@@ -53,30 +53,45 @@ class SVHNDataReader(object):
         print("Num. of test samples {}".format(self._n_test_data))
         print("Num. of classes {}".format(self._n_cls))
 
-    def get_l_train_batch(self,):
+    def get_l_train_batch(self, batch_size=None):
         """Return next batch data.
 
         Return next batch data. Once all samples are read, permutate all samples.
         
         Returns
         ------------
-        tuple of 2: First is for sample and the second is for label.
-                            First data is binarized if a value is greater than 0, then 1;
-                            otherwise 0.
+        tuple of 3: ndarray (data), placeholder, ndarray (label)
+
         """
         # Read data
+        if batch_size is None:
+            _batch_size = self._batch_size
+        else:
+            _batch_size = batch_size
+
         beg = self._next_position_l_train
-        end = self._next_position_l_train+self._batch_size
-        batch_data_x_ = self.l_train_data["X"][beg:end, :]
-        batch_data_y_ = self.l_train_data["y"][beg:end]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        end = self._next_position_l_train + _batch_size
+        if end < self._n_l_train_data:
+            batch_data_x_ = self.l_train_data["X"][beg:end, :]
+            batch_data_y_ = self.l_train_data["y"][beg:end]
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        else:
+            bs_s = _batch_size - self._n_l_train_data + beg
+            batch_data_x_ = self.l_train_data["X"][beg:end, :]
+            batch_data_y_ = self.l_train_data["y"][beg:end]
+            batch_data_x__ = self.l_train_data["X"][0:bs_s, :]
+            batch_data_y__ = self.l_train_data["y"][0:bs_s]
+            batch_data_x_ = np.concatenate(
+                (batch_data_x_, batch_data_x__))
+            batch_data_y_ = np.concatenate(
+                (batch_data_y_, batch_data_y__))
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
-        batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
-        self._next_position_l_train += self._batch_size
+        self._next_position_l_train += _batch_size
         if self._next_position_l_train >= self._n_l_train_data:
             self._next_position_l_train = 0
 
@@ -86,31 +101,48 @@ class SVHNDataReader(object):
             self.l_train_data["X"] = self.l_train_data["X"][idx]
             self.l_train_data["y"] = self.l_train_data["y"][idx]
 
-        return batch_data_x0, batch_data_x1, batch_data_y
+        batch_data_x0 = self.reshape(batch_data_x0)
+        return batch_data_x0, None, batch_data_y
 
-    def get_u_train_batch(self,):
+    def get_u_train_batch(self, batch_size=None):
         """Return next batch data.
 
         Return next batch data. Once all samples are read, permutate all samples.
 
         Returns:
-        tuple of 2: First is for sample and the second is for label.
-                            First data is binarized if a value is greater than 0, then 1;
-                            otherwise 0.
+        tuple of 3: ndarray (data), ndarray (data), ndarray (label)
+
         """
         # Read data
+        if batch_size is None:
+            _batch_size = self._batch_size
+        else:
+            _batch_size = batch_size
+
         beg = self._next_position_u_train
-        end = self._next_position_u_train+self._batch_size
-        batch_data_x_ = self.u_train_data["X"][beg:end, :]
-        batch_data_y_ = self.u_train_data["y"][beg:end]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        end = self._next_position_u_train + _batch_size
+        if end < self._n_u_train_data:
+            batch_data_x_ = self.u_train_data["X"][beg:end, :]
+            batch_data_y_ = self.u_train_data["y"][beg:end]
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
+        else:
+            bs_s = _batch_size - self._n_u_train_data + beg
+            batch_data_x_ = self.u_train_data["X"][beg:end, :]
+            batch_data_y_ = self.u_train_data["y"][beg:end]
+            batch_data_x__ = self.u_train_data["X"][0:bs_s, :]
+            batch_data_y__ = self.u_train_data["y"][0:bs_s]
+            batch_data_x_ = np.concatenate(
+                (batch_data_x_, batch_data_x__))
+            batch_data_y_ = np.concatenate(
+                (batch_data_y_, batch_data_y__))
+            batch_data_x = (batch_data_x_/ 255.).astype(np.float32)
 
         batch_data_x0 = self._transform(batch_data_x)
         batch_data_x1 = self._transform(batch_data_x)
         batch_data_y = batch_data_y_.astype(np.int32)
 
         # Reset pointer
-        self._next_position_u_train += self._batch_size
+        self._next_position_u_train += _batch_size
         if self._next_position_u_train >= self._n_u_train_data:
             self._next_position_u_train = 0
 
@@ -119,7 +151,9 @@ class SVHNDataReader(object):
             np.random.shuffle(idx)
             self.u_train_data["X"] = self.u_train_data["X"][idx]
             self.u_train_data["y"] = self.u_train_data["y"][idx]
-
+ 
+        batch_data_x0 = self.reshape(batch_data_x0)
+        batch_data_x1 = self.reshape(batch_data_x1)
         return batch_data_x0, batch_data_x1, batch_data_y
 
     def get_test_batch(self,):
@@ -135,9 +169,10 @@ class SVHNDataReader(object):
         # Read data
         batch_data_x_ = self.test_data["X"]
         batch_data_y_ = self.test_data["y"]
-        batch_data_x = ((batch_data_x_ - 127.5)/ 127.5).astype(np.float32)
+        batch_data_x = (batch_data_x_ / 255.).astype(np.float32)
         batch_data_y = batch_data_y_.astype(np.int32)
 
+        batch_data_x = self.reshape(batch_data_x)
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
