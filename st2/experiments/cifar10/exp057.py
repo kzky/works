@@ -48,7 +48,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred = cnn_model_003(ctx, x_l)
+    pred = cifar10_resnet23_prediction(ctx)
     loss_ce = ce_loss(ctx, pred, y_l)
     loss_er = er_loss(ctx, pred)
     loss_supervised = loss_ce + loss_er

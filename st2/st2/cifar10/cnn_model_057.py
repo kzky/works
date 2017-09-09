@@ -26,8 +26,7 @@ def er_loss(ctx, pred):
         loss_er = - F.sum(pred_normalized * pred_log_normalized) / denominator
     return loss_er
 
-def cifar10_resnet23_prediction(image,
-                                ctx, test=False):
+def cifar10_resnet23_prediction(image, ctx, test=False):
     """
     Construct ResNet 23
     """
