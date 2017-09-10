@@ -73,7 +73,7 @@ def main(args):
     loss_er1 = er_loss(ctx, pred_x_u1)
     loss_unsupervised = loss_sr + loss_er0 + loss_er1
 
-    ## knowledge transfer for cnn
+    ## knowledge transfer for resnet
     pred_res_x_u0 = cifar10_resnet23_prediction(ctx, "resnet", x_u0)
     loss_res_unsupervised = kl_divergence(ctx, pred_res_x_u0, pred_x_u0)
 
@@ -169,7 +169,7 @@ def main(args):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
                 label = get_test_data(y_data, k, batch_size_eval)
                 pred_res_eval.forward(clear_buffer=True)
-                ve += categorical_error(pred_eval.d, label)
+                ve += categorical_error(pred_res_eval.d, label)
                 iter_val += 1
             msg = "Model:resnet,Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
                 epoch,
