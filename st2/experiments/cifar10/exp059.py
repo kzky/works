@@ -48,7 +48,9 @@ def main(args):
     batch_size, m, h, w = batch_size, 3, 32, 32
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
+    x_l.persistent = True
     y_l = nn.Variable((batch_size, 1))
+    y_l.persistent = True
     pred = cnn_model_003(ctx, "cnn", x_l)
     loss_ce = ce_loss(ctx, pred, y_l)
     loss_er = er_loss(ctx, pred)
@@ -61,6 +63,7 @@ def main(args):
     
     ## stochastic regularization for cnn
     x_u0 = nn.Variable((batch_size, m, h, w))
+    x_u0.persistent = True
     x_u1 = nn.Variable((batch_size, m, h, w))
     pred_x_u0 = cnn_model_003(ctx, "cnn", x_u0)
     pred_x_u0.persistent = True
