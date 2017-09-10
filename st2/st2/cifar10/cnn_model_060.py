@@ -11,7 +11,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.elu, test=False):
         h = act(h)
         return h
 
-def cnn_model_003(ctx, x, scope, act=F.elu, do=True, test=False):
+def cnn_model_003(ctx, scope, x, act=F.elu, do=True, test=False):
     with nn.context_scope(ctx):
         with nn.parameter_scope(scope):
             # Convblock0

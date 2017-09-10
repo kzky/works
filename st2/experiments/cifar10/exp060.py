@@ -54,7 +54,7 @@ def main(args):
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
-    pred, log_var = cnn_model_003(ctx, x_l)
+    pred, log_var = cnn_model_003(ctx, "cnn", x_l)
     one = F.constant(1., log_var.shape)
     loss_ce = ce_loss(ctx, pred, y_l)
     reg_sigma = sigma_regularization(ctx, log_var, one)
@@ -69,9 +69,9 @@ def main(args):
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u0.persistent = True
     x_u1 = nn.Variable((batch_size, m, h, w))
-    pred_x_u0, log_var0 = cnn_model_003(ctx, x_u0)
+    pred_x_u0, log_var0 = cnn_model_003(ctx, "cnn", x_u0)
     pred_x_u0.persistent = True
-    pred_x_u1, log_var1 = cnn_model_003(ctx, x_u1)
+    pred_x_u1, log_var1 = cnn_model_003(ctx, "cnn", x_u1)
     loss_sr = sr_loss_with_uncertainty(ctx, 
                                        pred_x_u0, pred_x_u1, log_var0, log_var1)
     reg_sigma0 = sigma_regularization(ctx, log_var0, one)
@@ -79,7 +79,6 @@ def main(args):
     reg_sigmas = sigmas_regularization(ctx, log_var0, log_var1)
     loss_unsupervised = loss_sr + er_loss(ctx, pred_x_u0) + er_loss(ctx, pred_x_u1) \
                         + lambda_ * (reg_sigma0 + reg_sigma1) + lambda_ * reg_sigmas
-
 
     ## knowledge transfer for resnet
     pred_res_x_u0 = cifar10_resnet23_prediction(ctx, "resnet", x_u0)
@@ -89,7 +88,7 @@ def main(args):
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
     x_eval = nn.Variable((batch_size_eval, m, h, w))
     x_eval.persistent = True
-    pred_eval, _ = cnn_model_003(ctx, x_eval, test=True)
+    pred_eval, _ = cnn_model_003(ctx, "cnn", x_eval, test=True)
     pred_res_eval = cifar10_resnet23_prediction(ctx, "resnet", x_eval, test=True)
 
     # Solver
