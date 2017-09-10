@@ -131,5 +131,5 @@ def cifar10_resnet23_prediction(ctx, scope, image, test=False):
 def kl_divergence(ctx, pred, label):
     with nn.context_scope(ctx):
         elms = F.softmax(label, axis=1) * F.log(F.softmax(pred, axis=1))
-        loss = F.mean(-F.sum(elms, axis=1))
+        loss = -F.mean(F.sum(elms, axis=1))
     return loss
