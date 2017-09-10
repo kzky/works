@@ -132,10 +132,10 @@ def main(args):
         loss_res_unsupervised.forward(clear_no_need_grad=True)
         solver_res.zero_grad()
         loss_res_supervised.backward(clear_buffer=True)
-        x_u0.need_grad = False  # no need grad for teacher
+        pred_x_u0.need_grad = False  # no need grad for teacher
         loss_res_unsupervised.backward(clear_buffer=True)
         solver_res.update()
-        x_u0.need_grad = True
+        pred_x_u0.need_grad = True
         
         # Evaluate
         if (i+1) % iter_epoch == 0:
