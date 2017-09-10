@@ -63,6 +63,7 @@ def main(args):
     x_u0 = nn.Variable((batch_size, m, h, w))
     x_u1 = nn.Variable((batch_size, m, h, w))
     pred_x_u0 = cnn_model_003(ctx, "cnn", x_u0)
+    pred_x_u0.persistent = True
     pred_x_u1 = cnn_model_003(ctx, "cnn", x_u1)
     loss_sr = sr_loss(ctx, pred_x_u0, pred_x_u1)
     loss_er0 = er_loss(ctx, pred_x_u0)
