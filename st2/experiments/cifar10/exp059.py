@@ -14,10 +14,10 @@ from st2.cifar10.datasets import Cifar10DataReader, Separator
 """
 The same script as the `st` module but with nnabla.
 
-- ResNet23
+- ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
-- Transfer knowledge
+- Transfer knowledge to ResNet23
 """
 
 def categorical_error(pred, label):
