@@ -170,9 +170,8 @@ def cifar10_resnet23_prediction(ctx, scope, image, test=False):
 
 def softmax_with_temperature(ctx, x, t):
     with nn.context_scope(ctx):
-        h = F.exp(x / t)
-        n = F.sum(h, axis=1, keepdims=True)
-        h = h / n
+        h = x / t
+        h = F.softmax(h, axis=1)
     return h
 
 def kl_divergence(ctx, pred, label, log_var):
