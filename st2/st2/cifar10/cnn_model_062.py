@@ -177,7 +177,7 @@ def softmax_with_temperature(ctx, x, t):
 def kl_divergence(ctx, pred, label, log_var):
     with nn.context_scope(ctx):
         s = F.pow_scalar(F.exp(log_var), 0.5)
-        elms = F.log(softmax_with_temperature(ctx, label, 1. / s)) \
+        elms = softmax_with_temperature(ctx, label, 1. / s) \
                * F.log(F.softmax(pred, axis=1))
         loss = -F.mean(F.sum(elms, axis=1))
     return loss
