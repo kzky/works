@@ -32,7 +32,7 @@ def main(args):
     device_id = args.device_id
     batch_size = args.batch_size
     batch_size_eval = args.batch_size_eval
-    n_l_train_data = 1000
+    n_l_train_data = args.n_label
     n_train_data = 73257
     n_cls = 10
     learning_rate = 1. * 1e-3
@@ -151,6 +151,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", "-b", type=int, default=100)
     parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
     parser.add_argument("--epoch", type=int, default=300)
+    parser.add_argument("--n_label", type=int, default=1000)
     args = parser.parse_args()
 
     main(args)
