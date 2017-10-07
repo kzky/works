@@ -11,10 +11,10 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.prelu, test=False):
         shape = h.shape
         w = nn.Variable(shape)
         w.d = (np.ones(shape) * 0.2).astype(np.float32)
-        h = act(h, w, base_axis=1)
+        h = act(h, w)
         return h
 
-def cnn_model_003(ctx, x, act=PF.prelu, do=True, test=False):
+def cnn_model_003(ctx, x, act=F.prelu, do=True, test=False):
     with nn.context_scope(ctx):
         # Convblock0
         h = conv_unit(x, "conv00", 128, k=3, s=1, p=1, act=act, test=test)
