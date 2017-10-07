@@ -9,7 +9,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.prelu, test=False):
         h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
         h = PF.batch_normalization(h, batch_stat=not test)
         shape = h.shape
-        w = nn.Variable(shape)
+        w = nn.Variable((shape[1], ))
         w.d = (np.ones(shape) * 0.2).astype(np.float32)
         h = act(h, w)
         return h
