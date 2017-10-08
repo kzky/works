@@ -21,6 +21,7 @@ The same script as the `st` module but with nnabla.
 - Squared error between uncertainty (sigma) and 1/sqrt(2), sigma becmoes one at the end. Applied for CE loss also.
 - Squared error between uncertainties, sigma square.
 - Add coefficient to sigma regularization (default is one)
+- Relu
 """
 
 def categorical_error(pred, label):
