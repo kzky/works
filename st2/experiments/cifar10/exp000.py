@@ -91,6 +91,7 @@ def main(args):
         # Train
         loss_supervised.forward(clear_no_need_grad=True)
         solver.zero_grad()
+        loss_supervised(clear_buffer=True)
         solver.update()
         
         # Evaluate
