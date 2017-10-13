@@ -36,7 +36,7 @@ def main(args):
     learning_rate = 1. * 1e-3
     n_epoch = args.epoch
     act = F.relu
-    iter_epoch = n_train_data / batch_size
+    iter_epoch = n_l_train_data / batch_size
     n_iter = n_epoch * iter_epoch
     extension_module = args.context
 
