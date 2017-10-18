@@ -8,7 +8,7 @@ import numpy as np
 import os
 import time
 import argparse
-from st2.cifar10.cnn_model_071 import cnn_model_003, ce_loss, sr_loss, er_loss, sr_loss_with_uncertainty, ce_loss_with_uncertainty, sigma_regularization, sigmas_regularization
+from st2.cifar10.cnn_model_076 import cnn_model_003, ce_loss, sr_loss, er_loss, sr_loss_with_uncertainty, ce_loss_with_uncertainty, sigma_regularization, sigmas_regularization
 from st2.cifar10.datasets import Cifar10DataReader, Separator
 
 """
