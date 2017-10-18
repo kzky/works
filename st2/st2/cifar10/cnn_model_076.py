@@ -11,7 +11,7 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.elu, test=False):
     with nn.parameter_scope(scope):
         h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
         h = PF.batch_normalization(h, batch_stat=not test)
-        h = act(h)
+        h = srelus(h)
         return h
 
 def cnn_model_003(ctx, x, act=F.elu, do=True, test=False):
