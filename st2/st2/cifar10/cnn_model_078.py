@@ -40,23 +40,30 @@ def cnn_model_003(ctx, x, act=F.elu, do=True, test=False):
         h = conv_unit(h, "conv20", 512, k=3, s=1, p=0, act=act, test=test)  # 8 -> 6
         h = conv_unit(h, "conv21", 256, k=1, s=1, p=0, act=act, test=test)
         h = conv_unit(h, "conv22", 128, k=1, s=1, p=0, act=act, test=test)
-        u = h
+        h_branch = h
 
         # Convblock 3
-        h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
+        h = conv_unit(h_branch, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
         h = F.average_pooling(h, (6, 6))
         with nn.parameter_scope("bn2"):
             h = PF.batch_normalization(h, batch_stat=not test)
         pred = F.reshape(h, (h.shape[0], np.prod(h.shape[1:])))
 
         # Uncertainty
-        u = conv_unit(u, "u0", 10, k=1, s=1, p=0, act=act, test=test)
-        u = F.average_pooling(u, (6, 6))
+        u0 = conv_unit(h_branch, "u0", 10, k=1, s=1, p=0, act=act, test=test)
+        u0 = F.average_pooling(u0, (6, 6))
         with nn.parameter_scope("u0bn"):
-            u = PF.batch_normalization(u, batch_stat=not test)
-            log_var = F.reshape(u, (u.shape[0], np.prod(u.shape[1:])))
+            u0 = PF.batch_normalization(u0, batch_stat=not test)
+            log_var = F.reshape(u0, (u0.shape[0], np.prod(u0.shape[1:])))
 
-        return pred, log_var
+        # Uncertainty for uncertainty
+        u1 = conv_unit(h_branch, "u1", 10, k=1, s=1, p=0, act=act, test=test)
+        u1 = F.average_pooling(u1, (6, 6))
+        with nn.parameter_scope("u1bn"):
+            u1 = PF.batch_normalization(u1, batch_stat=not test)
+            log_s = F.reshape(u1, (u1.shape[0], np.prod(u1.shape[1:])))
+
+        return pred, log_var, log_s
 
 def ce_loss(ctx, pred, y_l):
     with nn.context_scope(ctx):
@@ -76,13 +83,16 @@ def sr_loss(ctx, pred0, pred1):
         loss_sr = F.mean(F.squared_error(pred0, pred1))
     return loss_sr
 
-def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var0, log_var1):
-    #TODO: squared error/absolute error
-    s0 = F.exp(log_var0)
-    s1 = F.exp(log_var1)
+def sr_loss_with_uncertainty(ctx, pred0, pred1, log_v0, log_v1, 
+                             log_s0, log_s1):
+    v0 = F.exp(log_v0)
+    v1 = F.exp(log_v1)
     squared_error = F.squared_error(pred0, pred1)
+    s0 = F.exp(log_s0)
+    s1 = F.exp(log_s1)
     with nn.context_scope(ctx):
-        loss_sr = F.mean(squared_error * (1 / s0 + 1 / s1) + (s0 / s1 + s1 / s0)) * 0.5
+        error = squared_error * (1 / v0 + 1 / v1) + (v0 / v1 + v1 / v0) + (s0 / s1 + s1 / s0)
+        loss_sr = F.mean(error) * 0.5
     return loss_sr
 
 def er_loss(ctx, pred):
@@ -101,15 +111,3 @@ def sigma_regularization(ctx, log_var, one):
         h = F.pow_scalar(h, 0.5)
         r = F.mean(F.squared_error(h, one))
     return r
-
-def sigmas_regularization(ctx, log_var0, log_var1):
-    with nn.context_scope(ctx):
-        h0 = F.exp(log_var0)
-        h0 = F.pow_scalar(h0, 0.5)
-        h1 = F.exp(log_var1)
-        h1 = F.pow_scalar(h1, 0.5)
-        r = F.mean(F.squared_error(h0, h1))
-    return r
-    
-
-
