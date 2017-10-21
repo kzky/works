@@ -85,7 +85,7 @@ def main(args):
     test_path = os.path.join(home, "datasets/mnist/test.npz")
 
     # data reader
-    data_reader = MnistDataReader(l_train_path, u_train_path, test_path,
+    data_reader = MNISTDataReader(l_train_path, u_train_path, test_path,
                                   batch_size=batch_size,
                                   n_cls=n_cls,
                                   da=True,
