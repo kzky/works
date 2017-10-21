@@ -8,11 +8,11 @@ class MNISTDataReader(object):
     def __init__(
             self,
             l_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/l_cifar-10.npz",
+            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/l_mnist.npz",
             u_train_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/cifar-10.npz", 
+            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/mnist.npz", 
             test_path=\
-            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/cifar-10.npz",
+            "/home/kzk/.chainer/dataset/pfnet/chainer/mnist/mnist.npz",
             batch_size=64,
             n_cls=10,
             da=False,
@@ -21,12 +21,12 @@ class MNISTDataReader(object):
         # Load dataset
         self.l_train_data = dict(np.load(l_train_path))
         self.l_train_data = {
-            "train_x":self.l_train_data["x"], 
-            "train_y":self.l_train_data["y"][:, np.newaxis]}
+            "train_x":self.l_train_data["train_x"], 
+            "train_y":self.l_train_data["train_y"][:, np.newaxis]}
         _u_train_data = np.load(u_train_path)
         self.u_train_data = {
-            "train_x":_u_train_data["x"], 
-            "train_y":_u_train_data["y"][:, np.newaxis]}
+            "train_x":_u_train_data["train_x"], 
+            "train_y":_u_train_data["train_y"][:, np.newaxis]}
         _test_data = np.load(test_path)
         self.test_data = {
             "test_x": _test_data["x"], 
@@ -215,26 +215,26 @@ class Separator(object):
 
     def separate_then_save(
             self,
-            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/cifar-10.npz"):
+            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/mnist.npz"):
         ldata, udata = self._separate(fpath)
         self._save_ssl_data(fpath, ldata, udata)
         
     def _separate(
             self,
-            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/cifar-10.npz"):
+            fpath="/home/kzk/.chainer/dataset/pfnet/chainer/mnist/mnist.npz"):
         
         data = np.load(fpath)
-        n = len(data["train_x"])
+        n = len(data["x"])
         idxs = np.arange(n)
-        idxs_l = self._sample_indices(data["train_y"])
+        idxs_l = self._sample_indices(data["y"])
         idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
 
         ldata = {}
         udata = {}
-        ldata["train_x"] = data["train_x"][idxs_l]
-        ldata["train_y"] = data["train_y"][idxs_l]
-        udata["train_x"] = data["train_x"][idxs_u]
-        udata["train_y"] = data["train_y"][idxs_u]
+        ldata["train_x"] = data["x"][idxs_l]
+        ldata["train_y"] = data["y"][idxs_l]
+        udata["train_x"] = data["x"][idxs_u]
+        udata["train_y"] = data["y"][idxs_u]
 
         return ldata, udata
 
