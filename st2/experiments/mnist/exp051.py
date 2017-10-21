@@ -36,7 +36,7 @@ def main(args):
     device_id = args.device_id
     batch_size = args.batch_size
     batch_size_eval = args.batch_size_eval
-    n_l_train_data = 4000
+    n_l_train_data = 100
     n_train_data = 50000
     n_cls = 10
     learning_rate = 1. * 1e-3
