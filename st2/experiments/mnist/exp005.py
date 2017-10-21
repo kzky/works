@@ -44,7 +44,7 @@ def main(args):
 
     # Model
     ## supervised 
-    batch_size, m, h, w = batch_size, 3, 32, 32
+    batch_size, m, h, w = batch_size, 1, 28, 28
     ctx = extension_context(extension_module, device_id=device_id)
     x_l = nn.Variable((batch_size, m, h, w))
     y_l = nn.Variable((batch_size, 1))
@@ -64,7 +64,7 @@ def main(args):
     loss_unsupervised = loss_sr + loss_er0 + loss_er1
 
     ## evaluate
-    batch_size_eval, m, h, w = batch_size, 3, 32, 32
+    batch_size_eval, m, h, w = batch_size, 1, 28, 28
     x_eval = nn.Variable((batch_size_eval, m, h, w))
     pred_eval = cnn_model_003(ctx, x_eval, test=True)
     

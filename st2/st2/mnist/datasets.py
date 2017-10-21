@@ -51,7 +51,7 @@ class MNISTDataReader(object):
     def reshape(self, x):
         if self._shape:
             bs = x.shape[0]
-            return x.reshape(bs, 3, 32, 32)
+            return x.reshape(bs, 1, 28, 28)
         return x
     
     def get_l_train_batch(self, batch_size=None):
@@ -178,7 +178,7 @@ class MNISTDataReader(object):
 
     def _transform(self, imgs):
         bs = imgs.shape[0]
-        imgs = imgs.reshape(bs, 3, 32, 32)
+        imgs = imgs.reshape(bs, 1, 28, 28)
         imgs_ = np.zeros_like(imgs)
         for i, img in enumerate(imgs):
             # random flip
@@ -189,17 +189,16 @@ class MNISTDataReader(object):
 
             # rotation
             n = np.random.choice(np.arange(-15, 15))
-            M = cv2.getRotationMatrix2D((32/2, 32/2), n, 1)
-            dst = cv2.warpAffine(img_.transpose(1, 2, 0), M, (32, 32))
+            M = cv2.getRotationMatrix2D((28/2, 28/2), n, 1)
+            dst = cv2.warpAffine(img_.transpose(1, 2, 0), M, (28, 28))
 
             # translation
             M = np.float32([[1,0,np.random.randint(-2, 2)],
                             [0,1,np.random.randint(-2, 2)]])
-            dst = cv2.warpAffine(dst, M, (32, 32))
+            dst = cv2.warpAffine(dst, M, (28, 28))
+            imgs_[i] = dst.reshape((1, 28, 28))
 
-            imgs_[i] = dst.transpose(2, 0, 1)
-
-        imgs_ = imgs_.reshape(bs, 3072)
+        imgs_ = imgs_.reshape(bs, 28*28)
         return imgs_
 
 class Separator(object):
