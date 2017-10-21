@@ -37,7 +37,7 @@ def main(args):
     batch_size = args.batch_size
     batch_size_eval = args.batch_size_eval
     n_l_train_data = 100
-    n_train_data = 50000
+    n_train_data = 60000
     n_cls = 10
     learning_rate = 1. * 1e-3
     n_epoch = 300
