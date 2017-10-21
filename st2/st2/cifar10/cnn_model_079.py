@@ -80,7 +80,7 @@ def sr_loss_with_uncertainty(ctx, pred0, pred1, log_var0, log_var1):
     s1 = F.pow_scalar(var0, 0.5)
     squared_error = F.squared_error(pred0, pred1)
     with nn.context_scope(ctx):
-        loss = F.log(s1/s0) + (var0/var1 + squared_error/var0) * 0.5
+        loss = F.log(s1/s0) + (var0/var1 + squared_error/var1) * 0.5
         loss_sr = F.mean(loss)
     return loss_sr
 
