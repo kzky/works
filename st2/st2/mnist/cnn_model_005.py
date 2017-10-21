@@ -14,9 +14,9 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
 def cnn_model_003(ctx, x, act=F.relu, test=False):
     with nn.context_scope(ctx):
         # Convblock0
-        h = conv_unit(x, "conv00", 128, k=3, s=1, p=1, act=act, test=test)
-        h = conv_unit(h, "conv01", 128, k=3, s=1, p=1, act=act, test=test)
-        h = conv_unit(h, "conv02", 128, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(x, "conv00", 64, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(h, "conv01", 64, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(h, "conv02", 64, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 28 -> 14
         with nn.parameter_scope("bn0"):
             h = PF.batch_normalization(h, batch_stat=not test)
@@ -24,9 +24,9 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
             h = F.dropout(h)
 
         # Convblock 1
-        h = conv_unit(h, "conv10", 256, k=3, s=1, p=1, act=act, test=test)
-        h = conv_unit(h, "conv11", 256, k=3, s=1, p=1, act=act, test=test)
-        h = conv_unit(h, "conv12", 256, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(h, "conv10", 128, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(h, "conv11", 128, k=3, s=1, p=1, act=act, test=test)
+        h = conv_unit(h, "conv12", 128, k=3, s=1, p=1, act=act, test=test)
         h = F.max_pooling(h, (2, 2))  # 14 -> 7
         with nn.parameter_scope("bn1"):
             h = PF.batch_normalization(h, batch_stat=not test)
@@ -34,9 +34,9 @@ def cnn_model_003(ctx, x, act=F.relu, test=False):
             h = F.dropout(h)
 
         # Convblock 2
-        h = conv_unit(h, "conv20", 512, k=3, s=1, p=0, act=act, test=test)  # 7 -> 5
-        h = conv_unit(h, "conv21", 256, k=1, s=1, p=0, act=act, test=test)
-        h = conv_unit(h, "conv22", 128, k=1, s=1, p=0, act=act, test=test)
+        h = conv_unit(h, "conv20", 256, k=3, s=1, p=0, act=act, test=test)  # 7 -> 5
+        h = conv_unit(h, "conv21", 128, k=1, s=1, p=0, act=act, test=test)
+        h = conv_unit(h, "conv22", 64, k=1, s=1, p=0, act=act, test=test)
         h = conv_unit(h, "conv23", 10, k=1, s=1, p=0, act=act, test=test)
 
         # Convblock 3
