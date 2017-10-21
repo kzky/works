@@ -9,7 +9,7 @@ import os
 import time
 import argparse
 from st2.mnist.cnn_model_005 import cnn_model_003, ce_loss, sr_loss, er_loss
-from st.mnist.datasets import MNISTDataReader, Separator
+from st2.mnist.datasets import MNISTDataReader, Separator
 
 """
 The same script as the `st` module but with nnabla.
