@@ -17,7 +17,7 @@ The same script as the `st` module but with nnabla.
 - ResNet23
 - Stochastic Regularization
 - Entropy Regularization
-- Uncertainty for SR loss using JSD
+- Uncertainty for SR loss using s-KLD
 - Squared error between uncertainty (sigma) and one, sigma becmoes one at the end. Applied for CE loss also.
 - Squared error between uncertainties, sigma square.
 - Add coefficient to sigma regularization (default is one)

@@ -17,7 +17,7 @@ The same script as the `st` module but with nnabla.
 - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
 - Stochastic Regularization
 - Entropy Regularization
-- Uncertainty for SR loss using JSD
+- Uncertainty for SR loss using s-KLD
 - Squared error between uncertainty (sigma) and 1/sqrt(2), sigma becmoes one at the end. Applied for CE loss also.
 - Squared error between uncertainties, sigma square.
 - Add coefficient to sigma regularization (default is one)

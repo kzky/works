@@ -17,7 +17,7 @@ The same script as the `st` module but with nnabla.
 - ConvPool-CNN-C (Springenberg et al., 2014, Salimans&Kingma (2016))
 - Stochastic Regularization
 - Entropy Regularization for the outputs before CE loss and SR loss
-- Uncertainty for SR loss using JSD
+- Uncertainty for SR loss using s-KLD
 """
 
 def categorical_error(pred, label):
