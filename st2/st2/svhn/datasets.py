@@ -217,7 +217,7 @@ class Separator(object):
         n = len(data["X"])
         idxs = np.arange(n)
         idxs_l = self._sample_indices(np.squeeze(data["y"]))
-        idxs_u = np.asarray(list(set(idxs) - set(idxs_l)))
+        idxs_u = np.random.permutation(idxs)
 
         ldata = {}
         udata = {}
