@@ -43,7 +43,7 @@ def main(args):
     n_epoch = 300
     act = F.relu
     iter_epoch = n_train_data / batch_size
-    n_iter = n_epoch * iter_epoch
+    n_iter = int(n_epoch * iter_epoch)
     extension_module = args.context
     lambda_ = args.lambda_
 
