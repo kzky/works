@@ -111,9 +111,9 @@ def main(args):
         loss_supervised.backward(clear_buffer=True)
         loss_unsupervised.backward(clear_buffer=True)
         solver.update()
-        
-        # Evaluate
-        if (i+1) % iter_epoch == 0:
+
+         # Evaluate
+        if int((i+1) % iter_epoch) == 0:
             # Get data and set it to the varaibles
             x_data, y_data = data_reader.get_test_batch()
 
