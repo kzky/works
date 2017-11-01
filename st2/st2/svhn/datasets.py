@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.io
 import os
-from chainer import cuda
 import cv2
 
 class SVHNDataReader(object):
