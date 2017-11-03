@@ -43,7 +43,7 @@ def main(args):
     n_epoch = 300
     act = F.relu
     iter_epoch = n_train_data / batch_size
-    n_iter = n_epoch * iter_epoch
+    n_iter = int(n_epoch * iter_epoch)
     extension_module = args.context
     lambda_ = args.lambda_
 
@@ -104,6 +104,8 @@ def main(args):
     epoch = 1
     st = time.time()
     acc_prev = 0.
+    ve_best = 1.
+    save_path_prev = ""
     for i in range(n_iter):
         # Get data and set it to the varaibles
         x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch()
@@ -121,13 +123,12 @@ def main(args):
         solver.update()
         
         # Evaluate
-        if (i+1) % iter_epoch == 0:
+        if int((i+1) % iter_epoch) == 0:
             # Get data and set it to the varaibles
             x_data, y_data = data_reader.get_test_batch()
 
             # Evaluation loop
             ve = 0.
-            ve_best = 1.
             iter_val = 0
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
@@ -142,8 +143,14 @@ def main(args):
                 (1. - ve) * 100)            
             print(msg)
             if ve < ve_best:
-                nn.save_parameters(os.path.join(
-                    args.model_save_path, 'params_%06d.h5' % epoch))
+                if not os.path.exists(args.model_save_path):
+                    os.makedirs(args.model_save_path)
+                if save_path_prev != "":
+                    os.remove(save_path_prev)
+                save_path = os.path.join(
+                    args.model_save_path, 'params_%06d.h5' % epoch)
+                nn.save_parameters(save_path)
+                save_path_prev = save_path
                 ve_best = ve
             st = time.time()
             epoch +=1
