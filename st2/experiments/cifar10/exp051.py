@@ -127,6 +127,7 @@ def main(args):
 
             # Evaluation loop
             ve = 0.
+            ve_best = 1.
             iter_val = 0
             for k in range(0, len(x_data), batch_size_eval):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
@@ -134,11 +135,16 @@ def main(args):
                 pred_eval.forward(clear_buffer=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
+            ve /= iter_val
             msg = "Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
                 epoch,
                 time.time() - st, 
-                (1. - ve / iter_val) * 100)
+                (1. - ve) * 100)            
             print(msg)
+            if ve < ve_best:
+                nn.save_parameters(os.path.join(
+                    args.model_save_path, 'params_%06d.h5' % epoch))
+                ve_best = ve
             st = time.time()
             epoch +=1
 
@@ -159,6 +165,9 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", "-b", type=int, default=100)
     parser.add_argument("--batch_size_eval", "-e", type=int, default=100)
     parser.add_argument("--lambda_", "-l", type=float, default=1.)
+    parser.add_argument("--model-save-path", "-o",
+                        type=str, default="tmp.monitor",
+                        help='Path where model parameters are saved.')
     args = parser.parse_args()
 
     main(args)
