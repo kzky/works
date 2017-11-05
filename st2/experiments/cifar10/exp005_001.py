@@ -59,9 +59,11 @@ def main(args):
     x_l_1 = nn.Variable((batch_size, m, h, w))
     y_l_1 = nn.Variable((batch_size, 1))
     coef = nn.Variable()
-    x_l_m = coef * x_l_0 + (1 - coef) * x_l_1
-    y_l_m = coef * F.one_hot(y_l_0, (n_cls, )) \
-            + (1-coef) * F.one_hot(y_l_1, (n_cls, ))
+    coef_b = F.broadcast(coef.reshape([1]*x_l_0.ndim, unlink=True), x_l_0.shape)
+    x_l_m = coef_b * x_l_0 + (1 - coef_b) * x_l_1
+    coef_b = F.broadcast(coef.reshape([1]*pred.ndim, unlink=True), pred.shape)
+    y_l_m = coef_b * F.one_hot(y_l_0, (n_cls, )) \
+            + (1-coef_b) * F.one_hot(y_l_1, (n_cls, ))
     x_l_m.need_grad, y_l_m.need_grad = False, False
     pred_m = cnn_model_003(ctx, x_l_m)
     loss_er_m = er_loss(ctx, pred_m)  #todo: need?
@@ -80,14 +82,16 @@ def main(args):
     loss_er1 = er_loss(ctx, pred_x_u1)
     loss_unsupervised = loss_sr + loss_er0 + loss_er1
     ## VRM (mixup)
-    coef_u = nn.Variable()
     x_u2 = nn.Variable((batch_size, m, h, w))  # not to overwrite x_u1.d
-    x_u_m = coef * x_u0 + (1-coef) * x_u2
+    coef_u = nn.Variable()
+    coef_u_b = F.broadcast(coef_u.reshape([1]*x_u0.ndim, unlink=True), x_u0.shape)
+    x_u_m = coef_u_b * x_u0 + (1-coef_u_b) * x_u2
     pred_x_u0_ = nn.Variable(pred_x_u0.shape)  # unlink forward pass but reuse result
     pred_x_u1_ = nn.Variable(pred_x_u1.shape)
     pred_x_u0_.data = pred_x_u0.data
     pred_x_u1_.data = pred_x_u1.data
-    y_u_m = coef * pred_x_u0_ + (1-coef) * pred_x_u1_
+    coef_u_b = F.broadcast(coef_u.reshape([1]*pred_x_u0.ndim, unlink=True), pred_x_u0.shape)
+    y_u_m = coef_u_b * pred_x_u0_ + (1-coef_u_b) * pred_x_u1_
     x_u_m.need_grad, y_u_m.need_grad = False, False
     pred_x_u_m = cnn_model_003(ctx, x_u_m)
     loss_er_u_m = er_loss(ctx, pred_x_u_m)  #todo: need?
