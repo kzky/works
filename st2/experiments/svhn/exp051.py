@@ -104,6 +104,8 @@ def main(args):
     epoch = 1
     st = time.time()
     acc_prev = 0.
+    ve_best = 1.
+    save_path_prev = ""
     for i in range(n_iter):
         # Get data and set it to the varaibles
         x_l0_data, x_l1_data, y_l_data = data_reader.get_l_train_batch()
@@ -134,11 +136,22 @@ def main(args):
                 pred_eval.forward(clear_buffer=True)
                 ve += categorical_error(pred_eval.d, label)
                 iter_val += 1
+            ve /= iter_val
             msg = "Epoch:{},ElapsedTime:{},Acc:{:02f}".format(
                 epoch,
                 time.time() - st, 
-                (1. - ve / iter_val) * 100)
+                (1. - ve) * 100)            
             print(msg)
+            if ve < ve_best:
+                if not os.path.exists(args.model_save_path):
+                    os.makedirs(args.model_save_path)
+                if save_path_prev != "":
+                    os.remove(save_path_prev)
+                save_path = os.path.join(
+                    args.model_save_path, 'params_%06d.h5' % epoch)
+                nn.save_parameters(save_path)
+                save_path_prev = save_path
+                ve_best = ve
             st = time.time()
             epoch +=1
 
@@ -161,6 +174,9 @@ if __name__ == '__main__':
     parser.add_argument("--lambda_", "-l", type=float, default=1.)
     parser.add_argument("--epoch", type=int, default=300)
     parser.add_argument("--n_label", type=int, default=1000)
+    parser.add_argument("--model-save-path", "-o",
+                        type=str, default="tmp.monitor",
+                        help='Path where model parameters are saved.')
     args = parser.parse_args()
 
     main(args)
