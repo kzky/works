@@ -154,7 +154,7 @@ def main(args):
         coef_data = np.random.beta(alpha, alpha)
         coef_u.d = coef_data
         x_u2.d = np.random.permutation(x_u1_data)
-        loss_supervised_m.forward(clear_no_need_grad=True)
+        loss_unsupervised_m.forward(clear_no_need_grad=True)
         
         ## backward
         solver.zero_grad()
