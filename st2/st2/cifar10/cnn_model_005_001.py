@@ -60,7 +60,8 @@ def sr_loss(ctx, pred0, pred1):
 
 def ce_loss_soft(ctx, pred, target):
     with nn.context_scope(ctx):
-        loss = F.mean(F.sum(F.softmax(target) * F.log(F.softmax(pred)), axis=1))
+        #todo: devide or not
+        loss = - F.mean(F.sum(F.softmax(target) * F.log(F.softmax(pred)), axis=1))
     return loss
 
 def er_loss(ctx, pred):
