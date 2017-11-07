@@ -68,7 +68,7 @@ def main(args):
     pred_m = cnn_model_003(ctx, x_l_m)
     loss_er_m = er_loss(ctx, pred_m)  #todo: need?
     loss_ce_m = ce_loss_soft(ctx, pred, y_l_m)
-    loss_supervised_m = loss_ce_m + loss_er_m
+    loss_supervised_m = loss_ce_m #+ loss_er_m
     
     # Semi-Supervised Model
     ## ERM
@@ -96,7 +96,7 @@ def main(args):
     pred_x_u_m = cnn_model_003(ctx, x_u_m)
     loss_er_u_m = er_loss(ctx, pred_x_u_m)  #todo: need?
     loss_ce_u_m = ce_loss_soft(ctx, pred_x_u_m, y_u_m)
-    loss_unsupervised_m = loss_ce_u_m + loss_er_u_m
+    loss_unsupervised_m = loss_ce_u_m #+ loss_er_u_m
     
     # Evaluatation Model
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
@@ -158,9 +158,9 @@ def main(args):
         
         ## backward
         solver.zero_grad()
-        loss_supervised.backward(clear_buffer=True)
-        loss_supervised_m.backward(clear_buffer=True)
-        loss_unsupervised.backward(clear_buffer=True)
+        loss_supervised.backward(clear_buffer=False)
+        loss_supervised_m.backward(clear_buffer=False)
+        loss_unsupervised.backward(clear_buffer=False)
         loss_unsupervised_m.backward(clear_buffer=True)
         solver.update()
         
