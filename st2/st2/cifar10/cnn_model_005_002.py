@@ -18,10 +18,7 @@ def cnn_model_003(ctx, h, act=F.swish, test=False):
             h = F.image_augmentation(h, (c, s, s),
                                      min_scale=1.0, max_scale=1.5,
                                      angle=0.5, aspect_ratio=1.3, distortion=0.2,
-                                     flip_lr=True, brightness=25.5,
-                                     brightness_each=True,
-                                     contrast=1.1, contrast_center=128.0,
-                                     contrast_each=True, noise=25.5)
+                                     flip_lr=True)
         # Convblock0
         h = conv_unit(h, "conv00", 128, k=3, s=1, p=1, act=act, test=test)
         h = conv_unit(h, "conv01", 128, k=3, s=1, p=1, act=act, test=test)
