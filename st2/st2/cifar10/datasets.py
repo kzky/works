@@ -195,6 +195,9 @@ class Cifar10DataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
+        if not self._da:
+            return imgs
+        
         bs = imgs.shape[0]
         imgs = imgs.reshape(bs, 3, 32, 32)
         imgs_ = np.zeros_like(imgs)

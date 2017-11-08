@@ -171,6 +171,8 @@ class SVHNDataReader(object):
         return batch_data_x , batch_data_y
 
     def _transform(self, imgs):
+        if not self._da:
+            return imgs
         imgs_ = np.zeros_like(imgs)
         for i, img in enumerate(imgs):
             img_ = np.copy(img)
