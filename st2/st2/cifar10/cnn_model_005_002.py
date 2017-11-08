@@ -14,8 +14,8 @@ def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
 def cnn_model_003(ctx, h, act=F.relu, test=False):
     with nn.context_scope(ctx):
         if not test:
-            b, c, h, w = h.shape
-            h = F.image_augmentation(h, (c, h, w),
+            b, c, s, s = h.shape
+            h = F.image_augmentation(h, (c, s, s),
                                      min_scale=1.0, max_scale=1.5,
                                      angle=0.5, aspect_ratio=1.3, distortion=0.2,
                                      flip_lr=True, brightness=25.5,
