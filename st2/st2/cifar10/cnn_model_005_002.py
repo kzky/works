@@ -4,14 +4,14 @@ import nnabla.parametric_functions as PF
 from nnabla.contrib.context import extension_context
 import numpy as np
 
-def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.relu, test=False):
+def conv_unit(x, scope, maps, k=4, s=2, p=1, act=F.swish, test=False):
     with nn.parameter_scope(scope):
         h = PF.convolution(x, maps, kernel=(k, k), stride=(s, s), pad=(p, p))
         h = PF.batch_normalization(h, batch_stat=not test)
         h = act(h)
         return h
 
-def cnn_model_003(ctx, h, act=F.relu, test=False):
+def cnn_model_003(ctx, h, act=F.swish, test=False):
     with nn.context_scope(ctx):
         if not test:
             b, c, s, s = h.shape
