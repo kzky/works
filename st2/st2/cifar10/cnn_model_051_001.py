@@ -52,7 +52,7 @@ def cnn_model_003(ctx, x, act=F.elu, do=True, test=False):
         with nn.parameter_scope("u0bn"):
             u = PF.batch_normalization(u, batch_stat=not test)
         with nn.parameter_scope("shared-sigma"):
-            log_var = F.affine(u, 1)
+            log_var = PF.affine(u, 1)
             
         return pred, log_var
 
