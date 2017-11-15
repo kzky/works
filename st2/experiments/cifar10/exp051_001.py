@@ -143,16 +143,6 @@ def main(args):
                 time.time() - st, 
                 (1. - ve) * 100)            
             print(msg)
-            if ve < ve_best:
-                if not os.path.exists(args.model_save_path):
-                    os.makedirs(args.model_save_path)
-                if save_path_prev != "":
-                    os.remove(save_path_prev)
-                save_path = os.path.join(
-                    args.model_save_path, 'params_%06d.h5' % epoch)
-                nn.save_parameters(save_path)
-                save_path_prev = save_path
-                ve_best = ve
             st = time.time()
             epoch +=1
 
