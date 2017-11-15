@@ -50,7 +50,7 @@ def global_view(ctx, h):
 def spatial_view(ctx, h):
     """spatial connection only"""
     with nn.parameter_scope("sv"):
-        h = F.mean(x, axis=1)
+        h = F.mean(h, axis=1)
         h = PF.affine(h, 10)
         return h
 

@@ -44,7 +44,7 @@ def main(args):
     extension_module = args.context
 
     # Model
-    views = [global_view, spatial_view, faeture_view]
+    views = [global_view, spatial_view, feature_view]
     ## supervised 
     batch_size, m, h, w = batch_size, 3, 32, 32
     ctx = extension_context(extension_module, device_id=device_id)
@@ -56,7 +56,7 @@ def main(args):
         pred = view(ctx, feature)
         loss_ce = ce_loss(ctx, pred, y_l)
         loss_er = er_loss(ctx, pred)
-        loss_supervised += [loss_cr, loss_er]
+        loss_supervised += [loss_ce, loss_er]
     loss_supervised = reduce(lambda x, y: x+y, loss_supervised)
 
     ## cross view loss
@@ -78,9 +78,9 @@ def main(args):
     for pred_a, pred_b in itertools.product(pred_x_u0, pred_x_u1): # multi-view
         if pred_a == pred_b:
             continue
-        loss_unsupervised += sr_loss(ctx, pred_a, pred_b)
+        loss_unsupervised += [sr_loss(ctx, pred_a, pred_b)]
     loss_unsupervised = reduce(lambda x, y: x+y, loss_unsupervised) \
-                        + loss_er = reduce(lambda x, y: x+y, loss_er)
+                        + reduce(lambda x, y: x+y, loss_er)
 
     ## evaluate
     batch_size_eval, m, h, w = batch_size, 3, 32, 32
@@ -88,7 +88,7 @@ def main(args):
     feature_eval = cnn_model_003(ctx, x_eval, test=True)
     pred_eval = []
     for view in views:
-        pred_eval += view(feature_eval)
+        pred_eval += [view(ctx, feature_eval)]
         
     # Solver
     with nn.context_scope(ctx):
@@ -137,7 +137,7 @@ def main(args):
         solver.update()
         
         # Evaluate
-        if int((i+1) % iter_epoch) == 0:
+        if int((i + 1) % iter_epoch) == 0:
             # Get data and set it to the varaibles
             x_data, y_data = data_reader.get_test_batch()
 
@@ -148,7 +148,7 @@ def main(args):
                 x_eval.d = get_test_data(x_data, k, batch_size_eval)
                 label = get_test_data(y_data, k, batch_size_eval)
                 feature_eval.forward(clear_buffer=True)
-                for i in range(pred_eval):
+                for i in range(len(pred_eval)):
                     pred_eval[i].forward()
                     ve[i] += categorical_error(pred_eval[i].d, label)
                 iter_val += 1
