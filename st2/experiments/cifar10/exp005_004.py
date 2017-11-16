@@ -138,6 +138,7 @@ def main(args):
                 epoch,
                 time.time() - st, 
                 (1. - ve) * 100)
+            print(msg)
             st = time.time()
             epoch +=1
             coef.d = rampups[epoch]
