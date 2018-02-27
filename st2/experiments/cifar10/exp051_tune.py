@@ -86,7 +86,7 @@ def main(args):
     home = os.environ.get("HOME")
     fpath = os.path.join(home, "datasets/cifar10/cifar-10.npz")
     separator = Separator(n_l_train_data)
-    separator.separate_then_save(fpath)
+    #separator.separate_then_save(fpath)
 
     l_train_path = os.path.join(home, "datasets/cifar10/l_cifar-10.npz")
     u_train_path = os.path.join(home, "datasets/cifar10/cifar-10.npz")
