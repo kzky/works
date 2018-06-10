@@ -15,29 +15,87 @@ from nnabla.initializer import (
 from nnabla.parametric_functions import parametric_function_api
 
 
-@parametric_function_api("in")
-def instance_normalization(inp, axes=[1], decay_rate=0.9, eps=1e-5,
-                           batch_stat=True, output_stat=False, fix_parameters=False):
-    """Instance Normalization (implemented using BatchNormalization)
+@parametric_function_api("cbn")
+def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
+        batch_stat=True, output_stat=False, fix_parameters=False):
+    """Conditional Batch Normalization
 
-    Instance normalization is equivalent to the batch normalization if a batch size is one, in
-    other words, it normalizes over spatial dimension(s), meaning all dimensions except for
-    the batch and feature dimension.
 
+    Conditional Normalization is usually to condition the scale and bias with learned mappings. If it is applied to the batch normalization, it is called the conditional batch normalization.
+
+    Batch normalization with two contional mappings is defined as follows,
+
+    ..math:
+    
+    h = f(z) frac{(x - \mu)}{\sigma} + g(z).
+    
+
+    References:
+    - Dumoulin, Vincent, Shlens, Jonathon, and Kudlur, Manju- nath. A learned representation for artistic style
+    - Zhu, Jun-Yan, Zhang, Richard, Pathak, Deepak, Darrell, Trevor, Efros, Alexei A,Wang, Oliver, and Shechtman, Eli. Toward multimodal image-to-image translation. In Advances in Neural Information Processing Systems, pp. 465–476, 2017b
+    - Radford, Alec, Metz, Luke, and Chintala, Soumith. Un- supervised representation learning with deep convolu- tional generative adversarial networks. arXiv preprint arXiv:1511.06434, 2015.
+    - Perez, Ethan, Strub, Florian, De Vries, Harm, Dumoulin, Vincent, and Courville, Aaron. Film: Visual reason- ing with a general conditioning layer. arXiv preprint arXiv:1709.07871, 2017.
     """
-    assert len(axes) == 1
+
     shape_stat = [1 for _ in inp.shape]
     shape_stat[axes[0]] = inp.shape[axes[0]]
-    beta = get_parameter_or_create(
-        "beta", shape_stat, ConstantInitializer(0), not fix_parameters)
-    gamma = get_parameter_or_create(
-        "gamma", shape_stat, ConstantInitializer(1), not fix_parameters)
+    b, c, s0, s1 = inp.shape
+
+    # Conditional normalization
+    gamma = PF.affine(z, c, with_bias=False, name="gamma")
+    gamma = F.reshape(gamma, shape_stat)
+    beta = PF.affine(z, c, with_bias=False, name="beta")
+    beta = F.reshape(beta, shape_stat)
+
+    # Batch normalization
     mean = get_parameter_or_create(
         "mean", shape_stat, ConstantInitializer(0), False)
     var = get_parameter_or_create(
         "var", shape_stat, ConstantInitializer(0), False)
     return F.batch_normalization(inp, beta, gamma, mean, var, axes,
                                  decay_rate, eps, batch_stat, output_stat)
+
+
+@parametric_function_api("cin")
+def CIN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
+        batch_stat=True, output_stat=False, fix_parameters=False):
+    """Conditional Instance Normalization
+
+
+    Conditional Normalization is usually to condition the scale and bias with learned mappings. If it is applied to the batch normalization, it is called the conditional batch normalization.
+
+    Instance normalization with two contional mappings is defined as follows,
+
+    ..math:
+    
+    h = f(z) frac{(x - \mu)}{\sigma} + g(z).
+
+    Instance normalization normalizes input over the spatial dimension(s) for each batch and feature, not over the batch dimensinos. Thus, there is no need to take the moving average of stats.
+    
+
+    References:
+    - Dumoulin, Vincent, Shlens, Jonathon, and Kudlur, Manju- nath. A learned representation for artistic style
+    - Zhu, Jun-Yan, Zhang, Richard, Pathak, Deepak, Darrell, Trevor, Efros, Alexei A,Wang, Oliver, and Shechtman, Eli. Toward multimodal image-to-image translation. In Advances in Neural Information Processing Systems, pp. 465–476, 2017b
+    - Radford, Alec, Metz, Luke, and Chintala, Soumith. Un- supervised representation learning with deep convolu- tional generative adversarial networks. arXiv preprint arXiv:1511.06434, 2015.
+    - Perez, Ethan, Strub, Florian, De Vries, Harm, Dumoulin, Vincent, and Courville, Aaron. Film: Visual reason- ing with a general conditioning layer. arXiv preprint arXiv:1709.07871, 2017.
+    """
+
+    shape_stat = [1 for _ in inp.shape]
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+    b, c, s0, s1 = inp.shape
+
+    # Conditional normalization
+    gamma = PF.affine(z, c, with_bias=False, name="gamma")
+    gamma = F.reshape(gamma, shape_stat)
+    beta = PF.affine(z, c, with_bias=False, name="beta")
+    beta = F.reshape(beta, shape_stat)
+
+    # Instance normalization
+    mean = F.sum(inp, axis=(s0, s1), keepdims=True) / (s0 * s1)
+    sigma2 = F.pow_scalar(F.sum(inp - mean, axis=(s0, s1), keepdims=True), 2.0) / (s0 * s1)
+    h = (inp - mean) / F.pow_scalar(sigma2 + eps, 1.0 / 2)
+    
+    return gamma * h + beta
 
 
 def convolution(x, n, kernel, stride, pad, init_method=None):
@@ -64,7 +122,7 @@ def deconvolution(x, n, kernel, stride, pad, init_method=None):
 
 def convblock(x, n=0, k=(4, 4), s=(2, 2), p=(1, 1), leaky=False, init_method=None):
     x = convolution(x, n=n, kernel=k, stride=s, pad=p, init_method=init_method)
-    x = instance_normalization(x, fix_parameters=True)
+    x = CIN(x, fix_parameters=True)
     x = F.leaky_relu(x, alpha=0.2) if leaky else F.relu(x)
     return x
 
@@ -79,7 +137,7 @@ def unpool_block(x, n=0, k=(4, 4), s=(2, 2), p=(1, 1), leaky=False, unpool=False
         x = F.unpooling(x, kernel=(2, 2))
         x = convolution(x, n, kernel=(3, 3), stride=(1, 1),
                         pad=(1, 1), init_method=init_method)
-    x = instance_normalization(x, fix_parameters=True)
+    x = CIN(x, fix_parameters=True)
     x = F.leaky_relu(x, alpha=0.2) if leaky else F.relu(x)
     return x
 
@@ -89,12 +147,12 @@ def resblock(x, n=256, init_method=None):
     with nn.parameter_scope('block1'):
         r = convolution(r, n, kernel=(3, 3), pad=(1, 1),
                         stride=(1, 1), init_method=init_method)
-        r = instance_normalization(r, fix_parameters=True)
+        r = CIN(r, fix_parameters=True)
         r = F.relu(r)
     with nn.parameter_scope('block2'):
         r = convolution(r, n, kernel=(3, 3), pad=(1, 1),
                         stride=(1, 1), init_method=init_method)
-        r = instance_normalization(r, fix_parameters=True)
+        r = CIN(r, fix_parameters=True)
     return x + r
 
 
