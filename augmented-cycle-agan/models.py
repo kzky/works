@@ -19,22 +19,6 @@ from nnabla.parametric_functions import parametric_function_api
 def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
         batch_stat=True, output_stat=False, fix_parameters=False):
     """Conditional Batch Normalization
-
-
-    Conditional Normalization is usually to condition the scale and bias with learned mappings. If it is applied to the batch normalization, it is called the conditional batch normalization.
-
-    Batch normalization with two contional mappings is defined as follows,
-
-    ..math:
-    
-    h = f(z) frac{(x - \mu)}{\sigma} + g(z).
-    
-
-    References:
-    - Dumoulin, Vincent, Shlens, Jonathon, and Kudlur, Manju- nath. A learned representation for artistic style
-    - Zhu, Jun-Yan, Zhang, Richard, Pathak, Deepak, Darrell, Trevor, Efros, Alexei A,Wang, Oliver, and Shechtman, Eli. Toward multimodal image-to-image translation. In Advances in Neural Information Processing Systems, pp. 465–476, 2017b
-    - Radford, Alec, Metz, Luke, and Chintala, Soumith. Un- supervised representation learning with deep convolu- tional generative adversarial networks. arXiv preprint arXiv:1511.06434, 2015.
-    - Perez, Ethan, Strub, Florian, De Vries, Harm, Dumoulin, Vincent, and Courville, Aaron. Film: Visual reason- ing with a general conditioning layer. arXiv preprint arXiv:1709.07871, 2017.
     """
 
     shape_stat = [1 for _ in inp.shape]
@@ -60,24 +44,6 @@ def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
 def CIN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
         batch_stat=True, output_stat=False, fix_parameters=False):
     """Conditional Instance Normalization
-
-
-    Conditional Normalization is usually to condition the scale and bias with learned mappings. If it is applied to the batch normalization, it is called the conditional batch normalization.
-
-    Instance normalization with two contional mappings is defined as follows,
-
-    ..math:
-    
-    h = f(z) frac{(x - \mu)}{\sigma} + g(z).
-
-    Instance normalization normalizes input over the spatial dimension(s) for each batch and feature, not over the batch dimensinos. Thus, there is no need to take the moving average of stats.
-    
-
-    References:
-    - Dumoulin, Vincent, Shlens, Jonathon, and Kudlur, Manju- nath. A learned representation for artistic style
-    - Zhu, Jun-Yan, Zhang, Richard, Pathak, Deepak, Darrell, Trevor, Efros, Alexei A,Wang, Oliver, and Shechtman, Eli. Toward multimodal image-to-image translation. In Advances in Neural Information Processing Systems, pp. 465–476, 2017b
-    - Radford, Alec, Metz, Luke, and Chintala, Soumith. Un- supervised representation learning with deep convolu- tional generative adversarial networks. arXiv preprint arXiv:1511.06434, 2015.
-    - Perez, Ethan, Strub, Florian, De Vries, Harm, Dumoulin, Vincent, and Courville, Aaron. Film: Visual reason- ing with a general conditioning layer. arXiv preprint arXiv:1709.07871, 2017.
     """
 
     shape_stat = [1 for _ in inp.shape]
