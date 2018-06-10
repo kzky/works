@@ -14,13 +14,30 @@ from nnabla.initializer import (
     ConstantInitializer, NormalInitializer, UniformInitializer)
 from nnabla.parametric_functions import parametric_function_api
 
+@parametric_function_api("in")
+def instance_normalization(inp, axes=[1], decay_rate=0.9, eps=1e-5,
+                           batch_stat=True, output_stat=False, fix_parameters=False):
+    """Batch Normalization
+    """
+    shape_stat = [1 for _ in inp.shape]
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+    beta = get_parameter_or_create(
+        "beta", shape_stat, ConstantInitializer(0), not fix_parameters)
+    gamma = get_parameter_or_create(
+        "gamma", shape_stat, ConstantInitializer(1), not fix_parameters)
+    mean = get_parameter_or_create(
+        "mean", shape_stat, ConstantInitializer(0), False)
+    var = get_parameter_or_create(
+        "var", shape_stat, ConstantInitializer(0), False)
+    return F.batch_normalization(inp, beta, gamma, mean, var, axes,
+                                 decay_rate, eps, batch_stat, output_stat)
+
 
 @parametric_function_api("cbn")
 def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
         batch_stat=True, output_stat=False, fix_parameters=False):
     """Conditional Batch Normalization
     """
-
     shape_stat = [1 for _ in inp.shape]
     shape_stat[axes[0]] = inp.shape[axes[0]]
     b, c, s0, s1 = inp.shape
@@ -40,12 +57,35 @@ def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
                                  decay_rate, eps, batch_stat, output_stat)
 
 
+@parametric_function_api("in")
+def CI(inp, axes=[1], decay_rate=0.9, eps=1e-5,
+                           batch_stat=True, output_stat=False, fix_parameters=False):
+    """Instance Normalization (implemented using BatchNormalization)
+    """
+    shape_stat = [1 for _ in inp.shape]
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+
+
+    # Conditional normalization
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+    beta = get_parameter_or_create(
+        "beta", shape_stat, ConstantInitializer(0), not fix_parameters)
+    gamma = get_parameter_or_create(
+        "gamma", shape_stat, ConstantInitializer(1), not fix_parameters)
+
+    # Instance normalization
+    mean = F.sum(inp, axis=(s0, s1), keepdims=True) / (s0 * s1)
+    sigma2 = F.pow_scalar(F.sum(inp - mean, axis=(s0, s1), keepdims=True), 2.0) / (s0 * s1)
+    h = (inp - mean) / F.pow_scalar(sigma2 + eps, 1.0 / 2)
+    
+    return gamma * h + beta
+
+
 @parametric_function_api("cin")
 def CIN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
         batch_stat=True, output_stat=False, fix_parameters=False):
     """Conditional Instance Normalization
     """
-
     shape_stat = [1 for _ in inp.shape]
     shape_stat[axes[0]] = inp.shape[axes[0]]
     b, c, s0, s1 = inp.shape
@@ -150,7 +190,7 @@ def generator(x, scopename, maps=64, unpool=False, init_method=None):
     return x
 
 
-def discriminator(x, scopename, maps=64, init_method=None):
+def discriminator_g(x, scopename, maps=64, init_method=None):
     with nn.parameter_scope('discriminator'):
         with nn.parameter_scope(scopename):
             with nn.parameter_scope('conv1'):
@@ -181,11 +221,40 @@ def g(y, unpool=False, init_method=None):
 
 
 def d_x(x, init_method=None):
-    return discriminator(x, scopename='x', init_method=init_method)
+    return discriminator_g(x, scopename='x', init_method=init_method)
 
 
 def d_y(y, init_method=None):
-    return discriminator(y, scopename='y', init_method=init_method)
+    return discriminator_g(y, scopename='y', init_method=init_method)
+
+
+def encoder(x, y, scopename, latent, maps=64, unpool=False, init_method=None):
+    """Encoder
+    
+    Architecture is not clear up to now (20180611), to my best knowledge.
+
+    Use simply the half of the generator, then perform the affine tranformation to get one-dimensional output.
+
+    """
+    h = F.concatenate(*[x, y])
+    with nn.parameter_scope('generator'):
+        with nn.parameter_scope(scopename):
+            with nn.parameter_scope('conv1'):
+                h = convblock(h, n=maps, k=(7, 7), s=(1, 1), p=(3, 3),
+                              leaky=False, init_method=init_method)
+            with nn.parameter_scope('conv2'):
+                h = convblock(h, n=maps*2, k=(3, 3), s=(2, 2), p=(1, 1),
+                              leaky=False, init_method=init_method)
+            with nn.parameter_scope('conv3'):
+                h = convblock(h, n=maps*4, k=(3, 3), s=(2, 2), p=(1, 1),
+                              leaky=False, init_method=init_method)
+            for i in range(9):
+                with nn.parameter_scope('res{}'.format(i+1)):
+                    h = resblock(h, n=maps*4, init_method=init_method)
+            with nn.parameter_scope('last'):
+                h = PF.affine(h, latent)
+    return h
+
 
 
 def image_augmentation(image):
