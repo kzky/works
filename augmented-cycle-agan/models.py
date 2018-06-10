@@ -14,9 +14,9 @@ from nnabla.initializer import (
     ConstantInitializer, NormalInitializer, UniformInitializer)
 from nnabla.parametric_functions import parametric_function_api
 
-@parametric_function_api("in")
-def instance_normalization(inp, axes=[1], decay_rate=0.9, eps=1e-5,
-                           batch_stat=True, output_stat=False, fix_parameters=False):
+@parametric_function_api("bn")
+def BN(inp, axes=[1], decay_rate=0.9, eps=1e-5,
+       batch_stat=True, output_stat=False, fix_parameters=False):
     """Batch Normalization
     """
     shape_stat = [1 for _ in inp.shape]
@@ -58,8 +58,8 @@ def CBN(inp, z, axes=[1], decay_rate=0.9, eps=1e-5,
 
 
 @parametric_function_api("in")
-def CI(inp, axes=[1], decay_rate=0.9, eps=1e-5,
-                           batch_stat=True, output_stat=False, fix_parameters=False):
+def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5,
+       batch_stat=True, output_stat=False, fix_parameters=False):
     """Instance Normalization (implemented using BatchNormalization)
     """
     shape_stat = [1 for _ in inp.shape]
