@@ -237,7 +237,7 @@ def encoder(x, y, scopename, latent, maps=64, unpool=False, init_method=None):
 
     """
     h = F.concatenate(*[x, y])
-    with nn.parameter_scope('generator'):
+    with nn.parameter_scope('encoder'):
         with nn.parameter_scope(scopename):
             with nn.parameter_scope('conv1'):
                 h = convblock(h, n=maps, k=(7, 7), s=(1, 1), p=(3, 3),
@@ -254,7 +254,6 @@ def encoder(x, y, scopename, latent, maps=64, unpool=False, init_method=None):
             with nn.parameter_scope('last'):
                 h = PF.affine(h, latent)
     return h
-
 
 
 def image_augmentation(image):
