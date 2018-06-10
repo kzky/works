@@ -1,5 +1,6 @@
 #TODO: set better default hyper parameters
 
+
 def get_args(monitor_path='tmp.monitor', max_epoch=200, model_save_path=None,
              learning_rate=2*1e-4,
              batch_size=1, description=None):
@@ -52,7 +53,9 @@ def get_args(monitor_path='tmp.monitor', max_epoch=200, model_save_path=None,
     parser.add_argument('--unpool', action='store_true')
     parser.add_argument('--init-method', default=None, type=str,
                         help="`None`|`paper`")
-
+    parser.add_argument('--latent', default=256, 
+                        help="Number of dimensions of latent variables.")
+    
     args = parser.parse_args()
     if not os.path.isdir(args.model_save_path):
         os.makedirs(args.model_save_path)
