@@ -236,6 +236,7 @@ def encoder(x, y, scopename, latent, maps=64, unpool=False, init_method=None):
     Use simply the half of the generator, then perform the affine tranformation to get one-dimensional output.
 
     """
+    #TODO
     h = F.concatenate(*[x, y])
     with nn.parameter_scope('encoder'):
         with nn.parameter_scope(scopename):
@@ -254,6 +255,29 @@ def encoder(x, y, scopename, latent, maps=64, unpool=False, init_method=None):
             with nn.parameter_scope('last'):
                 h = PF.affine(h, latent)
     return h
+
+
+def discriminator_z(z, scopename):
+    """Discriminator for z
+    
+    Architecture is not clear up to now (20180611), to my best knowledge.
+
+    Use simply latent-to-1 affine.
+
+    """
+    #TODO
+    h = z
+    with nn.parameter_scope('encoder'):
+        with nn.parameter_scope(scopename):
+            h = PF.affine(h, 1)
+    return h
+
+def d_z_x(x, init_method=None):
+    return discriminator_z(x, scopename='x')
+
+
+def d_z_y(y, init_method=None):
+    return discriminator_z(y, scopename='y')
 
 
 def image_augmentation(image):
