@@ -47,7 +47,7 @@ def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2),
     return h
 
 
-def dencoder(z, maps=512, test=False):
+def decoder(z, maps=512, test=False):
     h = z
     h = deconvblock(h, maps // 1, test=test, scopename="deconvblock-1")
     h = deconvblock(h, maps // 1, test=test, scopename="deconvblock-2")
@@ -83,18 +83,21 @@ def loss_kl(mu, logvar, var):
 
 def main():
     # Data
-    b, c, h, w = 8, 16, 128, 128
+    b, c, h, w = 8, 3, 128, 128
+    maps = 16
     x = nn.Variable([b, c, h, w])
     # Network
-    e = encoder(x, c)
+    e = encoder(x, maps)
+    print("Encode:", e)
     z, mu, logvar, var = infer(e)
     x_recon = decoder(z, c * 32)
+    print("Recon", x_recon)
     # Loss
     recon_loss = loss_recon(x_recon, x)
-    loss_kl = loss_kl(mu, logvar, var)
-    loss = recon_loss + loss_kl
+    kl_loss = loss_kl(mu, logvar, var)
+    loss = recon_loss + kl_loss
 
-    print(loss)
+    print("Loss", loss)
 
 if __name__ == '__main__':
     main()
