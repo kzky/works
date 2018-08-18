@@ -51,8 +51,12 @@ def get_args(batch_size=16, ih=128, iw=128, max_iter=150000, save_interval=1000,
                         help="Model load path to a h5 file used in generation and validation.")
     parser.add_argument("--solver", type=str, default="Momentum", 
                         help="Solver")
-    parser.add_argument("--lr", type=float, default=1e-5,
-                        help="Learning rate for generator")
+    parser.add_argument("--lr", type=float, default2e-3,
+                        help="Learning rate")
+    parser.add_argument("--beta1", type=float, default2e-3,
+                        help="beta1 of Adam")
+    parser.add_argument("--beta2", type=float, default2e-3,
+                        help="beta2 of Adam")
     parser.add_argument("--decay-rate", type=float, default=1e-4, 
                         help="Decay rate")
     parser.add_argument("--train-data-path", "-T", type=str, default="",

@@ -66,8 +66,9 @@ def infer(x, T=100):
     logvar = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
     logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
     var = F.exp(logvar)
+    std = F.pow_scalar(var, 0.5)
     n = F.randn(shape=(b, c, h, w))
-    z = x + var * n
+    z = x + std * n
     return z, mu, logvar, var
 
 
@@ -77,7 +78,7 @@ def loss_recon(x_recon, x_real):
 
 
 def loss_kl(mu, logvar, var):
-    loss = - F.mean(1 + logvar ** 2 - mu ** 2 - var ** 2) / 2
+    loss = - F.mean(1 + logvar ** 2 - mu ** 2 - var ** 2) * 0.5
     return loss
 
 
