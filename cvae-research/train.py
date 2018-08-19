@@ -42,7 +42,7 @@ def train(args):
     monitor_recon_loss = MonitorSeries("Reconstruction Loss", monitor, interval=10)
     monitor_kl_loss = MonitorSeries("KL Loss", monitor, interval=10)
     monitor_time = MonitorTimeElapsed("Training Time", monitor, interval=10)
-    monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1, 
+    monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1, num_images=1, 
                                  normalize_method=normalize_method)
 
     # DataIterator
@@ -54,7 +54,7 @@ def train(args):
         x_data = di.next()[0]
         x.d = x_data
 
-        # Zerograd, forward, backward, weight-decay, update
+        # Zerograd, forward, backward, update
         solver.zero_grad()
         loss.forward(clear_no_need_grad=True)
         loss.backward(clear_buffer=True)

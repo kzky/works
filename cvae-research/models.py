@@ -66,7 +66,7 @@ def infer(x, T=100):
     mu = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
     logvar = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
     #TODO: better to clip?
-    logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
+    #logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
     var = F.exp(logvar)
     std = F.pow_scalar(var, 0.5)
     n = F.randn(shape=(b, c, h, w))
