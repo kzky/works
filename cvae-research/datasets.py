@@ -28,9 +28,8 @@ def data_iterator_celebA(img_path, batch_size=64, ih=128, iw=128,
         img = np.asarray(img).transpose(2, 0, 1)
         cx = 89
         cy = 121
-        img = img[cy - 64: cy + 64, 
-                  cx - 64: cx + 64, :] / 255.
-        img = img * 2. - 1.
+        img = img[:, cy - 64: cy + 64, cx - 64: cx + 64] 
+        img = img / 127.5 - 1.0
         return img, None
 
 

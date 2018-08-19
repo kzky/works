@@ -14,7 +14,7 @@ from functools import reduce
 from datasets import data_iterator_celebA
 from args import get_args, save_args
 from models import encoder, decoder, infer, loss_recon, loss_kl
-
+from helpers import normalize_method
 
 def train(args):
     # Context
@@ -42,7 +42,8 @@ def train(args):
     monitor_recon_loss = MonitorSeries("Reconstruction Loss", monitor, interval=10)
     monitor_kl_loss = MonitorSeries("KL Loss", monitor, interval=10)
     monitor_time = MonitorTimeElapsed("Training Time", monitor, interval=10)
-    monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1)
+    monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1, 
+                                 normalize_method=normalize_method)
 
     # DataIterator
     di = data_iterator_celebA(args.train_data_path, args.batch_size)
@@ -51,6 +52,7 @@ def train(args):
     for i in range(args.max_iter):
         # Feed data
         x_data = di.next()[0]
+        x.d = x_data
 
         # Zerograd, forward, backward, weight-decay, update
         solver.zero_grad()
@@ -67,7 +69,7 @@ def train(args):
 
     # Monitor and save
     monitor_recon_loss.add(i, recon_loss.d)
-    monitor_kl_loss.add(i, recon_loss.d)
+    monitor_kl_loss.add(i, kl_loss.d)
     monitor_time.add(i)
     if i % args.save_interval == 0:
         monitor_image.add(i, x_recon.d)
