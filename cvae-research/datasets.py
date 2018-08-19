@@ -21,7 +21,7 @@ def get_np_array_from_tar_object(tar_extractfl):
 
 def data_iterator_celebA(img_path, batch_size=64, ih=128, iw=128, 
                          shuffle=True, rng=None):
-    imgs += glob.glob("{}/*.png".format(img_path))
+    imgs = glob.glob("{}/*.png".format(img_path))
 
     def load_func(i):
         img = Image.open(imgs[i])
@@ -39,3 +39,4 @@ def data_iterator_celebA(img_path, batch_size=64, ih=128, iw=128,
 
 
 if __name__ == '__main__':
+    pass

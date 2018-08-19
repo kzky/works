@@ -13,8 +13,7 @@
 # limitations under the License.
 
 
-def get_args(batch_size=16, ih=128, iw=128, max_iter=150000, save_interval=1000, 
-             S=3, R=8, D=5, maps=64):
+def get_args(batch_size=32, ih=128, iw=128, max_iter=158275, save_interval=1000, maps=16):
     """
     Get command line arguments.
 
@@ -41,8 +40,9 @@ def get_args(batch_size=16, ih=128, iw=128, max_iter=150000, save_interval=1000,
     parser.add_argument("--iw", type=int, default=iw,
                         help="Image width.")
     parser.add_argument("--max-iter", type=int, default=max_iter,
-                        help="Max iterations")
-    parser.add_argument("--maps", type=int, default=maps,
+                        help="Max iterations. Default is 25 epoch with 32 batch size")
+    parser.add_argument("--maps", type=int, default=maps, 
+                        help="Initial feature maps")
     parser.add_argument("--save-interval", type=int, default=10000,
                         help="Interval for saving models.")
     parser.add_argument("--monitor-path", type=str, default="./result/example_0",
@@ -51,11 +51,11 @@ def get_args(batch_size=16, ih=128, iw=128, max_iter=150000, save_interval=1000,
                         help="Model load path to a h5 file used in generation and validation.")
     parser.add_argument("--solver", type=str, default="Momentum", 
                         help="Solver")
-    parser.add_argument("--lr", type=float, default2e-3,
+    parser.add_argument("--lr", type=float, default=1e-3,
                         help="Learning rate")
-    parser.add_argument("--beta1", type=float, default2e-3,
+    parser.add_argument("--beta1", type=float, default=0.9,
                         help="beta1 of Adam")
-    parser.add_argument("--beta2", type=float, default2e-3,
+    parser.add_argument("--beta2", type=float, default=0.999,
                         help="beta2 of Adam")
     parser.add_argument("--decay-rate", type=float, default=1e-4, 
                         help="Decay rate")

@@ -16,9 +16,9 @@ import nnabla.initializer as I
 #TODO: conditioning
 
 def convblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), 
-              test=False, scopename="convblock"):
+              test=False, name="convblock"):
     h = x
-    with nn.parameter_scope(scopename):
+    with nn.parameter_scope(name):
         h = PF.convolution(h, maps, kernel, pad, stride)
         h = PF.batch_normalization(h, batch_stat=not test)
         h = F.relu(h)
@@ -27,20 +27,20 @@ def convblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2),
 
 def encoder(x, maps=16, test=False):
     h = x
-    h = convblock(h, maps * 1, test=test, scopename="convblock-1")
-    h = convblock(h, maps * 2, test=test, scopename="convblock-2")
-    h = convblock(h, maps * 4, test=test, scopename="convblock-3")
-    h = convblock(h, maps * 8, test=test, scopename="convblock-4")
-    h = convblock(h, maps * 16, test=test, scopename="convblock-5")
-    h = convblock(h, maps * 32, test=test, scopename="convblock-6")
-    h = convblock(h, maps * 32, test=test, scopename="convblock-7")
+    h = convblock(h, maps * 1, test=test, name="convblock-1")
+    h = convblock(h, maps * 2, test=test, name="convblock-2")
+    h = convblock(h, maps * 4, test=test, name="convblock-3")
+    h = convblock(h, maps * 8, test=test, name="convblock-4")
+    h = convblock(h, maps * 16, test=test, name="convblock-5")
+    h = convblock(h, maps * 32, test=test, name="convblock-6")
+    h = convblock(h, maps * 32, test=test, name="convblock-7")
     return h
 
 
 def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), 
-                test=False, scopename="convblock"):
+                test=False, name="convblock"):
     h = x
-    with nn.parameter_scope(scopename):
+    with nn.parameter_scope(name):
         h = PF.deconvolution(h, maps, kernel, pad, stride)
         h = PF.batch_normalization(h, batch_stat=not test)
         h = F.relu(h)
@@ -49,13 +49,14 @@ def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2),
 
 def decoder(z, maps=512, test=False):
     h = z
-    h = deconvblock(h, maps // 1, test=test, scopename="deconvblock-1")
-    h = deconvblock(h, maps // 1, test=test, scopename="deconvblock-2")
-    h = deconvblock(h, maps // 2, test=test, scopename="deconvblock-3")
-    h = deconvblock(h, maps // 4, test=test, scopename="deconvblock-4")
-    h = deconvblock(h, maps // 8, test=test, scopename="deconvblock-5")
-    h = deconvblock(h, maps // 16, test=test, scopename="deconvblock-6")
-    h = deconvblock(h, maps // 32, test=test, scopename="deconvblock-7")
+    h = deconvblock(h, maps // 1, test=test, name="deconvblock-1")
+    h = deconvblock(h, maps // 1, test=test, name="deconvblock-2")
+    h = deconvblock(h, maps // 2, test=test, name="deconvblock-3")
+    h = deconvblock(h, maps // 4, test=test, name="deconvblock-4")
+    h = deconvblock(h, maps // 8, test=test, name="deconvblock-5")
+    h = deconvblock(h, maps // 16, test=test, name="deconvblock-6")
+    h = deconvblock(h, maps // 32, test=test, name="deconvblock-7")
+    h = PF.convolution(h, 3, kernel=(3, 3), pad=(1, 1), name="last-conv")
     return h
 
 
@@ -64,7 +65,7 @@ def infer(x, T=100):
     b, c, h, w = x.shape
     mu = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
     logvar = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
-    logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
+    #logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
     var = F.exp(logvar)
     std = F.pow_scalar(var, 0.5)
     n = F.randn(shape=(b, c, h, w))
@@ -91,7 +92,7 @@ def main():
     e = encoder(x, maps)
     print("Encode:", e)
     z, mu, logvar, var = infer(e)
-    x_recon = decoder(z, c * 32)
+    x_recon = decoder(z, maps * 32)
     print("Recon", x_recon)
     # Loss
     recon_loss = loss_recon(x_recon, x)

@@ -6,17 +6,14 @@ import nnabla.functions as F
 import nnabla.parametric_functions as PF
 import nnabla.solvers as S
 import nnabla.communicators as C
-from nnabla.monitor import Monitor, MonitorSeries, MonitorTimeElapsed, MonitorImag
+from nnabla.monitor import Monitor, MonitorSeries, MonitorTimeElapsed, MonitorImage
 from nnabla.ext_utils import get_extension_context
 import nnabla.utils.save as save
 from functools import reduce
 
 from datasets import data_iterator_celebA
 from args import get_args, save_args
-from models import get_loss, lapsrn
-from helpers import (get_solver, upsample, downsample, 
-                     split, to_BCHW, to_BHWC, normalize, ycbcr_to_rgb, 
-                     normalize_method)
+from models import encoder, decoder, infer, loss_recon, loss_kl
 
 
 def train(args):
@@ -26,10 +23,10 @@ def train(args):
     nn.set_default_context(ctx)
 
     # Model
-    x = nn.Variable([b, c, h, w])
-    e = encoder(x, maps)
+    x = nn.Variable([args.batch_size, 3, args.ih, args.iw])
+    e = encoder(x, args.maps)
     z, mu, logvar, var = infer(e)
-    x_recon = decoder(z, c * 32).apply(persistent=True)
+    x_recon = decoder(z, args.maps * 32).apply(persistent=True)
 
     # Loss
     recon_loss = loss_recon(x_recon, x).apply(persistent=True)
@@ -48,7 +45,7 @@ def train(args):
     monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1)
 
     # DataIterator
-    di = data_iterator_celebA(args.img_path, args.batch_size)
+    di = data_iterator_celebA(args.train_data_path, args.batch_size)
     
     # Train loop
     for i in range(args.max_iter):
