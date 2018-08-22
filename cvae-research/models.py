@@ -37,11 +37,15 @@ def encoder(x, maps=16, test=False):
     return h
 
 
-def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), 
+def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), use_deconv=False, 
                 test=False, name="convblock"):
     h = x
     with nn.parameter_scope(name):
-        h = PF.deconvolution(h, maps, kernel, pad, stride)
+        if use_deconv:
+            h = PF.deconvolution(h, maps, kernel, pad, stride)
+        else:
+            h = F.unpooling(h, (2, 2))
+            h = PF.convolution(h, maps, kernel=(3, 3), pad=(1, 1), stride=(1, 1))
         h = PF.batch_normalization(h, batch_stat=not test)
         h = F.relu(h)
     return h
@@ -60,7 +64,7 @@ def decoder(z, maps=512, test=False):
     return h
 
 
-def infer(x, T=100):
+def infer(x, sigma=1.0, T=100):
     #TODO: sphere-constraint
     b, c, h, w = x.shape
     mu = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
@@ -69,7 +73,7 @@ def infer(x, T=100):
     #logvar = F.minimum_scalar(F.maximum_scalar(logvar, -T), T)
     var = F.exp(logvar)
     std = F.pow_scalar(var, 0.5)
-    n = F.randn(shape=(b, c, h, w))
+    n = F.randn(sigma=sigma, shape=(b, c, h, w))
     z = x + std * n
     return z, mu, logvar, var
 
