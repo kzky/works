@@ -42,9 +42,12 @@ def train(args):
     monitor_recon_loss = MonitorSeries("Reconstruction Loss", monitor, interval=10)
     monitor_kl_loss = MonitorSeries("KL Loss", monitor, interval=10)
     monitor_time = MonitorTimeElapsed("Training Time", monitor, interval=10)
-    monitor_image = MonitorImage("Reconstruction Image", monitor, interval=1, num_images=1, 
-                                 normalize_method=normalize_method)
+    monitor_image_origin = MonitorImage("Original Image", monitor, interval=1, num_images=1, 
+                                        normalize_method=normalize_method)
+    monitor_image_recon = MonitorImage("Reconstruction Image", monitor, interval=1, num_images=1, 
+                                       normalize_method=normalize_method)
 
+    
     # DataIterator
     di = data_iterator_celebA(args.train_data_path, args.batch_size)
     
@@ -65,14 +68,16 @@ def train(args):
         monitor_kl_loss.add(i, recon_loss.d)
         monitor_time.add(i)
         if i % args.save_interval == 0:
-            monitor_image.add(i, x_recon.d)
+            monitor_image_origin.add(i, x.d)
+            monitor_image_recon.add(i, x_recon.d)
+            nn.save_parameters("{}/param_{}.h5".format(args.monitor_path, i))
 
     # Monitor and save
     monitor_recon_loss.add(i, recon_loss.d)
     monitor_kl_loss.add(i, kl_loss.d)
     monitor_time.add(i)
-    if i % args.save_interval == 0:
-        monitor_image.add(i, x_recon.d)
+    monitor_image.add(i, x_recon.d)
+    nn.save_parameters("{}/param_{}.h5".format(args.monitor_path, i))
 
 
 def main():
