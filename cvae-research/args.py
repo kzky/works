@@ -59,8 +59,12 @@ def get_args(batch_size=32, ih=128, iw=128, max_iter=158275, save_interval=1000,
                         help="beta1 of Adam")
     parser.add_argument("--beta2", type=float, default=0.999,
                         help="beta2 of Adam")
-    parser.add_argument("--decay-rate", type=float, default=1e-4, 
-                        help="Decay rate")
+    parser.add_argument("--lam-fft", type=float, default=1.0,
+                        help="lambda fft loss")
+    parser.add_argument("--use-patch", action="store_true",
+                        help="Use patch also for fft.")
+    parser.add_argument("--weight-decay-rate", type=float, default=1e-4, 
+                        help="Weight decay rate")
     parser.add_argument("--train-data-path", "-T", type=str, default="",
                         help='Path to training data')
     parser.add_argument("--valid-data-path", "-V", type=str, default="",

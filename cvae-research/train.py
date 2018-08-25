@@ -13,29 +13,15 @@ from functools import reduce
 
 from datasets import data_iterator_celebA
 from args import get_args, save_args
-from models import encoder, decoder, infer, loss_recon, loss_kl
-from helpers import normalize_method
+from models import encoder, decoder, infer, loss_recon, loss_kl, loss_fft
+from helpers import normalize_method, rgb2gray
 
 def train(args):
     # Context
     extension_module = args.context
     ctx = get_extension_context(extension_module, device_id=args.device_id)
     nn.set_default_context(ctx)
-
-    # Model
-    x = nn.Variable([args.batch_size, 3, args.ih, args.iw])
-    e = encoder(x, args.maps)
-    z, mu, logvar, var = infer(e)
-    x_recon = decoder(z, args.maps * 32).apply(persistent=True)
-
-    # Loss
-    recon_loss = loss_recon(x_recon, x).apply(persistent=True)
-    kl_loss = loss_kl(mu, logvar, var).apply(persistent=True)
-    loss = recon_loss + kl_loss
-
-    # Solver
-    solver = S.Adam(args.lr, args.beta1, args.beta2)
-    solver.set_parameters(nn.get_parameters())
+    nn.set_auto_forward(True)
         
     # Monitor
     monitor = Monitor(args.monitor_path)
@@ -47,12 +33,30 @@ def train(args):
     monitor_image_recon = MonitorImage("Reconstruction Image", monitor, interval=1, num_images=1, 
                                        normalize_method=normalize_method)
 
+    # Solver
+    solver = S.Adam(args.lr, args.beta1, args.beta2)
     
     # DataIterator
     di = data_iterator_celebA(args.train_data_path, args.batch_size)
-    
+
+
     # Train loop
     for i in range(args.max_iter):
+        # Model
+        x = nn.Variable([args.batch_size, 3, args.ih, args.iw])
+        e = encoder(x, args.maps)
+        z, mu, logvar, var = infer(e)
+        x_recon = decoder(z, args.maps * 32).apply(persistent=True)
+    
+        # Loss
+        recon_loss = loss_recon(x_recon, x).apply(persistent=True)
+        kl_loss = loss_kl(mu, logvar, var).apply(persistent=True)
+        fft_loss = loss_fft(rgb2gray(x_recon), rgb2gray(x), args.use_patch)
+        loss = recon_loss + kl_loss + args.lam_fft * fft_loss
+    
+        # Set params to solver
+        solver.set_parameters(nn.get_parameters())
+
         # Feed data
         x_data = di.next()[0]
         x.d = x_data

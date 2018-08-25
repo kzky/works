@@ -88,6 +88,44 @@ def loss_kl(mu, logvar, var):
     return loss
 
 
+def loss_fft(x_recon, x_real, use_patch=False):
+    shape = x_real.shape + (1, )
+    imag = nn.Variable.from_numpy_array(np.zeros(shape))
+    x_real_real = F.reshape(x_real, shape, inplace=False)
+    x_real_comp = F.concatenate(x_real_real, imag, axis=len(shape) - 1)
+    x_recon_real = F.reshape(x_recon, shape, inplace=False)
+    x_recon_comp = F.concatenate(x_recon_real, imag, axis=len(shape) - 1)
+
+    # Power for whole image
+    x_real_fft = F.fft(x_real_comp, signal_ndim=2, normalized=True)
+    x_recon_fft = F.fft(x_recon_comp, signal_ndim=2, normalized=True)
+    x_real_fft_p = F.sum(x_real_fft ** 2.0, axis=shape[-1])
+    x_recon_fft_p = F.sum(x_recon_fft ** 2.0, axis=shape[-1])
+    loss_image = F.mean(F.squared_error(x_recon_fft_p, x_real_fft_p))
+
+    if not use_patch:
+        return loss_image
+
+    # Power for patches
+    b, h, w, _ = shape
+    s = 4
+    sh, sw = h // s, w // s
+    loss_patch = 0
+    
+    for i in range(s * s):
+        ih = np.random.choice(np.arange(h - sh), replace=False)
+        iw = np.random.choice(np.arange(w - sw), replace=False)
+        x_real_comp_patch = x_real_comp[:, ih:ih + sh, iw:iw + sw, :]
+        x_recon_comp_patch = x_real_comp[:, ih:ih + sh, iw:iw + sw, :]
+        x_real_patch_fft = F.fft(x_real_comp_patch, signal_ndim=2, normalized=True)
+        x_recon_patch_fft = F.fft(x_recon_comp_patch, signal_ndim=2, normalized=True)
+        x_real_patch_fft_p = F.sum(x_real_patch_fft ** 2.0, axis=shape[-1])
+        x_recon_patch_fft_p = F.sum(x_recon_patch_fft ** 2.0, axis=shape[-1])
+        l = F.mean(F.squared_error(x_recon_patch_fft_p, x_real_patch_fft_p))
+        loss_patch += l
+    return loss_image + loss_patch
+
+
 def main():
     # Data
     b, c, h, w = 8, 3, 128, 128

@@ -48,3 +48,10 @@ def normalize_method(x):
     x = (np.clip(x, -1, 1) + 1) * 127.5
     x = x.astype(np.uint8)
     return x
+
+
+def rgb2gray(x, reshape=True):
+    b, c, h, w = x.shape
+    gray = 0.299 * x[:, 0, :, :] + 0.587 * x[:, 1, :, :] + 0.114 * x[:, 2, :, :]
+    gray = F.reshape(gray, (b, h, w)) if reshape else gray
+    return gray
