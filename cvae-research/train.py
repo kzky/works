@@ -51,8 +51,7 @@ def train(args):
         # Loss
         recon_loss = loss_recon(x_recon, x).apply(persistent=True)
         kl_loss = loss_kl(mu, logvar, var).apply(persistent=True)
-        fft_loss = loss_fft(rgb2gray(x_recon), rgb2gray(x), args.use_patch)
-        loss = recon_loss + kl_loss + args.lam_fft * fft_loss
+        loss = recon_loss + kl_loss
     
         # Set params to solver
         solver.set_parameters(nn.get_parameters())
