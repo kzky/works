@@ -51,8 +51,6 @@ def get_args(batch_size=32, ih=128, iw=128, max_iter=158275, save_interval=1000,
                         help="Model load path to a h5 file used in generation and validation.")
     parser.add_argument("--sigma", type=float, default=1.0, 
                         help="Noise level")
-    parser.add_argument("--solver", type=str, default="Momentum", 
-                        help="Solver")
     parser.add_argument("--lr", type=float, default=1e-3,
                         help="Learning rate")
     parser.add_argument("--beta1", type=float, default=0.9,
