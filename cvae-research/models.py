@@ -76,6 +76,35 @@ def infer(x, sigma=1.0, T=100):
     return z, mu, logvar, var
 
 
+def rgb_to_gray(x, c0=0.2989, c1=0.5870, c2=0.1140, reshape=True):
+    b, c, h, w = x.shape
+    r, g, b = x[:, 0, :, :], x[:, 1, :, :], x[:, 2, :, :]
+    gray = c0 * r + c1 * g + c2 * b
+    gray = gray.reshape((b, h, w)) if reshape else gray
+    return 
+
+
+def laplacian_pyramid(x, level=1):
+    h = x
+    ds = []
+    for i in range(level):
+        s = F.average_pooling(h, (2, 2))
+        u = F.unpooling(s, (2, 2))
+        d = h - u
+        h = s
+        ds += [d]
+    return ds
+
+
+def loss_edge(x, y, level=1):
+    loss = 0
+    lp_xs = laplacian_pyramid(x, level)
+    lp_ys = laplacian_pyramid(y, level)
+    for lp_x, lp_y in zip (lp_xs, lp_ys):
+        loss += F.mean(F.squared_error(lp_x, lp_y))
+    return loss
+
+
 def loss_recon(x_recon, x_real):
     loss = F.mean(F.squared_error(x_recon, x_real))
     return loss
