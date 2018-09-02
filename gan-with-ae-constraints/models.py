@@ -13,7 +13,12 @@ from nnabla.parametric_functions import parametric_function_api
 
 import nnabla.initializer as I
 
-#TODO: conditioning
+
+def pixel_wise_feature_vector_normalization(h, eps=1e-8):
+    mean = F.mean(F.pow_scalar(h, 2), axis=1, keepdims=True)
+    deno = F.pow_scalar(mean + eps, 0.5)
+    return F.div2(h, F.broadcast(deno, h.shape))
+
 
 def convblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), 
               test=False, name="convblock"):
@@ -26,15 +31,21 @@ def convblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2),
 
 
 def encoder(x, maps=16, test=False):
-    h = x
-    h = convblock(h, maps * 1, test=test, name="convblock-1")
-    h = convblock(h, maps * 2, test=test, name="convblock-2")
-    h = convblock(h, maps * 4, test=test, name="convblock-3")
-    h = convblock(h, maps * 8, test=test, name="convblock-4")
-    h = convblock(h, maps * 16, test=test, name="convblock-5")
-    h = convblock(h, maps * 32, test=test, name="convblock-6")
-    h = convblock(h, maps * 32, test=test, name="convblock-7")
+    with nn.parameter_scope("encoder"):
+        h = x
+        h = convblock(h, maps * 1, test=test, name="convblock-1")
+        h = convblock(h, maps * 2, test=test, name="convblock-2")
+        h = convblock(h, maps * 4, test=test, name="convblock-3")
+        h = convblock(h, maps * 8, test=test, name="convblock-4")
+        h = convblock(h, maps * 16, test=test, name="convblock-5")
+        h = convblock(h, maps * 32, test=test, name="convblock-6")
+        h = convblock(h, maps * 32, test=test, name="convblock-7")
     return h
+
+
+def discriminator(x, maps=16, test=False, shared=True):
+    if shared:
+        return encoder(x, maps=maps, test=test)
 
 
 def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), use_deconv=False, 
@@ -52,28 +63,22 @@ def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), use_deconv=Fa
 
 
 def decoder(z, maps=512, test=False):
-    h = z
-    h = deconvblock(h, maps // 1, test=test, name="deconvblock-1")
-    h = deconvblock(h, maps // 1, test=test, name="deconvblock-2")
-    h = deconvblock(h, maps // 2, test=test, name="deconvblock-3")
-    h = deconvblock(h, maps // 4, test=test, name="deconvblock-4")
-    h = deconvblock(h, maps // 8, test=test, name="deconvblock-5")
-    h = deconvblock(h, maps // 16, test=test, name="deconvblock-6")
-    h = deconvblock(h, maps // 32, test=test, name="deconvblock-7")
-    h = PF.convolution(h, 3, kernel=(3, 3), pad=(1, 1), name="last-conv")
+    with nn.parameter_scope("decoder"):
+        h = z
+        h = deconvblock(h, maps // 1, test=test, name="deconvblock-1")
+        h = deconvblock(h, maps // 1, test=test, name="deconvblock-2")
+        h = deconvblock(h, maps // 2, test=test, name="deconvblock-3")
+        h = deconvblock(h, maps // 4, test=test, name="deconvblock-4")
+        h = deconvblock(h, maps // 8, test=test, name="deconvblock-5")
+        h = deconvblock(h, maps // 16, test=test, name="deconvblock-6")
+        h = deconvblock(h, maps // 32, test=test, name="deconvblock-7")
+        h = PF.convolution(h, 3, kernel=(3, 3), pad=(1, 1), name="last-conv")
     return h
 
 
-def infer(x, sigma=1.0, T=100):
-    #TODO: sphere-constraint
-    b, c, h, w = x.shape
-    mu = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
-    logvar = PF.convolution(x, c, kernel=(1, 1), pad=(0, 0))
-    var = F.exp(logvar)
-    std = F.pow_scalar(var, 0.5)
-    n = F.randn(sigma=sigma, shape=(b, c, h, w))
-    z = x + std * n
-    return z, mu, logvar, var
+def generator(x, maps=16, test=False, shared=True):
+    if shared:
+        return decoder(x, maps=maps, test=test)
 
 
 def rgb_to_gray(x, c0=0.2989, c1=0.5870, c2=0.1140, reshape=True):
@@ -105,8 +110,8 @@ def loss_edge(x, y, level=1):
     return loss
 
 
-def loss_recon(x_recon, x_real):
-    loss = F.mean(F.squared_error(x_recon, x_real))
+def loss_rec(x_rec, x_real):
+    loss = F.mean(F.squared_error(x_rec, x_real))
     return loss
 
 
@@ -115,20 +120,27 @@ def loss_kl(mu, logvar, var):
     return loss
 
 
-def loss_fft(x_recon, x_real, use_patch=False):
+def loss_gan(d_x_fake, d_x_real=None):
+    """Least Square Loss"""
+        if d_x_real is None:
+            return F.mean(F.pow_scalar((d_x_fake - 1.0), 2.0))
+        return F.mean(F.pow_scalar((d_x_real - 1.0), 2.0) + F.pow_scalar(d_x_fake, 2.))
+
+
+def loss_fft(x_rec, x_real, use_patch=False):
     shape = x_real.shape + (1, )
     imag = nn.Variable.from_numpy_array(np.zeros(shape))
     x_real_real = F.reshape(x_real, shape, inplace=False)
     x_real_comp = F.concatenate(x_real_real, imag, axis=len(shape) - 1)
-    x_recon_real = F.reshape(x_recon, shape, inplace=False)
-    x_recon_comp = F.concatenate(x_recon_real, imag, axis=len(shape) - 1)
+    x_rec_real = F.reshape(x_rec, shape, inplace=False)
+    x_rec_comp = F.concatenate(x_rec_real, imag, axis=len(shape) - 1)
 
     # Power for whole image
     x_real_fft = F.fft(x_real_comp, signal_ndim=2, normalized=True)
-    x_recon_fft = F.fft(x_recon_comp, signal_ndim=2, normalized=True)
+    x_rec_fft = F.fft(x_rec_comp, signal_ndim=2, normalized=True)
     x_real_fft_p = F.sum(x_real_fft ** 2.0, axis=shape[-1])
-    x_recon_fft_p = F.sum(x_recon_fft ** 2.0, axis=shape[-1])
-    loss_image = F.mean(F.squared_error(x_recon_fft_p, x_real_fft_p))
+    x_rec_fft_p = F.sum(x_rec_fft ** 2.0, axis=shape[-1])
+    loss_image = F.mean(F.squared_error(x_rec_fft_p, x_real_fft_p))
 
     if not use_patch:
         return loss_image
@@ -143,12 +155,12 @@ def loss_fft(x_recon, x_real, use_patch=False):
         ih = np.random.choice(np.arange(h - sh), replace=False)
         iw = np.random.choice(np.arange(w - sw), replace=False)
         x_real_comp_patch = x_real_comp[:, ih:ih + sh, iw:iw + sw, :]
-        x_recon_comp_patch = x_real_comp[:, ih:ih + sh, iw:iw + sw, :]
+        x_rec_comp_patch = x_real_comp[:, ih:ih + sh, iw:iw + sw, :]
         x_real_patch_fft = F.fft(x_real_comp_patch, signal_ndim=2, normalized=True)
-        x_recon_patch_fft = F.fft(x_recon_comp_patch, signal_ndim=2, normalized=True)
+        x_rec_patch_fft = F.fft(x_rec_comp_patch, signal_ndim=2, normalized=True)
         x_real_patch_fft_p = F.sum(x_real_patch_fft ** 2.0, axis=shape[-1])
-        x_recon_patch_fft_p = F.sum(x_recon_patch_fft ** 2.0, axis=shape[-1])
-        l = F.mean(F.squared_error(x_recon_patch_fft_p, x_real_patch_fft_p))
+        x_rec_patch_fft_p = F.sum(x_rec_patch_fft ** 2.0, axis=shape[-1])
+        l = F.mean(F.squared_error(x_rec_patch_fft_p, x_real_patch_fft_p))
         loss_patch += l
     return loss_image + loss_patch
 
@@ -162,12 +174,12 @@ def main():
     e = encoder(x, maps)
     print("Encode:", e)
     z, mu, logvar, var = infer(e)
-    x_recon = decoder(z, maps * 32)
-    print("Recon", x_recon)
+    x_rec = decoder(z, maps * 32)
+    print("Rec", x_rec)
     # Loss
-    recon_loss = loss_recon(x_recon, x)
+    rec_loss = loss_rec(x_rec, x)
     kl_loss = loss_kl(mu, logvar, var)
-    loss = recon_loss + kl_loss
+    loss = rec_loss + kl_loss
 
     print("Loss", loss)
 

@@ -25,10 +25,10 @@ def evaluate(args):
     # Model
     nn.load_parameters(args.model_load_path)
     x = nn.Variable([args.batch_size, 3, args.ih, args.iw])
-    e = encoder(x, args.maps)
+    e = encoder(x, args.maps, test=True)
     z, mu, logvar, var = infer(e, sigma=args.sigma)
     z = z + nn.Variable.from_numpy_array(np.random.choice([-1, 1], z.shape))
-    x_recon = decoder(z, args.maps * 32).apply(persistent=True)
+    x_recon = decoder(z, args.maps * 32, test=True).apply(persistent=True)
 
     # Data iterator
     di = data_iterator_celebA(args.valid_data_path, args.batch_size)
