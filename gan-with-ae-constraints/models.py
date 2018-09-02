@@ -62,7 +62,7 @@ def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), use_deconv=Fa
     return h
 
 
-def decoder(z, maps=512, test=False):
+def decoder(z, maps=512, test=False, last_act="linear"):
     with nn.parameter_scope("decoder"):
         h = z
         h = deconvblock(h, maps // 1, test=test, name="deconvblock-1")
@@ -73,10 +73,11 @@ def decoder(z, maps=512, test=False):
         h = deconvblock(h, maps // 16, test=test, name="deconvblock-6")
         h = deconvblock(h, maps // 32, test=test, name="deconvblock-7")
         h = PF.convolution(h, 3, kernel=(3, 3), pad=(1, 1), name="last-conv")
+        h = h if last_act == "linear" else F.tanh(h)
     return h
 
 
-def generator(x, maps=16, test=False, shared=True):
+def generator(x, maps=512, test=False, shared=True):
     if shared:
         return decoder(x, maps=maps, test=test)
 
@@ -122,9 +123,9 @@ def loss_kl(mu, logvar, var):
 
 def loss_gan(d_x_fake, d_x_real=None):
     """Least Square Loss"""
-        if d_x_real is None:
-            return F.mean(F.pow_scalar((d_x_fake - 1.0), 2.0))
-        return F.mean(F.pow_scalar((d_x_real - 1.0), 2.0) + F.pow_scalar(d_x_fake, 2.))
+    if d_x_real is None:
+        return F.mean(F.pow_scalar((d_x_fake - 1.0), 2.0))
+    return F.mean(F.pow_scalar((d_x_real - 1.0), 2.0) + F.pow_scalar(d_x_fake, 2.))
 
 
 def loss_fft(x_rec, x_real, use_patch=False):
