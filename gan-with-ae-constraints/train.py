@@ -43,7 +43,7 @@ def train(args):
     e = encoder(x_real, args.maps)
     e = pixel_wise_feature_vector_normalization(e)
     x_rec = decoder(e, args.maps * 32).apply(persistent=True)
-    z = e + F.randn(shape=e.shape)
+    z = e + pixel_wise_feature_vector_normalization(F.randn(shape=e.shape))
     z = pixel_wise_feature_vector_normalization(z).apply(need_grad=False)
     x_fake = generator(z, test=False)
     d_fake = discriminator(x_fake, test=False)
