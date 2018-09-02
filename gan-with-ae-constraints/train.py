@@ -50,18 +50,18 @@ def train(args):
     d_real = discriminator(x_real, test=False)
     
     # Loss
-    rec_loss = loss_rec(x_rec, x_real).apply(persistent=True)
-    gen_loss = loss_gan(d_fake).apply(persistent=True)
-    dis_loss = loss_gan(d_fake, d_real).apply(persistent=True)
+    vloss_rec = loss_rec(x_rec, x_real).apply(persistent=True)
+    vloss_gen = loss_gan(d_fake).apply(persistent=True)
+    vloss_dis = loss_gan(d_fake, d_real).apply(persistent=True)
     
         
     # Solver
     solver_enc = S.Adam(args.lr, args.beta1, args.beta2)
     with nn.parameter_scope("encoder"):
-        solver.set_parameters(nn.get_parameters())
+        solver_enc.set_parameters(nn.get_parameters())
     solver_dec = S.Adam(args.lr, args.beta1, args.beta2)
     with nn.parameter_scope("decoder"):
-        solver.set_parameters(nn.get_parameters())
+        solver_dec.set_parameters(nn.get_parameters())
     solver_gen = solver_dec
     solver_dis = solver_enc
 
@@ -76,24 +76,24 @@ def train(args):
 
         # Train Auto-Encoder
         solver_enc.zero_grad(), solver_dec.zero_grad()
-        loss_rec.forward(clear_no_need_grad=True)
-        loss_rec.backward(clear_buffer=True)
+        vloss_rec.forward(clear_no_need_grad=True)
+        vloss_rec.backward(clear_buffer=True)
         solver_enc.update(), solver_dec.update()
         # Train Generator
         solver_gen.zero_grad()
-        loss_gen.forward(clear_no_need_grad=True)
-        loss_gen.backward(clear_buffer=True)
+        vloss_gen.forward(clear_no_need_grad=True)
+        vloss_gen.backward(clear_buffer=True)
         solver_gen.update()
         # Train Discriminator
         solver_dis.zero_grad()
-        loss_dis.forward(clear_no_need_grad=True)
-        loss_dis.backward(clear_buffer=True)
+        vloss_dis.forward(clear_no_need_grad=True)
+        vloss_dis.backward(clear_buffer=True)
         solver_dis.update()
         
         # Monitor and save
-        monitor_rec_loss.add(i, rec_loss.d)
-        monitor_gen_loss.add(i, gen_loss.d)
-        monitor_dis_loss.add(i, dis_loss.d)
+        monitor_rec_loss.add(i, vloss_rec.d)
+        monitor_gen_loss.add(i, vloss_gen.d)
+        monitor_dis_loss.add(i, vloss_dis.d)
         monitor_time.add(i)
         if i % args.save_interval == 0:
             monitor_image_origin.add(i, x_real.d)
