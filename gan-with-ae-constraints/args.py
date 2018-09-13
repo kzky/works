@@ -51,14 +51,16 @@ def get_args(batch_size=32, ih=128, iw=128, max_iter=158275, save_interval=1000,
                         help="Model load path to a h5 file used in generation and validation.")
     parser.add_argument("--sigma", type=float, default=1.0, 
                         help="Noise level")
-    parser.add_argument("--lr", type=float, default=1e-3,
+    parser.add_argument("--lr", type=float, default=2e-4,
                         help="Learning rate")
-    parser.add_argument("--beta1", type=float, default=0.9,
+    parser.add_argument("--beta1", type=float, default=0.5,
                         help="beta1 of Adam")
     parser.add_argument("--beta2", type=float, default=0.999,
                         help="beta2 of Adam")
-    parser.add_argument("--lam-fft", type=float, default=1.0,
-                        help="lambda fft loss")
+    parser.add_argument("--lam", type=float, default=1.0,
+                        help="Lambda for weights of objectives.")
+    parser.add_argument("--use-pfvn", action="store_true",
+                        help="Use pixel-wise feature vector normalization for encodings.")
     parser.add_argument("--use-patch", action="store_true",
                         help="Use patch also for fft.")
     parser.add_argument("--weight-decay-rate", type=float, default=1e-4, 

@@ -39,21 +39,23 @@ def train(args):
                                      normalize_method=normalize_method)
         
     # Model
-    x_real = nn.Variable([args.batch_size, 3, args.ih, args.iw])
-    e = encoder(x_real, args.maps)
-    e = pixel_wise_feature_vector_normalization(e)
+    x_real0 = nn.Variable([args.batch_size, 3, args.ih, args.iw])
+    x_real1 = nn.Variable([args.batch_size, 3, args.ih, args.iw])
+    e = encoder(x_real0, args.maps)
+    e = pixel_wise_feature_vector_normalization(e) if args.use_pfvn else e
     x_rec = decoder(e, args.maps * 32).apply(persistent=True)
-    z = e + pixel_wise_feature_vector_normalization(F.randn(shape=e.shape))
-    z = pixel_wise_feature_vector_normalization(z).apply(need_grad=False)
+    r = F.randn(shape=e.shape)
+    z = e + pixel_wise_feature_vector_normalization(r) if args.use_pfvn else r
+    z = pixel_wise_feature_vector_normalization(z).apply(need_grad=False) \
+        if args.use_pfvn else z.apply(need_grad=False)
     x_fake = generator(z, test=False)
     d_fake = discriminator(x_fake, test=False)
-    d_real = discriminator(x_real, test=False)
+    d_real = discriminator(x_real1, test=False)
     
     # Loss
-    vloss_rec = loss_rec(x_rec, x_real).apply(persistent=True)
-    vloss_gen = loss_gan(d_fake).apply(persistent=True)
-    vloss_dis = loss_gan(d_fake, d_real).apply(persistent=True)
-    
+    vloss_rec = loss_rec(x_rec, x_real0).apply(persistent=True)
+    vloss_gen = args.lam * loss_gan(d_fake).apply(persistent=True)
+    vloss_dis = args.lam * loss_gan(d_fake, d_real).apply(persistent=True)
         
     # Solver
     solver_enc = S.Adam(args.lr, args.beta1, args.beta2)
@@ -72,18 +74,23 @@ def train(args):
     for i in range(args.max_iter):
         # Feed data
         x_data = di.next()[0]
-        x_real.d = x_data
-
+        x_real0.d = x_data
         # Train Auto-Encoder
-        solver_enc.zero_grad(), solver_dec.zero_grad()
+        solver_enc.zero_grad()
+        solver_dec.zero_grad()
         vloss_rec.forward(clear_no_need_grad=True)
         vloss_rec.backward(clear_buffer=True)
-        solver_enc.update(), solver_dec.update()
+        solver_enc.update()
+        solver_dec.update()
         # Train Generator
         solver_gen.zero_grad()
         vloss_gen.forward(clear_no_need_grad=True)
         vloss_gen.backward(clear_buffer=True)
         solver_gen.update()
+
+        # Feed data
+        x_data = di.next()[0]
+        x_real1.d = x_data
         # Train Discriminator
         solver_dis.zero_grad()
         vloss_dis.forward(clear_no_need_grad=True)
@@ -96,14 +103,13 @@ def train(args):
         monitor_dis_loss.add(i, vloss_dis.d)
         monitor_time.add(i)
         if i % args.save_interval == 0:
-            monitor_image_origin.add(i, x_real.d)
+            monitor_image_origin.add(i, x_real0.d)
             monitor_image_rec.add(i, x_rec.d)
             monitor_image_gen.add(i, x_fake.d)
             nn.save_parameters("{}/param_{}.h5".format(args.monitor_path, i))
 
     # Monitor and save
     monitor_rec_loss.add(i, rec_loss.d)
-    monitor_kl_loss.add(i, kl_loss.d)
     monitor_time.add(i)
     monitor_image.add(i, x_rec.d)
     nn.save_parameters("{}/param_{}.h5".format(args.monitor_path, i))
