@@ -30,17 +30,20 @@ def convblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2),
     return h
 
 
+def append(h, h_list):
+    h_list.append(h)
+    return h
+
+
 def encoder(x, maps=16, test=False):
     with nn.parameter_scope("encoder"):
+        h_list = []
         h = x
-        h = convblock(h, maps * 1, test=test, name="convblock-1")
-        h = convblock(h, maps * 2, test=test, name="convblock-2")
-        h = convblock(h, maps * 4, test=test, name="convblock-3")
-        h = convblock(h, maps * 8, test=test, name="convblock-4")
-        h = convblock(h, maps * 16, test=test, name="convblock-5")
-        h = convblock(h, maps * 32, test=test, name="convblock-6")
+        for i, r in enumerate([1, 2, 4, 8, 16, 32]):
+            h = convblock(h, maps * r, test=test, name="convblock-{}".format(i + 1))
+            h_list.append(h)
         h = convblock(h, maps * 32, test=test, name="convblock-7")
-    return h
+    return h, h_list
 
 
 def discriminator(x, maps=16, test=False, shared=True):
@@ -62,24 +65,22 @@ def deconvblock(x, maps, kernel=(4, 4), pad=(1, 1), stride=(2, 2), use_deconv=Fa
     return h
 
 
-def decoder(z, maps=512, test=False, last_act="linear"):
+def decoder(z, maps=512, test=False, last_act="linear", h_list=[]):
     with nn.parameter_scope("decoder"):
         h = z
         h = deconvblock(h, maps // 1, test=test, name="deconvblock-1")
-        h = deconvblock(h, maps // 1, test=test, name="deconvblock-2")
-        h = deconvblock(h, maps // 2, test=test, name="deconvblock-3")
-        h = deconvblock(h, maps // 4, test=test, name="deconvblock-4")
-        h = deconvblock(h, maps // 8, test=test, name="deconvblock-5")
-        h = deconvblock(h, maps // 16, test=test, name="deconvblock-6")
-        h = deconvblock(h, maps // 32, test=test, name="deconvblock-7")
+        for i, e in enumerate(h_list[::-1]):
+            r = e.shape[1]
+            h = F.concatenate(*[h, e], axis=1)
+            h = deconvblock(h, maps // r, test=test, name="deconvblock-{}".format(i+2))
         h = PF.convolution(h, 3, kernel=(3, 3), pad=(1, 1), name="last-conv")
         h = h if last_act == "linear" else F.tanh(h)
     return h
 
 
-def generator(x, maps=512, test=False, shared=True):
+def generator(x, maps=512, test=False, shared=True, h_list=[]):
     if shared:
-        return decoder(x, maps=maps, test=test)
+        return decoder(x, maps=maps, test=test, h_list=h_list)
 
 
 def rgb_to_gray(x, c0=0.2989, c1=0.5870, c2=0.1140, reshape=True):
@@ -172,17 +173,9 @@ def main():
     maps = 16
     x = nn.Variable([b, c, h, w])
     # Network
-    e = encoder(x, maps)
-    print("Encode:", e)
-    z, mu, logvar, var = infer(e)
-    x_rec = decoder(z, maps * 32)
-    print("Rec", x_rec)
-    # Loss
-    rec_loss = loss_rec(x_rec, x)
-    kl_loss = loss_kl(mu, logvar, var)
-    loss = rec_loss + kl_loss
-
-    print("Loss", loss)
+    e, h_list = encoder(x, maps)
+    x_rec = decoder(e, maps * 32, h_list=h_list)
+    
 
 if __name__ == '__main__':
     main()
