@@ -26,3 +26,10 @@ screen -Sdm "example-6" bash -c "python train.py -d 1 --train-data-path /data/da
 
 # 
 screen -Sdm "example-7" bash -c "python train.py -d 2 --train-data-path /data/datasets/celebA/img_align_celeba_png --monitor-path result/example_7"
+
+
+# 
+screen -Sdm "example-8" bash -c "python train.py -d 2 --train-data-path /data/datasets/celebA/img_align_celeba_png --monitor-path result/example_8 --lam 0.1 --use-pfvn"
+
+# 
+screen -Sdm "example-9" bash -c "python train.py -d 3 --train-data-path /data/datasets/celebA/img_align_celeba_png --monitor-path result/example_9 --lam 0.1"

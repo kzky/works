@@ -15,7 +15,8 @@ from datasets import data_iterator_celebA
 from args import get_args, save_args
 from models import (encoder, decoder, generator, discriminator, 
                     loss_rec, loss_edge, loss_gan, 
-                    pixel_wise_feature_vector_normalization)
+                    pixel_wise_feature_vector_normalization, 
+                    add_noises)
 from helpers import normalize_method, rgb2gray
 
 def train(args):
@@ -53,9 +54,9 @@ def train(args):
     d_real, _ = discriminator(x_real1, test=False)
     
     # Loss
-    vloss_rec = loss_rec(x_rec, x_real0).apply(persistent=True)
-    vloss_gen = args.lam * loss_gan(d_fake).apply(persistent=True)
-    vloss_dis = args.lam * loss_gan(d_fake, d_real).apply(persistent=True)
+    vloss_rec = args.lam * loss_rec(x_rec, x_real0).apply(persistent=True)
+    vloss_gen = loss_gan(d_fake).apply(persistent=True)
+    vloss_dis = loss_gan(d_fake, d_real).apply(persistent=True)
         
     # Solver
     solver_enc = S.Adam(args.lr, args.beta1, args.beta2)
