@@ -78,6 +78,23 @@ def decoder(z, maps=512, test=False, last_act="linear", h_list=[]):
     return h
 
 
+def add_noises(e, h_list, use_pfvn):
+    # Add noise to the last encode
+    r = F.randn(shape=e.shape)
+    z = e + pixel_wise_feature_vector_normalization(r) if use_pfvn else r
+    z = pixel_wise_feature_vector_normalization(z).apply(need_grad=False) \
+        if use_pfvn else z.apply(need_grad=False)
+    z_list = []
+    # Add noise to the intrmediate encodes
+    for h in h_list:
+        r = F.randn(shape=h.shape)
+        z_h = h + pixel_wise_feature_vector_normalization(r) if use_pfvn else r
+        z_h = pixel_wise_feature_vector_normalization(z_h).apply(need_grad=False) \
+              if use_pfvn else z_h.apply(need_grad=False)
+        z_list.append(z_h)
+    return z, z_list
+
+
 def generator(x, maps=512, test=False, shared=True, h_list=[]):
     if shared:
         return decoder(x, maps=maps, test=test, h_list=h_list)

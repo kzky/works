@@ -45,11 +45,8 @@ def train(args):
     e, h_list = encoder(x_real0, args.maps)
     e = pixel_wise_feature_vector_normalization(e) if args.use_pfvn else e
     x_rec = decoder(e, args.maps * 32, h_list=h_list).apply(persistent=True)
-    r = F.randn(shape=e.shape)
-    z = e + pixel_wise_feature_vector_normalization(r) if args.use_pfvn else r
-    z = pixel_wise_feature_vector_normalization(z).apply(need_grad=False) \
-        if args.use_pfvn else z.apply(need_grad=False)
-    x_fake = generator(z, test=False, h_list=h_list)
+    z, z_list = add_noises(e, h_list, args.use_pfvn)
+    x_fake = generator(z, test=False, h_list=z_list)
     d_fake, _ = discriminator(x_fake, test=False)
     d_real, _ = discriminator(x_real1, test=False)
     
