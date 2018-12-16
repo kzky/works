@@ -27,10 +27,10 @@ import nnabla.solvers as S
 import numpy as np
 from scipy import linalg
 
-def generate_random_class(n_classes, batch_size):
+def generate_random_class(n_classes, batch_size, replace=False):
     return np.random.choice(np.arange(n_classes),
                             batch_size,
-                            replace=False)
+                            replace=replace)
 
 
 def generate_one_class(class_id, batch_size):

@@ -43,6 +43,7 @@ def generate(args):
     image_size = args.image_size
     n_classes = args.n_classes
     not_sn = args.not_sn
+    replace = False if n_classes >= batch_size else True
     threshold = args.truncation_threshold
 
     # Model
@@ -84,7 +85,7 @@ def generate(args):
                                  num_images=args.batch_size,
                                  normalize_method=normalize_method)
     z_data = resample(batch_size, latent, threshold)
-    y_data = generate_random_class(n_classes, batch_size) if args.class_id == -1 else \
+    y_data = generate_random_class(n_classes, batch_size, replace) if args.class_id == -1 else \
              generate_one_class(args.class_id, batch_size)
     z.d = z_data
     y_fake.d = y_data

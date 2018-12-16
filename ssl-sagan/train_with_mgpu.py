@@ -50,6 +50,7 @@ def train(args):
     image_size = args.image_size
     n_classes = args.n_classes
     not_sn = args.not_sn
+    replace = False if n_classes >= batch_size else True
     
     # Model
     np.random.seed(412)  # workaround to start with the same weights in the distributed system.
@@ -66,7 +67,7 @@ def train(args):
     loss_dis = gan_loss(p_fake, p_real) / args.accum_grad
     # generator with fixed value for test
     z_test = nn.Variable.from_numpy_array(np.random.randn(batch_size, latent))
-    y_test = nn.Variable.from_numpy_array(generate_random_class(n_classes, batch_size))
+    y_test = nn.Variable.from_numpy_array(generate_random_class(n_classes, batch_size, replace))
     x_test = generator(z_test, y_test, maps=maps, n_classes=n_classes, test=True, sn=not_sn)
                        
     # Solver
@@ -110,7 +111,7 @@ def train(args):
             x_real.d, y_real.d = x_data, y_data.flatten()
             # feed z and y_fake
             z_data = np.random.randn(args.batch_size, args.latent)
-            y_data = generate_random_class(args.n_classes, args.batch_size)
+            y_data = generate_random_class(args.n_classes, args.batch_size, replace)
             z.d, y_fake.d = z_data, y_data
             loss_dis.forward(clear_no_need_grad=True)
             loss_dis.backward(1.0 / (args.accum_grad * n_devices), clear_buffer=True)
@@ -122,7 +123,7 @@ def train(args):
         solver_gen.zero_grad()
         for _ in range(args.accum_grad):
             z_data = np.random.randn(args.batch_size, args.latent)
-            y_data = generate_random_class(args.n_classes, args.batch_size)
+            y_data = generate_random_class(args.n_classes, args.batch_size, replace)
             z.d, y_fake.d = z_data, y_data
             loss_gen.forward(clear_no_need_grad=True)
             loss_gen.backward(1.0 / (args.accum_grad * n_devices), clear_buffer=True)
