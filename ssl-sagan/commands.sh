@@ -22,7 +22,7 @@
 # 10 picked clasees
 #####################
 python train.py -d 0 -c cudnn -b 32 -a 2 -t float \
-       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_abs \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
        --monitor-path ./result/10_picked_000 \
        --n-classes 10 \
@@ -30,7 +30,7 @@ python train.py -d 0 -c cudnn -b 32 -a 2 -t float \
        --save-interval 100
 
 python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
-       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_abs \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
        --monitor-path ./result/10_picked_001 \
        --n-classes 10 \
@@ -42,7 +42,7 @@ python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
 # 10 picked dog classes
 #######################
 python train.py -d 2 -c cudnn -b 32 -a 2 -t float \
-       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_abs \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
        --monitor-path ./result/10_picked_dog_000 \
        --n-classes 10 \
@@ -51,7 +51,7 @@ python train.py -d 2 -c cudnn -b 32 -a 2 -t float \
 
 
 python train.py -d 3 -c cudnn -b 32 -a 1 -t float \
-       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_abs \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
        --monitor-path ./result/10_picked_dog_001 \
        --n-classes 10 \
