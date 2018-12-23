@@ -32,7 +32,7 @@ import numpy as np
 
 
 def generate_images(model_load_path,
-                    batch_size=16, n_latent=512, use_bn=False,
+                    batch_size=16, n_latent=512, use_bn=True,
                     hyper_sphere=True, last_act='tanh',
                     use_wscale=True, use_he_backward=False,
                     resolution_list=[4, 8, 16, 32, 64, 128],
@@ -49,7 +49,7 @@ def generate_images(model_load_path,
 
 def generate_interpolated_images(model_load_path,
                                  batch_size=16, n_latent=512,
-                                 use_bn=False, hyper_sphere=True, last_act='tanh',
+                                 use_bn=True, hyper_sphere=True, last_act='tanh',
                                  use_wscale=True, use_he_backward=False,
                                  resolution_list=[4, 8, 16, 32, 64, 128],
                                  channel_list=[512, 512, 256, 128, 64, 32]):

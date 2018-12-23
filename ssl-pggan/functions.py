@@ -62,7 +62,7 @@ def layer_normalization(inp, fix_parameters=False):
     return f_layer_normalization(inp, beta, gamma)
 
 
-def BN(h, use_bn=False, test=False):
+def BN(h, use_bn=True, test=False):
     if use_bn:
         return PF.batch_normalization(h, batch_stat=not test)
     else:

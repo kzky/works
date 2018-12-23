@@ -34,7 +34,7 @@ import numpy as np
 
 
 class Generator:
-    def __init__(self, use_bn=False, last_act='tanh',
+    def __init__(self, use_bn=True, last_act='tanh',
                  use_wscale=True, use_he_backward=False):
         self.resolution_list = []
         self.channel_list = []
@@ -101,18 +101,15 @@ class Generator:
                 h = affine(h, channel * 4 * 4, with_bias=not self.use_bn,
                            use_wscale=self.use_wscale,
                            use_he_backward=self.use_he_backward)
-                h = BN(h, use_bn=self.use_bn, test=test)
                 h = F.reshape(h, (h.shape[0], channel, 4, 4))
-                h = pixel_wise_feature_vector_normalization(
-                    BN(h, use_bn=self.use_bn, test=test))
+                h = BN(h, use_bn=self.use_bn, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
                          with_bias=not self.use_bn,
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = pixel_wise_feature_vector_normalization(
-                    BN(h, use_bn=self.use_bn, test=test))
+                h = BN(h, use_bn=self.use_bn, test=test)
                 h = self.activation(h)
         return h
 
@@ -133,16 +130,14 @@ class Generator:
                          with_bias=not self.use_bn,
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = pixel_wise_feature_vector_normalization(
-                    BN(h, use_bn=self.use_bn, test=test))
+                h = BN(h, use_bn=self.use_bn, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
                          with_bias=not self.use_bn,
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = pixel_wise_feature_vector_normalization(
-                    BN(h, use_bn=self.use_bn, test=test))
+                h = BN(h, use_bn=self.use_bn, test=test)
                 h = self.activation(h)
         return h
 

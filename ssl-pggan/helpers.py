@@ -59,7 +59,7 @@ class MonitorImageTileWithName(MonitorImageTile):
         imsave(path, tile)
 
 
-def load_gen(model_load_path, use_bn=False, last_act='tanh',
+def load_gen(model_load_path, use_bn=True, last_act='tanh',
              use_wscale=True, use_he_backward=True,
              resolution_list=[4, 8, 16, 32, 64, 128], channel_list=[512, 512, 256, 128, 64, 32]):
     """Load generator and grow it
