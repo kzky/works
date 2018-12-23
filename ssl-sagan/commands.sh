@@ -37,7 +37,7 @@ python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
        --max-iter 80000 \
        --save-interval 800
 
-# Fix iteration with large batch size
+# Fix iteration with large batch size -> bug in loss scaling using accum_grad
 python train.py -d 0 -c cudnn -b 32 -a 8 -t float \
        -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
@@ -55,6 +55,24 @@ python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
        --max-iter 800000 \
        --save-interval 8000
 
+# 004: Fix iteration with large batch size and bug in accum_grad
+python train.py -d 0 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
+       --monitor-path ./result/10_picked_004 \
+       --n-classes 10 \
+       --max-iter 100000 \
+       --save-interval 1000
+
+# 005: Fix iteration with large batch size, fix bug in accum_grad, small model
+python train.py -d 1 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
+       --monitor-path ./result/10_picked_005 \
+       --n-classes 10 \
+       --maps 512 \
+       --max-iter 100000 \
+       --save-interval 1000
 
 
 #######################
@@ -77,7 +95,7 @@ python train.py -d 3 -c cudnn -b 32 -a 1 -t float \
        --max-iter 80000 \
        --save-interval 800
 
-# Fix iteration with large batch size
+# Fix iteration with large batch size -> bug in loss scaling using accum_grad
 python train.py -d 2 -c cudnn -b 32 -a 8 -t float \
        -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
@@ -94,3 +112,22 @@ python train.py -d 3 -c cudnn -b 32 -a 1 -t float \
        --n-classes 10 \
        --max-iter 800000 \
        --save-interval 8000
+
+# 004: Fix iteration with large batch size, fix bug in accum_grad
+python train.py -d 2 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_004 \
+       --n-classes 10 \
+       --max-iter 100000 \
+       --save-interval 1000
+
+# 005: Fix iteration with large batch size, fix bug in accum_grad, small model
+python train.py -d 3 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_005 \
+       --n-classes 10 \
+       --maps 512 \
+       --max-iter 100000 \
+       --save-interval 1000
