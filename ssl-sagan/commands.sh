@@ -37,6 +37,25 @@ python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
        --max-iter 80000 \
        --save-interval 800
 
+# Fix iteration with large batch size
+python train.py -d 0 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
+       --monitor-path ./result/10_picked_002 \
+       --n-classes 10 \
+       --max-iter 100000 \
+       --save-interval 1000
+
+# Fix iteration with small batch size 
+python train.py -d 1 -c cudnn -b 32 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10 \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_abs.txt \
+       --monitor-path ./result/10_picked_003 \
+       --n-classes 10 \
+       --max-iter 800000 \
+       --save-interval 8000
+
+
 
 #######################
 # 10 picked dog classes
@@ -57,3 +76,21 @@ python train.py -d 3 -c cudnn -b 32 -a 1 -t float \
        --n-classes 10 \
        --max-iter 80000 \
        --save-interval 800
+
+# Fix iteration with large batch size
+python train.py -d 2 -c cudnn -b 32 -a 8 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_002 \
+       --n-classes 10 \
+       --max-iter 100000 \
+       --save-interval 1000
+
+# Fix iteration with small batch size
+python train.py -d 3 -c cudnn -b 32 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_003 \
+       --n-classes 10 \
+       --max-iter 800000 \
+       --save-interval 8000
