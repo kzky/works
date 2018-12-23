@@ -120,7 +120,7 @@ class Generator:
 
         1. Upsampling
         2. Conv
-        3. Pixel-wise normalization
+        3. Batch normalization
         4. Relu
         """
         h = F.unpooling(h, kernel=(2, 2))
