@@ -59,7 +59,7 @@ def main():
                        num_samples=args.valid_samples,
                        dataset_name=args.dataset_name)
     # generator
-    gen = load_gen(args.model_load_path, use_bn=args.use_bn, last_act=args.last_act,
+    gen = load_gen(args.model_load_path, norm=args.norm, last_act=args.last_act,
                    use_wscale=args.not_use_wscale, use_he_backward=args.use_he_backward)
 
     # compute metric

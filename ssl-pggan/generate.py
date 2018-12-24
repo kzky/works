@@ -32,13 +32,13 @@ import numpy as np
 
 
 def generate_images(model_load_path,
-                    batch_size=16, n_latent=512, use_bn=True,
+                    batch_size=16, n_latent=512, norm="PFVN",
                     hyper_sphere=True, last_act='tanh',
                     use_wscale=True, use_he_backward=False,
                     resolution_list=[4, 8, 16, 32, 64, 128],
                     channel_list=[512, 512, 256, 128, 64, 32]):
     # Generate
-    gen = load_gen(model_load_path, use_bn=use_bn, last_act=last_act,
+    gen = load_gen(model_load_path, norm=norm, last_act=last_act,
                    use_wscale=use_wscale, use_he_backward=use_he_backward)
     z_data = np.random.randn(batch_size, n_latent, 1, 1)
     z = nn.Variable.from_numpy_array(z_data)
@@ -49,12 +49,12 @@ def generate_images(model_load_path,
 
 def generate_interpolated_images(model_load_path,
                                  batch_size=16, n_latent=512,
-                                 use_bn=True, hyper_sphere=True, last_act='tanh',
+                                 norm="PFVN", hyper_sphere=True, last_act='tanh',
                                  use_wscale=True, use_he_backward=False,
                                  resolution_list=[4, 8, 16, 32, 64, 128],
                                  channel_list=[512, 512, 256, 128, 64, 32]):
     # Generate
-    gen = load_gen(model_load_path, use_bn=use_bn, last_act=last_act,
+    gen = load_gen(model_load_path, norm=norm, last_act=last_act,
                    use_wscale=use_wscale, use_he_backward=use_he_backward)
     z_data0 = np.random.randn(1, n_latent, 1, 1)
     z_data1 = np.random.randn(1, n_latent, 1, 1)
@@ -95,7 +95,7 @@ def main():
     imgs = []
     for _ in range(side):
         img = generate_images(args.model_load_path,
-                              batch_size=side, use_bn=args.use_bn,
+                              batch_size=side, norm=args.norm,
                               n_latent=args.latent, hyper_sphere=args.hyper_sphere,
                               last_act=args.last_act,
                               use_wscale=args.not_use_wscale,
@@ -109,7 +109,7 @@ def main():
     imgs = []
     for _ in range(side):
         img = generate_interpolated_images(args.model_load_path,
-                                           batch_size=side, use_bn=args.use_bn,
+                                           batch_size=side, norm=args.norm,
                                            n_latent=args.latent, hyper_sphere=args.hyper_sphere,
                                            last_act=args.last_act,
                                            use_wscale=args.not_use_wscale,

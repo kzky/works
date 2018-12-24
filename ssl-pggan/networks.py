@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Sony Corporation. All Rights Reserved.
+#o Copyright (c) 2017 Sony Corporation. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ from functions import (minibatch_stddev,
                        BN,
                        LN,
                        pixel_wise_feature_vector_normalization,
+                       normalize,
+                       use_bias, 
                        conv,
                        affine)
 import nnabla as nn
@@ -34,7 +36,7 @@ import numpy as np
 
 
 class Generator:
-    def __init__(self, use_bn=True, last_act='tanh',
+    def __init__(self, norm="PFVN", last_act='tanh',
                  use_wscale=True, use_he_backward=False):
         self.resolution_list = []
         self.channel_list = []
@@ -45,7 +47,7 @@ class Generator:
         else:
             logger.info("Set the last activation function of the generator.")
             sys.exit(0)
-        self.use_bn = use_bn
+        self.norm = norm
         self.use_wscale = use_wscale
         self.use_he_backward = use_he_backward
 
@@ -98,18 +100,18 @@ class Generator:
         with nn.parameter_scope("phase_{}".format(resolution)):
             # affine is 1x1 conv with 4x4 kernel and 3x3 pad.
             with nn.parameter_scope("conv1"):
-                h = affine(h, channel * 4 * 4, with_bias=not self.use_bn,
+                h = affine(h, channel * 4 * 4, with_bias=use_bias(self.norm),
                            use_wscale=self.use_wscale,
                            use_he_backward=self.use_he_backward)
                 h = F.reshape(h, (h.shape[0], channel, 4, 4))
-                h = BN(h, use_bn=self.use_bn, test=test)
+                h = normalize(h, norm=self.norm, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
-                         with_bias=not self.use_bn,
+                         with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = BN(h, use_bn=self.use_bn, test=test)
+                h = normalize(h, norm=self.norm, test=test)
                 h = self.activation(h)
         return h
 
@@ -127,17 +129,17 @@ class Generator:
         with nn.parameter_scope("phase_{}".format(resolution)):
             with nn.parameter_scope("conv1"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
-                         with_bias=not self.use_bn,
+                         with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = BN(h, use_bn=self.use_bn, test=test)
+                h = normalize(h, norm=self.norm, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
-                         with_bias=not self.use_bn,
+                         with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = BN(h, use_bn=self.use_bn, test=test)
+                h = normalize(h, norm=self.norm, test=test)
                 h = self.activation(h)
         return h
 

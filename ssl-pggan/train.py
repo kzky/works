@@ -47,7 +47,7 @@ def main():
                        num_samples=args.train_samples,
                        dataset_name=args.dataset_name)
     # Model
-    generator = Generator(use_bn=args.use_bn, last_act=args.last_act,
+    generator = Generator(norm=args.norm, last_act=args.last_act,
                           use_wscale=args.not_use_wscale, use_he_backward=args.use_he_backward)
     discriminator = Discriminator(use_ln=args.use_ln, alpha=args.leaky_alpha,
                                   use_wscale=args.not_use_wscale, use_he_backward=args.use_he_backward)

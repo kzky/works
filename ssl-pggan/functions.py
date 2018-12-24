@@ -75,6 +75,81 @@ def LN(h, use_ln):
     else:
         return h
 
+@parametric_function_api("in")
+def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=True):
+    """Instance Normalization
+    """
+    if inp.shape[0] == 1:
+        return INByBatchNorm(inp, axes, decay_rate, eps, fix_parameters)
+
+    b, c = inp.shape[0:2]
+    spacial_shape = inp.shape[2:]
+
+    shape_stat = [1 for _ in inp.shape]
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+    beta = get_parameter_or_create(
+        "beta", shape_stat, ConstantInitializer(0), not fix_parameters)
+    gamma = get_parameter_or_create(
+        "gamma", shape_stat, ConstantInitializer(1), not fix_parameters)
+
+    # Instance normalization
+    # normalize over spatial dimensions
+    axis = [i for i in range(len(inp.shape)) if i > 1]
+    mean = F.sum(inp, axis=axis, keepdims=True) / np.prod(axis)
+    var = F.sum((inp - mean) ** 2.0, axis=axis, keepdims=True) / np.prod(axis)
+                
+    h = (inp - mean) / F.pow_scalar(var + eps, 0.5)
+    return gamma * inp + beta
+
+
+@parametric_function_api("in")
+def INByBatchNorm(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=True):
+    """Instance Normalization (implemented using BatchNormalization)
+    Instance normalization is equivalent to the batch normalization if a batch size is one, in
+    other words, it normalizes over spatial dimension(s), meaning all dimensions except for
+    the batch and feature dimension.
+    """
+    assert len(axes) == 1
+
+    shape_stat = [1 for _ in inp.shape]
+    shape_stat[axes[0]] = inp.shape[axes[0]]
+    beta = get_parameter_or_create(
+        "beta", shape_stat, ConstantInitializer(0), not fix_parameters)
+    gamma = get_parameter_or_create(
+        "gamma", shape_stat, ConstantInitializer(1), not fix_parameters)
+    mean = get_parameter_or_create(
+        "mean", shape_stat, ConstantInitializer(0), False)
+    var = get_parameter_or_create(
+        "var", shape_stat, ConstantInitializer(0), False)
+    return F.batch_normalization(inp, beta, gamma, mean, var, axes,
+                                 decay_rate, eps, batch_stat=True, output_stat=False)
+
+
+def normalize(h, y=None, norm="PFVN", test=False):
+    if norm == "PFVN":
+        return pixel_wise_feature_vector_normalization(h)
+    elif norm == "BN":
+        return PF.batch_normalization(h, batch_stat=not test)
+    elif norm == "IN":
+        return IN(h)
+    elif norm == "CCBN":
+        raise NotImplementedError("CCBN not implemented yet.")
+    else:
+        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN']")
+            
+
+def use_bias(norm):
+    if norm == "PFVN":
+        return True
+    elif norm == "BN":
+        return False
+    elif norm == "CCBN":
+        return False
+    elif norm == "IN":
+        return False
+    else:
+        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN']")
+
 
 @parametric_function_api("conv")
 def affine(inp, n_outmaps,
