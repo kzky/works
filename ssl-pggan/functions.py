@@ -76,7 +76,7 @@ def LN(h, use_ln):
         return h
 
 @parametric_function_api("in")
-def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=True):
+def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False):
     """Instance Normalization
     """
     if inp.shape[0] == 1:
@@ -123,6 +123,25 @@ def INByBatchNorm(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=True):
         "var", shape_stat, ConstantInitializer(0), False)
     return F.batch_normalization(inp, beta, gamma, mean, var, axes,
                                  decay_rate, eps, batch_stat=True, output_stat=False)
+
+
+@parametric_function_api("adain")
+def AdaIN(h, y, fix_parameters=False):
+    """Adaptive Instance Normalization
+    """
+    # 
+    b, c, _, _ = h.shape
+    h = IN(h, name="in", fix_parameters=True)
+
+    def embed_func(y, initializer):
+        o = PF.affine(y, initializer=initializer, with_bias=False).reshape([b, c, 1, 1])
+        return o
+    with nn.parameter_scope("gamma"):
+        gamma = embed_func(y, initializer=ConstantInitializer(1.))
+    with nn.parameter_scope("beta"):
+        beta = embed_func(y, initializer=ConstantInitializer(0.))
+    h = gamma * h + beta
+    return h
 
 
 def normalize(h, y=None, norm="PFVN", test=False):
