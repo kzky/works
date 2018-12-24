@@ -54,7 +54,8 @@ def main():
     num_batches = num_images // args.batch_size
 
     # DataIterator
-    di = data_iterator(args.img_path, args.batch_size,
+    di = data_iterator(args.img_path, args.attr_path,
+                       batch_size=args.batch_size,
                        imsize=(args.imsize, args.imsize),
                        num_samples=args.valid_samples,
                        dataset_name=args.dataset_name)

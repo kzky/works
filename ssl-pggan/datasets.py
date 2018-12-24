@@ -19,11 +19,11 @@ from nnabla.utils.data_iterator import data_iterator_simple
 import os
 from nnabla.utils.image_utils import imread, imresize
 import sys
-
+import csv
 import numpy as np
 
 
-def data_iterator(img_path, batch_size,
+def data_iterator(img_path, attr_path, batch_size=16,
                   imsize=(128, 128), num_samples=100, shuffle=True, rng=None, dataset_name="CelebA"):
     if dataset_name == "CelebA":
         di = data_iterator_celeba(img_path, batch_size,
@@ -34,7 +34,7 @@ def data_iterator(img_path, batch_size,
     return di
 
 
-def data_iterator_celeba(img_path, batch_size, imsize=(128, 128), num_samples=100, shuffle=True, rng=None):
+def data_iterator_celeba(img_path, attr_path, batch_size=16, imsize=(128, 128), num_samples=100, shuffle=True, rng=None):
     imgs = glob.glob("{}/*.png".format(img_path))
     if num_samples == -1:
         num_samples = len(imgs)
@@ -42,12 +42,34 @@ def data_iterator_celeba(img_path, batch_size, imsize=(128, 128), num_samples=10
         logger.info(
             "Num. of data ({}) is used for debugging".format(num_samples))
 
+    if attr_path != "":
+        fname_attr = load_attr_data(attr_path)
+
     def load_func(i):
+        # image
         cx = 89
         cy = 121
         img = imread(imgs[i], num_channels=3)
         img = img[cy - 64: cy + 64, cx - 64: cx +
                   64, :].transpose(2, 0, 1) / 255.
         img = img * 2. - 1.
-        return img, None
+        # attribute
+        if attr_path == "":
+            attr = None
+        else:
+            fname = img[i].rstrip(".png").split("/")[-1]
+            attr = fname_attr[fname]
+        return img, attr
     return data_iterator_simple(load_func, num_samples, batch_size, shuffle=shuffle, rng=rng, with_file_cache=False)
+
+
+def load_attr_data(attr_path):
+    with open(attr_path) as fp:
+        reader = csv.reader(fp, delimitter=",")
+        header = reader.readline()
+        fname_attr = {}
+        for l in reader:
+            fname = l[0].rstrip(".jpg")
+            attr = [int(x) for x in l[1:]]
+            fname_attr[fname] = attr
+        return fname_attr

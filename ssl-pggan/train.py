@@ -42,7 +42,8 @@ def main():
     nn.set_auto_forward(True)
 
     # Data Iterator
-    di = data_iterator(args.img_path, args.batch_size,
+    di = data_iterator(args.img_path, args.attr_path, 
+                       batch_size=args.batch_size,
                        imsize=(args.imsize, args.imsize),
                        num_samples=args.train_samples,
                        dataset_name=args.dataset_name)

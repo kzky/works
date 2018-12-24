@@ -36,6 +36,9 @@ def get_args(batch_size=16):
     parser.add_argument("--img-path", type=str,
                         default="~/img_align_celeba_png",
                         help="Image path.")
+    parser.add_argument("--attr-path", type=str,
+                        default="",
+                        help="Image attribute path.")
     parser.add_argument("--dataset-name", type=str, default="CelebA",
                         choices=["CelebA"],
                         help="Dataset name used.")
@@ -60,7 +63,8 @@ def get_args(batch_size=16):
                         help="Model load path used in generation and validation.")
     # parser.add_argument("--use-bn", action='store_false',
     #                     help="Do not use batch normalization.")
-    parser.add_argument("--norm", type=str, default="PFNV", choices=["PFVN", "BN", "IN", "CCBN"], 
+    parser.add_argument("--norm", type=str, default="PFNV", 
+                        choices=["PFVN", "BN", "IN", "CCBN", "CCIN"], 
                         help="Normalization method to use.")
     parser.add_argument("--use-ln", action='store_true',
                         help="Use layer normalization.")

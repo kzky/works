@@ -1,4 +1,4 @@
-#o Copyright (c) 2017 Sony Corporation. All Rights Reserved.
+# Copyright (c) 2017 Sony Corporation. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ class Generator:
 
         1. Upsampling
         2. Conv
-        3. Batch normalization
+        3. Normalization (PFVN, BN, iN, CCBN, CCIN)
         4. Relu
         """
         h = F.unpooling(h, kernel=(2, 2))
