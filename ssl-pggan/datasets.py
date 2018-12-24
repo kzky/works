@@ -71,5 +71,5 @@ def load_attr_data(attr_path):
         for l in reader:
             fname = l[0].rstrip(".jpg")
             attr = [int(x) for x in l[1:]]
-            fname_attr[fname] = attr
+            fname_attr[fname] = np.asarray(attr)
         return fname_attr
