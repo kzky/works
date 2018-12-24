@@ -75,6 +75,47 @@ def LN(h, use_ln):
     else:
         return h
 
+@parametric_function_api("ccbn")
+def CCBN(h, y, decay_rate=0.999, use_bn=True, test=False, fix_parameters=False, coefs=[1.0]):
+    """Categorical Conditional Batch Normaliazation
+
+    y is a batch of a vector (B x D) instead of a batch of an index (B). The vector is {1, -1} x D.
+
+    """
+    # Call the batch normalization once
+    shape_stat = [1 for _ in h.shape]
+    shape_stat[1] = h.shape[1]
+    gamma_tmp = nn.Variable.from_numpy_array(np.ones(shape_stat))
+    beta_tmp = nn.Variable.from_numpy_array(np.zeros(shape_stat))
+    mean = get_parameter_or_create(
+        "mean", shape_stat, ConstantInitializer(0.0), False)
+    var = get_parameter_or_create(
+        "var", shape_stat, ConstantInitializer(1.0), False)
+    h = F.batch_normalization(h, beta_tmp, gamma_tmp, mean, var,
+                              decay_rate=decay_rate, batch_stat=not test)
+
+    # Condition the gamma and beta with the class label
+    b, c = h.shape[0:2]
+    def embed_func(y, initializer):
+        if type(y) != list:
+            o = PF.affine(y, initializer=initializer, with_bias=False)
+        else:
+            y_list = y
+            o = reduce(lambda x, y: x + y, 
+                       [coef * PF.affine(y, initializer=initializer, with_bias=False) \
+                        for coef, y in zip(coefs, y_list)])
+        return o
+    with nn.parameter_scope("gamma"):
+        gamma = embed_func(y, ConstantInitializer(1.0))
+        gamma = F.reshape(gamma, [b, c] + [1 for _ in range(len(h.shape[2:]))])
+        gamma = F.broadcast(gamma, h.shape)
+    with nn.parameter_scope("beta"):
+        beta = embed_func(y, ConstantInitializer(0.0))
+        beta = F.reshape(beta, [b, c] + [1 for _ in range(len(h.shape[2:]))])
+        beta = F.broadcast(beta, h.shape)
+    return gamma * h + beta
+
+
 @parametric_function_api("in")
 def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False):
     """Instance Normalization
@@ -126,10 +167,10 @@ def INByBatchNorm(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False)
 
 
 @parametric_function_api("adain")
-def AdaIN(h, y, fix_parameters=False):
+def CCIN(h, y, fix_parameters=False):
     """Adaptive Instance Normalization
     """
-    # 
+    # Call the instance normalization once
     b, c, _, _ = h.shape
     h = IN(h, name="in", fix_parameters=True)
 
@@ -152,9 +193,11 @@ def normalize(h, y=None, norm="PFVN", test=False):
     elif norm == "IN":
         return IN(h)
     elif norm == "CCBN":
-        raise NotImplementedError("CCBN not implemented yet.")
+        return CCBN(h, y, batch_stat=not test)
+    elif norm == "CCIN":
+        return CCIN(h, y)
     else:
-        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN']")
+        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN', 'CCIN']")
             
 
 def use_bias(norm):
