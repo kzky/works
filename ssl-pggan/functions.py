@@ -103,7 +103,7 @@ def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False):
 
 
 @parametric_function_api("in")
-def INByBatchNorm(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=True):
+def INByBatchNorm(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False):
     """Instance Normalization (implemented using BatchNormalization)
     Instance normalization is equivalent to the batch normalization if a batch size is one, in
     other words, it normalizes over spatial dimension(s), meaning all dimensions except for
