@@ -71,3 +71,9 @@ def load_gen(model_load_path, norm="PFVN", last_act='tanh',
     for i in range(len(resolution_list)):
         gen.grow(resolution_list[i], channel_list[i])
     return gen
+
+
+def generate_random_attr(batch_size=16, dims=40, choices=[-1, 1]):
+    attr = np.rancom.choice(choices, batch_size * dims).reshape((batch_size, dims))
+    return attr
+    

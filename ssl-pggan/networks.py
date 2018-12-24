@@ -51,28 +51,28 @@ class Generator:
         self.use_wscale = use_wscale
         self.use_he_backward = use_he_backward
 
-    def __call__(self, x, test=False):
+    def __call__(self, x, y, test=False):
         """Generate images.
         """
         with nn.parameter_scope("generator"):
             h = self.first_cnn(
-                x, self.resolution_list[0], self.channel_list[0], test)
+                x, y, self.resolution_list[0], self.channel_list[0], test)
             for i in range(1, len(self.resolution_list)):
                 h = self.cnn(
-                    h, self.resolution_list[i], self.channel_list[i], test)
+                    h, y, self.resolution_list[i], self.channel_list[i], test)
             h = self.to_RGB(h, self.resolution_list[-1])
             h = self.last_act(h)
         return h
 
-    def transition(self, x, alpha, test=False):
+    def transition(self, x, y, alpha, test=False):
         """Generator in the transition period, almost the same as the callable.
         """
         with nn.parameter_scope("generator"):
             h = self.first_cnn(
-                x, self.resolution_list[0], self.channel_list[0], test)
+                x, y, self.resolution_list[0], self.channel_list[0], test)
             for i in range(1, len(self.resolution_list) - 1):
                 h = self.cnn(
-                    h, self.resolution_list[i], self.channel_list[i], test)
+                    h, y, self.resolution_list[i], self.channel_list[i], test)
             h = self.transition_cnn(h, self.resolution_list[-2], self.resolution_list[-1],
                                     self.channel_list[-2], self.channel_list[-1], alpha, test)
             h = self.last_act(h)
@@ -96,7 +96,7 @@ class Generator:
                      use_he_backward=self.use_he_backward)
         return h
 
-    def first_cnn(self, h, resolution, channel, test=False):
+    def first_cnn(self, h, y, resolution, channel, test=False):
         with nn.parameter_scope("phase_{}".format(resolution)):
             # affine is 1x1 conv with 4x4 kernel and 3x3 pad.
             with nn.parameter_scope("conv1"):
@@ -104,18 +104,18 @@ class Generator:
                            use_wscale=self.use_wscale,
                            use_he_backward=self.use_he_backward)
                 h = F.reshape(h, (h.shape[0], channel, 4, 4))
-                h = normalize(h, norm=self.norm, test=test)
+                h = normalize(h, y, norm=self.norm, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
                          with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = normalize(h, norm=self.norm, test=test)
+                h = normalize(h, y, norm=self.norm, test=test)
                 h = self.activation(h)
         return h
 
-    def cnn(self, h, resolution, channel, test):
+    def cnn(self, h, y, resolution, channel, test):
         """CNN block
 
         The following operations are performed two times.
@@ -132,14 +132,14 @@ class Generator:
                          with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = normalize(h, norm=self.norm, test=test)
+                h = normalize(h, y, norm=self.norm, test=test)
                 h = self.activation(h)
             with nn.parameter_scope("conv2"):
                 h = conv(h, channel, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
                          with_bias=use_bias(self.norm),
                          use_wscale=self.use_wscale,
                          use_he_backward=self.use_he_backward)
-                h = normalize(h, norm=self.norm, test=test)
+                h = normalize(h, y, norm=self.norm, test=test)
                 h = self.activation(h)
         return h
 
@@ -167,7 +167,7 @@ class Discriminator:
         self.use_wscale = use_wscale
         self.use_he_backward = use_he_backward
 
-    def __call__(self, x):
+    def __call__(self, x, y):
         """Discriminate images.
         """
         with nn.parameter_scope("discriminator"):
@@ -177,11 +177,11 @@ class Discriminator:
                 h = self.cnn(h, self.resolution_list[i],
                              self.channel_list[i], self.channel_list[i - 1])
             h = minibatch_stddev(h)
-            h = self.last_cnn(h, self.resolution_list[0], self.resolution_list[0],
+            h = self.last_cnn(h, y, self.resolution_list[0], self.resolution_list[0],
                               self.resolution_list[0])
         return h
 
-    def transition(self, x, alpha):
+    def transition(self, x, y, alpha):
         """Generator in the transition period, almost the same as the callable.
 
         """
@@ -192,7 +192,7 @@ class Discriminator:
                 h = self.cnn(h, self.resolution_list[i], self.channel_list[i],
                              self.channel_list[i - 1])
             h = minibatch_stddev(h)
-            h = self.last_cnn(h, self.resolution_list[0], self.resolution_list[0],
+            h = self.last_cnn(h, y, self.resolution_list[0], self.resolution_list[0],
                               self.resolution_list[0])
         return h
 
@@ -242,7 +242,7 @@ class Discriminator:
         h = F.average_pooling(h, kernel=(2, 2))
         return h
 
-    def last_cnn(self, h, resolution, ch_in, ch_out):
+    def last_cnn(self, h, y, resolution, ch_in, ch_out):
         with nn.parameter_scope("phase_{}".format(resolution)):
             with nn.parameter_scope("conv1"):
                 h = conv(h, ch_in, kernel=(3, 3), pad=(1, 1), stride=(1, 1),
@@ -262,6 +262,7 @@ class Discriminator:
                 h = affine(h, 1, with_bias=True,
                            use_wscale=self.use_wscale,
                            use_he_backward=self.use_he_backward)
+                
         return h
 
     def transition_cnn(self, h, pre_resolution, nxt_resolution, pre_channel, nxt_channel, alpha):

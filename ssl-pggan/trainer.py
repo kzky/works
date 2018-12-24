@@ -18,7 +18,7 @@ from nnabla import logger
 from nnabla.monitor import Monitor, MonitorSeries, MonitorTimeElapsed
 
 import datasets
-from helpers import MonitorImageTileWithName
+from helpers import MonitorImageTileWithName, generate_random_attr
 from networks import Generator, Discriminator
 from functions import pixel_wise_feature_vector_normalization
 
@@ -81,6 +81,7 @@ class Trainer:
         # Fix test random
         self.z_test = np.random.randn(
             self.di.batch_size, self.n_latent, 1, 1)  # Fix random seed for test
+        self.attr_test = generator_random_attr(batch_size)
 
         # TODO: change batchsize when the spatial size is greater than 128.
         for i in range(len(self.resolution_list) - 1):
@@ -126,7 +127,7 @@ class Trainer:
         kernel = (kernel_size, kernel_size)
 
         img_name = "original_phase_{}".format(resolution)
-        img, _ = self.di.next()
+        img, attr = self.di.next()
         self.monitor_image_tile.add(img_name, img)
 
         for epoch in range(epoch_per_resolution):
@@ -134,36 +135,40 @@ class Trainer:
             itr = 0
             current_epoch = self.di.epoch
             while self.di.epoch == current_epoch:
-                img, _ = self.di.next()
+                # Train discriminator
+                img, attr_r = self.di.next()
                 x = nn.Variable.from_numpy_array(img)
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen(z, test=True)
+                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                y = self.gen(z, attr_f, test=True)
 
                 y.need_grad = False
                 x_r = F.average_pooling(x, kernel=kernel)
 
-                p_real = self.dis(x_r)
-                p_fake = self.dis(y)
+                p_real = self.dis(x_r, attr_r)
+                p_fake = self.dis(y, attr_f)
                 p_real.persistent, p_fake.persistent = True, True
 
                 loss_dis = F.mean(F.pow_scalar((p_real - 1), 2.)
                                   + F.pow_scalar(p_fake, 2.) * self.l2_fake_weight)
                 loss_dis.persistent = True
 
-                if itr % self.n_critic + 1 == self.n_critic:
-                    with nn.parameter_scope("discriminator"):
-                        self.solver_dis.set_parameters(nn.get_parameters(),
-                                                       reset=False, retain_state=True)
-                        self.solver_dis.zero_grad()
-                        loss_dis.backward(clear_buffer=True)
-                        self.solver_dis.update()
+                with nn.parameter_scope("discriminator"):
+                    self.solver_dis.set_parameters(nn.get_parameters(),
+                                                   reset=False, retain_state=True)
+                    self.solver_dis.zero_grad()
+                    loss_dis.backward(clear_buffer=True)
+                    self.solver_dis.update()
+
+                # Train Generator
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen(z, test=False)
-                p_fake = self.dis(y)
+                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                y = self.gen(z, attr_f, test=False)
+                p_fake = self.dis(y, attr_f)
                 p_fake.persistent = True
 
                 loss_gen = F.mean(F.pow_scalar((p_fake - 1), 2.))
@@ -191,7 +196,8 @@ class Trainer:
                 z = nn.Variable.from_numpy_array(self.z_test)
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen(z, test=True)
+                attr_f = nn.Variable.from_numpy_array(self.attr_test)
+                y = self.gen(z, attr_f, test=True)
                 img_name = "phase_{}_epoch_{}".format(resolution, epoch + 1)
                 self.monitor_image_tile.add(
                     img_name, F.unpooling(y, kernel=kernel))
@@ -221,36 +227,39 @@ class Trainer:
             itr = 0
             current_epoch = self.di.epoch
             while self.di.epoch == current_epoch:
-                img, _ = self.di.next()
+                # Train Discriminator
+                img, attr_r = self.di.next()
                 x = nn.Variable.from_numpy_array(img)
-
+                
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen.transition(z, alpha, test=True)
+                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                y = self.gen.transition(z, attr_f, alpha, test=True)
 
                 y.need_grad = False
                 x_r = F.average_pooling(x, kernel=kernel)
 
-                p_real = self.dis.transition(x_r, alpha)
-                p_fake = self.dis.transition(y, alpha)
+                p_real = self.dis.transition(x_r, attr_r, alpha)
+                p_fake = self.dis.transition(y, attr_f, alpha)
 
                 loss_dis = F.mean(F.pow_scalar((p_real - 1), 2.)
                                   + F.pow_scalar(p_fake, 2.) * self.l2_fake_weight)
 
-                if itr % self.n_critic + 1 == self.n_critic:
-                    with nn.parameter_scope("discriminator"):
-                        self.solver_dis.set_parameters(nn.get_parameters(),
-                                                       reset=False, retain_state=True)
-                        self.solver_dis.zero_grad()
-                        loss_dis.backward(clear_buffer=True)
-                        self.solver_dis.update()
+                with nn.parameter_scope("discriminator"):
+                    self.solver_dis.set_parameters(nn.get_parameters(),
+                                                   reset=False, retain_state=True)
+                    self.solver_dis.zero_grad()
+                    loss_dis.backward(clear_buffer=True)
+                    self.solver_dis.update()
 
+                # Train Generator
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen.transition(z, alpha, test=False)
-                p_fake = self.dis.transition(y, alpha)
+                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                y = self.gen.transition(z, attr_f, alpha, test=False)
+                p_fake = self.dis.transition(y, attr_f, alpha)
 
                 loss_gen = F.mean(F.pow_scalar((p_fake - 1), 2))
                 with nn.parameter_scope("generator"):
@@ -268,7 +277,8 @@ class Trainer:
                 z = nn.Variable.from_numpy_array(self.z_test)
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                y = self.gen.transition(z, alpha)
+                attr_f = nn.Variable.from_numpy_array(self.attr_test)
+                y = self.gen.transition(z, attr_f, alpha)
                 img_name = "phase_{}_epoch_{}".format(phase, epoch + 1)
                 self.monitor_image_tile.add(
                     img_name, F.unpooling(y, kernel=kernel))
