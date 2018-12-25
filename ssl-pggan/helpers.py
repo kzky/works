@@ -74,6 +74,6 @@ def load_gen(model_load_path, norm="PFVN", last_act='tanh',
 
 
 def generate_random_attr(batch_size=16, dims=40, choices=[-1, 1]):
-    attr = np.rancom.choice(choices, batch_size * dims).reshape((batch_size, dims))
+    attr = np.random.choice(choices, batch_size * dims).reshape((batch_size, dims))
     return attr
     

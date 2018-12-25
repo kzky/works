@@ -26,7 +26,7 @@ import numpy as np
 def data_iterator(img_path, attr_path, batch_size=16,
                   imsize=(128, 128), num_samples=100, shuffle=True, rng=None, dataset_name="CelebA"):
     if dataset_name == "CelebA":
-        di = data_iterator_celeba(img_path, batch_size,
+        di = data_iterator_celeba(img_path, attr_path, batch_size,
                                   imsize=imsize, num_samples=num_samples, shuffle=shuffle, rng=rng)
     else:
         logger.info("Currently CelebA is only supported.")
@@ -57,7 +57,7 @@ def data_iterator_celeba(img_path, attr_path, batch_size=16, imsize=(128, 128), 
         if attr_path == "":
             attr = None
         else:
-            fname = img[i].rstrip(".png").split("/")[-1]
+            fname = imgs[i].rstrip(".png").split("/")[-1]
             attr = fname_attr[fname]
         return img, attr
     return data_iterator_simple(load_func, num_samples, batch_size, shuffle=shuffle, rng=rng, with_file_cache=False)
@@ -65,8 +65,8 @@ def data_iterator_celeba(img_path, attr_path, batch_size=16, imsize=(128, 128), 
 
 def load_attr_data(attr_path):
     with open(attr_path) as fp:
-        reader = csv.reader(fp, delimitter=",")
-        header = reader.readline()
+        reader = csv.reader(fp, delimiter=",")
+        header = next(reader)
         fname_attr = {}
         for l in reader:
             fname = l[0].rstrip(".jpg")

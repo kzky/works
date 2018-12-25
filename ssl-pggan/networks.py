@@ -258,12 +258,24 @@ class Discriminator:
                          use_he_backward=self.use_he_backward)
                 h = LN(h, use_ln=self.use_ln)
                 h = self.activation(h)
+            # Last affine
+            b, c = h.shape[:2]
+            h = h.reshape([b, c])
             with nn.parameter_scope("linear"):
-                h = affine(h, 1, with_bias=True,
-                           use_wscale=self.use_wscale,
-                           use_he_backward=self.use_he_backward)
-                
-        return h
+                o0 = affine(h, 1, with_bias=True,
+                            use_wscale=self.use_wscale,
+                            use_he_backward=self.use_he_backward)
+            # Project label
+            o1 = self.project(h, y)
+        return o0 + o1
+
+    def project(self, h, y):
+        c = h.shape[1]
+        with nn.parameter_scope("projection"):
+            e = PF.affine(y, c, with_bias=False)
+        o = F.sum(h * e, axis=1, keepdims=True)
+        return o
+            
 
     def transition_cnn(self, h, pre_resolution, nxt_resolution, pre_channel, nxt_channel, alpha):
         lhs = self.from_RGB(F.average_pooling(

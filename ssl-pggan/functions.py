@@ -76,7 +76,7 @@ def LN(h, use_ln):
         return h
 
 @parametric_function_api("ccbn")
-def CCBN(h, y, decay_rate=0.999, use_bn=True, test=False, fix_parameters=False, coefs=[1.0]):
+def CCBN(h, y, decay_rate=0.999, test=False, fix_parameters=False, coefs=[1.0]):
     """Categorical Conditional Batch Normaliazation
 
     y is a batch of a vector (B x D) instead of a batch of an index (B). The vector is {1, -1} x D.
@@ -98,11 +98,11 @@ def CCBN(h, y, decay_rate=0.999, use_bn=True, test=False, fix_parameters=False, 
     b, c = h.shape[0:2]
     def embed_func(y, initializer):
         if type(y) != list:
-            o = PF.affine(y, initializer=initializer, with_bias=False)
+            o = PF.affine(y, c, w_init=initializer, with_bias=False)
         else:
             y_list = y
             o = reduce(lambda x, y: x + y, 
-                       [coef * PF.affine(y, initializer=initializer, with_bias=False) \
+                       [coef * PF.affine(y, c, w_init=initializer, with_bias=False) \
                         for coef, y in zip(coefs, y_list)])
         return o
     with nn.parameter_scope("gamma"):
@@ -120,8 +120,8 @@ def CCBN(h, y, decay_rate=0.999, use_bn=True, test=False, fix_parameters=False, 
 def IN(inp, axes=[1], decay_rate=0.9, eps=1e-5, fix_parameters=False):
     """Instance Normalization
     """
-    if inp.shape[0] == 1:
-        return INByBatchNorm(inp, axes, decay_rate, eps, fix_parameters)
+    # if inp.shape[0] == 1:
+    #     return INByBatchNorm(inp, axes, decay_rate, eps, fix_parameters)
 
     b, c = inp.shape[0:2]
     spacial_shape = inp.shape[2:]
@@ -175,7 +175,7 @@ def CCIN(h, y, fix_parameters=False):
     h = IN(h, name="in", fix_parameters=True)
 
     def embed_func(y, initializer):
-        o = PF.affine(y, initializer=initializer, with_bias=False).reshape([b, c, 1, 1])
+        o = PF.affine(y, c, w_init=initializer, with_bias=False).reshape([b, c, 1, 1])
         return o
     with nn.parameter_scope("gamma"):
         gamma = embed_func(y, initializer=ConstantInitializer(1.))
@@ -193,7 +193,7 @@ def normalize(h, y=None, norm="PFVN", test=False):
     elif norm == "IN":
         return IN(h)
     elif norm == "CCBN":
-        return CCBN(h, y, batch_stat=not test)
+        return CCBN(h, y, test=test)
     elif norm == "CCIN":
         return CCIN(h, y)
     else:
@@ -205,12 +205,14 @@ def use_bias(norm):
         return True
     elif norm == "BN":
         return False
-    elif norm == "CCBN":
-        return False
     elif norm == "IN":
         return False
+    elif norm == "CCBN":
+        return False
+    elif norm == "CCIN":
+        return False
     else:
-        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN']")
+        raise ValueError("`norm` in ['PFVN', 'BN', 'CCBN', 'IN']")
 
 
 @parametric_function_api("conv")

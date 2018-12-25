@@ -43,12 +43,14 @@ def generate_images(model_load_path,
     z_data = np.random.randn(batch_size, n_latent, 1, 1)
     z = nn.Variable.from_numpy_array(z_data)
     z = pixel_wise_feature_vector_normalization(z) if hyper_sphere else z
-    y = gen(z, test=True)
+    #todo: None
+    y = gen(z, None, test=True)
     return y.d
 
 
 def generate_interpolated_images(model_load_path,
-                                 batch_size=16, n_latent=512,
+                                 batch_size=16, 
+                                 n_latent=512,
                                  norm="PFVN", hyper_sphere=True, last_act='tanh',
                                  use_wscale=True, use_he_backward=False,
                                  resolution_list=[4, 8, 16, 32, 64, 128],
@@ -64,8 +66,9 @@ def generate_interpolated_images(model_load_path,
         z_data = (1 - alpha) * z_data0 + alpha * z_data1
         z = nn.Variable.from_numpy_array(z_data)
         z = pixel_wise_feature_vector_normalization(z) if hyper_sphere else z
-        y = gen(z, test=True)
-        imgs.append(y.d)
+        #todo: None
+        y = gen(z, None, test=True)
+        imgs.append(y.d.copy())
     imgs = np.concatenate(imgs, axis=0)
     return imgs
 
@@ -95,8 +98,10 @@ def main():
     imgs = []
     for _ in range(side):
         img = generate_images(args.model_load_path,
-                              batch_size=side, norm=args.norm,
-                              n_latent=args.latent, hyper_sphere=args.hyper_sphere,
+                              batch_size=side,
+                              n_latent=args.latent, 
+                              norm=args.norm,
+                              hyper_sphere=args.hyper_sphere,
                               last_act=args.last_act,
                               use_wscale=args.not_use_wscale,
                               use_he_backward=args.use_he_backward,
@@ -109,8 +114,10 @@ def main():
     imgs = []
     for _ in range(side):
         img = generate_interpolated_images(args.model_load_path,
-                                           batch_size=side, norm=args.norm,
-                                           n_latent=args.latent, hyper_sphere=args.hyper_sphere,
+                                           batch_size=side, 
+                                           n_latent=args.latent, 
+                                           norm=args.norm,
+                                           hyper_sphere=args.hyper_sphere,
                                            last_act=args.last_act,
                                            use_wscale=args.not_use_wscale,
                                            use_he_backward=args.use_he_backward,

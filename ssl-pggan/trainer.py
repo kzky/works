@@ -81,7 +81,7 @@ class Trainer:
         # Fix test random
         self.z_test = np.random.randn(
             self.di.batch_size, self.n_latent, 1, 1)  # Fix random seed for test
-        self.attr_test = generator_random_attr(batch_size)
+        self.attr_test = generate_random_attr(self.di.batch_size)
 
         # TODO: change batchsize when the spatial size is greater than 128.
         for i in range(len(self.resolution_list) - 1):
@@ -127,7 +127,7 @@ class Trainer:
         kernel = (kernel_size, kernel_size)
 
         img_name = "original_phase_{}".format(resolution)
-        img, attr = self.di.next()
+        img, attr_r_d = self.di.next()
         self.monitor_image_tile.add(img_name, img)
 
         for epoch in range(epoch_per_resolution):
@@ -136,17 +136,18 @@ class Trainer:
             current_epoch = self.di.epoch
             while self.di.epoch == current_epoch:
                 # Train discriminator
-                img, attr_r = self.di.next()
+                img, attr_r_d = self.di.next()
                 x = nn.Variable.from_numpy_array(img)
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                attr_f = nn.Variable.from_numpy_array(generate_random_attr(batch_size)) \
+                         if attr_r_d is not None else None
                 y = self.gen(z, attr_f, test=True)
 
                 y.need_grad = False
                 x_r = F.average_pooling(x, kernel=kernel)
-
+                attr_r = nn.Variable.from_numpy_array(attr_r_d) if attr_r_d is not None else None
                 p_real = self.dis(x_r, attr_r)
                 p_fake = self.dis(y, attr_f)
                 p_real.persistent, p_fake.persistent = True, True
@@ -166,7 +167,7 @@ class Trainer:
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                attr_f = nn.Variable.from_numpy_array(generate_random_attr(batch_size))
                 y = self.gen(z, attr_f, test=False)
                 p_fake = self.dis(y, attr_f)
                 p_fake.persistent = True
@@ -196,7 +197,8 @@ class Trainer:
                 z = nn.Variable.from_numpy_array(self.z_test)
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(self.attr_test)
+                attr_f = nn.Variable.from_numpy_array(self.attr_test) \
+                         if attr_r_d is not None else None
                 y = self.gen(z, attr_f, test=True)
                 img_name = "phase_{}_epoch_{}".format(resolution, epoch + 1)
                 self.monitor_image_tile.add(
@@ -228,18 +230,19 @@ class Trainer:
             current_epoch = self.di.epoch
             while self.di.epoch == current_epoch:
                 # Train Discriminator
-                img, attr_r = self.di.next()
+                img, attr_r_d = self.di.next()
                 x = nn.Variable.from_numpy_array(img)
                 
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                attr_f = nn.Variable.from_numpy_array(generate_random_attr(batch_size)) \
+                         if attr_r_d is not None else None
                 y = self.gen.transition(z, attr_f, alpha, test=True)
 
                 y.need_grad = False
                 x_r = F.average_pooling(x, kernel=kernel)
-
+                attr_r = nn.Variable.from_numpy_array(attr_r_d) if attr_r_d is not None else None
                 p_real = self.dis.transition(x_r, attr_r, alpha)
                 p_fake = self.dis.transition(y, attr_f, alpha)
 
@@ -257,7 +260,8 @@ class Trainer:
                 z = F.randn(shape=(batch_size, self.n_latent, 1, 1))
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(generator_random_attr(batch_size))
+                attr_f = nn.Variable.from_numpy_array(generate_random_attr(batch_size)) \
+                         if attr_r_d is not None else None
                 y = self.gen.transition(z, attr_f, alpha, test=False)
                 p_fake = self.dis.transition(y, attr_f, alpha)
 
@@ -277,7 +281,8 @@ class Trainer:
                 z = nn.Variable.from_numpy_array(self.z_test)
                 z = pixel_wise_feature_vector_normalization(
                     z) if self.hyper_sphere else z
-                attr_f = nn.Variable.from_numpy_array(self.attr_test)
+                attr_f = nn.Variable.from_numpy_array(self.attr_test) \
+                         if attr_r_d is not None else None
                 y = self.gen.transition(z, attr_f, alpha)
                 img_name = "phase_{}_epoch_{}".format(phase, epoch + 1)
                 self.monitor_image_tile.add(
