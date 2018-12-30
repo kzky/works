@@ -191,11 +191,23 @@ python train.py -d 3 -c cudnn -b 32 -a 8 -t float \
 # dog or cat
 #######################
 
+# 000 -> mistook
 mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
        -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_dog_or_cat \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_dog_or_cat_abs.txt \
        --monitor-path ./result/dog_or_cat_000 \
        --n-classes 10 \
+       --maps 512 \
+       --max-iter 450000 \
+       --save-interval 10000 \
+       --flip
+
+# 001: fix 10 -> 143
+mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_dog_or_cat \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_dog_or_cat_abs.txt \
+       --monitor-path ./result/dog_or_cat_001 \
+       --n-classes 143 \
        --maps 512 \
        --max-iter 450000 \
        --save-interval 10000 \
@@ -208,7 +220,7 @@ mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
        -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_dog \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_dog_abs.txt \
        --monitor-path ./result/dog_000 \
-       --n-classes 10 \
+       --n-classes 120 \
        --maps 512 \
        --max-iter 450000 \
        --save-interval 10000 \
