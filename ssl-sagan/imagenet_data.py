@@ -48,7 +48,7 @@ def data_iterator_imagenet(img_path, dirname_to_label_path,
                            class_id=-1,
                            noise=True, 
                            normalize=lambda x: x / 128.0 - 1.0, 
-                           train=True, shuffle=True, rng=None):
+                           train=True, shuffle=True, rng=None, flip=False):
     # ------
     # Valid
     # ------
@@ -68,6 +68,7 @@ def data_iterator_imagenet(img_path, dirname_to_label_path,
             img = Image.open(imgs[i]).resize((iw, ih), Image.BILINEAR).convert("RGB")
             img = np.asarray(img)
             img = img.transpose((2, 0, 1))
+            img = img[:, :, ::-1] if flip else img
             img = img / 128.0 - 1.0
             return img, None
         di = data_iterator_simple(
@@ -86,7 +87,7 @@ def data_iterator_imagenet(img_path, dirname_to_label_path,
     imgs = []
     for dir_path in dir_paths:
         imgs += glob.glob("{}/*.JPEG".format(dir_path))
-    #np.random.shuffle(imgs)
+    np.random.shuffle(imgs)
     
     # Dirname to Label map
     dirname_to_label, label_to_dirname = create_dirname_label_maps(dirname_to_label_path)
@@ -101,6 +102,7 @@ def data_iterator_imagenet(img_path, dirname_to_label_path,
         img = Image.open(imgs[i]).resize((iw, ih), Image.BILINEAR).convert("RGB")
         img = np.asarray(img)
         img = img.transpose((2, 0, 1))
+        img = img[:, :, ::-1] if flip else img
         img = img / 128.0 - 1.0
         if noise:
             img += np.random.uniform(size=img.shape, low=0.0, high=1.0 / 128)

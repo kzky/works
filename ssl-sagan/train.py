@@ -77,7 +77,7 @@ def train(args):
     rng = np.random.RandomState(412)
     di = data_iterator_imagenet(args.train_dir, args.dirname_to_label_path,
                                 args.batch_size, n_classes=args.n_classes, 
-                                rng=rng)
+                                rng=rng, flip=args.flip)
 
     # Train loop
     for i in range(args.max_iter):
