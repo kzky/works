@@ -225,3 +225,17 @@ mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
        --max-iter 450000 \
        --save-interval 10000 \
        --flip
+
+
+#######################
+# cat
+#######################
+mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_cat \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_cat_abs.txt \
+       --monitor-path ./result/cat_000 \
+       --n-classes 22 \
+       --maps 512 \
+       --max-iter 450000 \
+       --save-interval 10000 \
+       --flip
