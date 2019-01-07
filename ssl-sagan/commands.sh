@@ -226,6 +226,17 @@ mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
        --save-interval 10000 \
        --flip
 
+# 007: Fix iteration with large batch size, fix bug in accum_grad, small model, longer iterations
+mpirun -n 4 python train_with_mgpu.py -d 2 -c cudnn -b 64 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_007 \
+       --n-classes 10 \
+       --maps 512 \
+       --max-iter 450000 \
+       --save-interval 10000 \
+       --flip
+
 
 #######################
 # cat
@@ -234,7 +245,7 @@ mpirun -n 4 python train_with_mgpu.py -d 0 -c cudnn -b 64 -a 1 -t float \
        -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_cat \
        -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_cat_abs.txt \
        --monitor-path ./result/cat_000 \
-       --n-classes 22 \
+       --n-classes 23 \
        --maps 512 \
        --max-iter 450000 \
        --save-interval 10000 \
