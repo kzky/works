@@ -237,6 +237,17 @@ mpirun -n 4 python train_with_mgpu.py -d 2 -c cudnn -b 64 -a 1 -t float \
        --save-interval 10000 \
        --flip
 
+# 008: 007, small embed's W init
+mpirun -n 4 python train_with_mgpu.py -d 2 -c cudnn -b 64 -a 1 -t float \
+       -T /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/train_cache_sngan_picked_10_dogs \
+       -L /home/Kazuki.Yoshiyama/data/imagenet/sngan_projection/dirname_to_label_picked_10_dogs_abs.txt \
+       --monitor-path ./result/10_picked_dog_008 \
+       --n-classes 10 \
+       --maps 512 \
+       --max-iter 450000 \
+       --save-interval 10000 \
+       --flip
+
 
 #######################
 # cat
